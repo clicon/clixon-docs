@@ -8,8 +8,9 @@ Welcome to Clixon's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Table of contents
 
+   INSTALL
 
 
 Indices and tables
