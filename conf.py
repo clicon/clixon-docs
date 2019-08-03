@@ -21,6 +21,8 @@ project = 'clixon'
 copyright = '2019, Olof Hagsand'
 author = 'Olof Hagsand'
 
+master_doc = 'index'
+
 # The full version, including alpha/beta/rc tags
 release = '4.0'
 
@@ -56,8 +58,8 @@ html_static_path = ['_static']
 
 html_context = {
     "display_github": True, # Integrate GitHub
-    "github_user": "MyUserName", # Username
-    "github_repo": "MyDoc", # Repo name
+    "github_user": "olofhagsand", # Username
+    "github_repo": "clicon/clixon-docs", # Repo name
     "github_version": "master", # Version
     "conf_py_path": "/source/", # Path in the checkout to the docs root
 }
