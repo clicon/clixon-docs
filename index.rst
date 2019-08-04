@@ -3,19 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Clixon's documentation!
-==================================
+Clixon documentation
+====================
+
+Clixon is a YANG-based configuration manager, with interactive CLI,
+NETCONF and RESTCONF interfaces, an embedded database and transaction
+mechanism.
 
 .. toctree::
    :maxdepth: 2
    :caption: Table of contents
 
-   INSTALL
+   overview
+   install
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -1,7 +1,11 @@
+.. _clixon_install:
+
 Installing Clixon
 =================
 
-Clixon runs on Linux, [FreeBSD port](https://www.freshports.org/devel/clixon) and Mac/Apple. CPU architecures include x86_64, i686, ARM32.
+.. This is a comment
+   
+Clixon runs on Linux, `FreeBSD port <https://www.freshports.org/devel/clixon>`_ and Mac/Apple. CPU architecures include x86_64, i686, ARM32.
 
 Ubuntu Linux
 ------------
@@ -9,32 +13,38 @@ Ubuntu Linux
 Installing dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Install packages::
+Install packages:
+::
+
   sudo apt-get update
   sudo apt-get install flex bison fcgi-dev curl-dev
 
+Install and build CLIgen:
+::
 
-Install and build CLIgen::
-    git clone https://github.com/olofhagsand/cligen.git
-    cd cligen;
-    configure;
-    make;
-    make install
+  git clone https://github.com/olofhagsand/cligen.git
+  cd cligen;
+  configure;
+  make;
+  make install
 
-
-Add a user group, using groupadd and usermod::
-  sudo groupadd clicon # 
+Add a user group, using groupadd and usermod:
+::
+   
+  sudo groupadd clicon
   sudo usermod -a -G clicon <user>
   sudo usermod -a -G clicon www-data
 
 
-
-Build from source::
-^^^^^^^^^^^^^^^^^^^
+Build from source
+^^^^^^^^^^^^^^^^^
+::
+   
      configure	       	       # Configure clixon to platform
      make                      # Compile
      sudo make install         # Install libs, binaries, and config-files
      sudo make install-include # Install include files (for compiling)
+
 
 
 FreeBSD
@@ -55,20 +65,24 @@ www is used, and the restconf daemon is placed in
 
 Binary package install
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-To install the pre-built binary package, use the FreeBSD pkg command::
+To install the pre-built binary package, use the FreeBSD pkg command:
+::
+   
   % pkg install clixon
 
 This will install clixon and all the dependencies needed.
 
 Build from source
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 If you prefer you can also build clixon from the
-[FreeBSD ports collection](https://www.freebsd.org/doc/handbook/ports-using.html)
+`FreeBSD ports collection <https://www.freebsd.org/doc/handbook/ports-using.html>`_
 
-Once you have the Ports Collection installed, you build clixon like this::
-  % cd /usr/ports/devel/clixon
-  % make && make install
+Once you have the Ports Collection installed, you build clixon like this
+::
+
+   % cd /usr/ports/devel/clixon
+   % make && make install
 
 One issue with using the Ports Collection is that it may
 not install the latest version from GitHub. The port is
