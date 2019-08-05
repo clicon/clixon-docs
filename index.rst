@@ -16,5 +16,5 @@ mechanism.
 
    overview
    install
-
+   quickstart
 

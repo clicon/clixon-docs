@@ -12,8 +12,8 @@ devices. But Clixon can be used for other YANG-based systems as well
 due to a modular and pluggable architecture.
 
 Clixon has a transaction mechanism that ensures configuration
-operations are atomic. It also features a generated configuration CLI
-using `CLIgen <http://www.cligen.se>`_.
+operations are atomic. It also features a generated interactive
+configuration CLI using `CLIgen <http://www.cligen.se>`_.
 
 The goal of Clixon is to provide a useful, production-grade, scalable
 and free YANG based configuration tool.
@@ -33,19 +33,19 @@ System Architecture
                   |  +----------+   \ +----------+--------+  |
                   |  +----------+    \|          |        |  |
     User <-->     |  | restconf |---- | backend  | plugins|  |   <--> System
-                  |  +----------+    /|          |        |  |
+                  |  +----------+    /| daemon   |        |  |
                   |  +----------+   / +----------+--------+  |
 	          |  | netconf  |--+  | datastore|           |
 		  |  +----------+     +----------+           |
                   +------------------------------------------+
 		 
-The system architecture is a central backend daemon with a configuration
-datastore and a set of internal clients communicating with the backend.
+The core of the  system architecture is a backend daemon with a configuration
+datastore and a set of internal clients: cli, restconf and netconf.
 
 The clients provide different frontend interfaces to external users,
-including an interactive CLI, a RESTCONF, and a NETCONF
-interface. Internally, the clients and backend communicate via
-NETCONF.
+including an interactive CLI, RESTCONF over HTTP, and XML NETCONF over
+SSH.  Internally, the clients and backend communicate via NETCONF over
+a UNIX socket.
 
 The backend manages a configuration datastore and implements a
 transaction mechanism for configuration operations (eg, create, read,
@@ -53,24 +53,25 @@ update, delete) . The datastore supports candidate, running and
 startup configurations.
 
 When you adapt Clixon to your system, you typically start with a set
-of YANG specifications that you want implemented on your system. You
-then write backend plugins that interact with the underlying
-system. The plugins are written in C using the Clixon API and a set of
-plugin callbacks. The main callback is a transaction callback, where
-you specify how configuration changes are made to your system.
+of YANG specifications that you want implemented. You then write
+backend plugins that interact with the underlying system. The plugins
+are written in C using the Clixon API and a set of plugin
+callbacks. The main callback is a transaction callback, where you
+specify how configuration changes are made to your system.
 
-You can also design your interactive CLI using `CLIgen
+You can also design an interactive CLI using `CLIgen
 <http://www.cligen.se>`_, where you specify the CLI commands and write
-CLI plugins.  The part of the CLI that involves configuration
-operations (eg create, read, update, delete) can be generated.
+CLI plugins.  You will have to write CLI rules, but Clixon can
+generate the configuration part of the CLI,including set, delete, show
+commands for a specific syntax.
    
 
 Supported Platforms
 -------------------
 
-Clixon supports GNU/Linux and FreeBSD. MacOS may work.
+Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work.
 
-Standards Clixon (partially) supports:
+Standards Clixon supports (some partially):
 
 * `RFC5277 <http://www.rfc-base.org/txt/rfc-5277.txt>`_ NETCONF Event Notifications.
 * `RFC6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_ YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF).
@@ -86,18 +87,14 @@ Standards Clixon (partially) supports:
 * `XPATH 1.0 <https://www.w3.org/TR/xpath-10>`_
 * `W3C XML XSD <http://www.w3.org/TR/2004/REC-xmlschema-2-20041028>`_
 
-
 How to get Clixon
 -----------------
 
 Get the Clixon source code from `Github <http://github.com/clicon/clixon>`_
 
-
-
 Support
 -------
 For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_
-
 
 Bug reports
 -----------
