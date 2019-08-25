@@ -7,6 +7,8 @@ Installing Clixon
    
 Clixon runs on Linux, `FreeBSD port <https://www.freshports.org/devel/clixon>`_ and Mac/Apple. CPU architecures include x86_64, i686, ARM32.
 
+You can also run Clixon in a docker container.
+
 Ubuntu Linux
 ------------
 
@@ -92,5 +94,8 @@ for the port tries to assure that the master branch will
 compile always, but no FreeBSD specific functional testing
 is done.
 
+Docker
+------
 
+NYI
 

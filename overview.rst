@@ -69,11 +69,13 @@ commands for a specific syntax.
 Supported Platforms
 -------------------
 
-Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work.
+Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work. Linux
+platforms include 32 and 64 bits Ubuntu, Alpine, Raspian, etc.
 
 Standards Clixon supports (some partially):
 
 * `RFC5277 <http://www.rfc-base.org/txt/rfc-5277.txt>`_ NETCONF Event Notifications.
+* `RFC5789 <http://www.rfc-base.org/txt/rfc-5289.txt>`_ PATCH Method for HTTP.
 * `RFC6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_ YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF).
 * `RFC6241 <http://www.rfc-base.org/txt/rfc-6241.txt>`_ NETCONF Configuration Protocol.
 * `RFC6242 <http://www.rfc-base.org/txt/rfc-6242.txt>`_ Using the NETCONF Configuration Protocol over Secure Shell (SSH)

@@ -5,7 +5,7 @@ Quick start
 
 .. This is a comment
    
-This section describes how to run the Hello world example available in the soure code at: https://github.com/clicon/clixon/tree/master/example/hello.
+This section describes how to run the Hello world example available in the soure code at: `hello example <https://github.com/clicon/clixon/tree/master/example/hello>`_.
 
 Clixon is not a system in itself, it is a support system for an
 application. In this case, the "application" is hello world. The hello
@@ -20,7 +20,7 @@ Content
 -------
 The application directory contains a Clixon example which includes a simple example. It contains the following files:
 
-* `hello.xml`       The configuration file. See https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2019-06-05.yang for the spec itself.
+* `hello.xml`       The configuration file. See `clixon-config.yang <https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2019-06-05.yang>`_ for the uang spec of hello.xml.
 * `clixon-hello@2019-04-17.yang` The yang spec of the example.
 * `hello_cli.cli`                CLIgen specification.
 * `Makefile.in`                  Example makefile where plugins are built and installed
@@ -90,7 +90,7 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 Restconf
 --------
 
-Clixon also provides a Restconf interface. A reverse proxy needs to be configured. There are [instructions how to setup Nginx](../../doc/FAQ.md#how-do-i-use-restconf) for Clixon.
+Clixon also provides a Restconf interface. A reverse proxy needs to be configured. There are nginxsetup_ for Clixon.
 
 Start restconf daemon
 ::
@@ -113,14 +113,14 @@ Start sending restconf commands (using Curl):
 Next steps
 ----------
 The hello world example only has a Yang spec and a template CLI
-spec. For more advanced applications, customized backend, cli, netconf
+spec. For more advanced applications, customized backend, CLI, netconf
 and restconf code callbacks becomes necessary.
 
 Further, you may want to add upgrade, RPC:s, state data, notification
-streams, authentication and authorization. The [main example](../main)
-contains examples for such capabilities.
+streams, authentication and authorization. The main example contains
+such capabilities.
 
-There are also [container examples](../../docker) and lots more.
+
 
 
 
