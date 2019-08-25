@@ -94,8 +94,45 @@ for the port tries to assure that the master branch will
 compile always, but no FreeBSD specific functional testing
 is done.
 
-Docker
-------
+Systemd
+-------
 
-NYI
+Once installed, Clixon can be setup using systemd. The following shows an example with the backend and restconf daemons for the main example.
+Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_retsconf.service, for example.
+
+Systemd backend
+^^^^^^^^^^^^^^^
+The backend service is installed at /etc/systemd/system/example.service, for example. Note that in this example, the backend installation requires the restconf service, which is not necessary.
+::
+
+   [Unit]
+   Description=Starts and stops a clixon example service on this system
+   Wants=example_restconf.service
+   [Service]
+   Type=forking
+   User=root
+   RestartSec=60
+   Restart=on-failure
+   ExecStart=/usr/local/sbin/clixon_backend -s running -f /usr/local/etc/example.xml
+   [Install]
+   WantedBy=multi-user.target
+
+
+Systemd restconf
+^^^^^^^^^^^^^^^^
+The Restconf service is installed at /etc/systemd/system/example_restconf.service, for example. 
+::
+   
+   [Unit]
+   Description=Starts and stops an example clixon restconf service on this system
+   Wants=example.service
+   After=example.service
+   [Service]
+   Type=simple
+   User=www-data
+   WorkingDirectory=/www-data
+   Restart=on-failure
+   ExecStart=/www-data/clixon_restconf -f /usr/local/etc/example.xml
+   [Install]
+   WantedBy=multi-user.target
 

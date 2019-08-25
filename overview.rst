@@ -3,17 +3,17 @@
 Overview
 ========
 
-Clixon is an open-source configuration tool that provides a
-configuration database, CLI, NETCONF XML and RESTCONF interfaces all
-defined by YANG.
+Networking devices and other computer systems can use Clixon as a
+management frontend.  Clixon provides a datastore, CLI, NETCONF and
+RESTCONF interfaces all defined by YANG.
 
-Most of the projects using Clixon are for embedded networking
-devices. But Clixon can be used for other YANG-based systems as well
-due to a modular and pluggable architecture.
+Most of the projects using Clixon are for networking devices. But
+Clixon can be used for other YANG-based systems as well due to a
+modular and pluggable architecture.
 
 Clixon has a transaction mechanism that ensures configuration
 operations are atomic. It also features a generated interactive
-configuration CLI using `CLIgen <http://www.cligen.se>`_.
+command-line interface using `CLIgen <http://www.cligen.se>`_.
 
 The goal of Clixon is to provide a useful, production-grade, scalable
 and free YANG based configuration tool.
@@ -32,20 +32,21 @@ System Architecture
                   |  |   cli    |--+                         |
                   |  +----------+   \ +----------+--------+  |
                   |  +----------+    \|          |        |  |
-    User <-->     |  | restconf |---- | backend  | plugins|  |   <--> System
+      User  <-->  |  | restconf |---- | backend  | plugin*|  |  <--> System
                   |  +----------+    /| daemon   |        |  |
                   |  +----------+   / +----------+--------+  |
 	          |  | netconf  |--+  | datastore|           |
 		  |  +----------+     +----------+           |
                   +------------------------------------------+
 		 
-The core of the  system architecture is a backend daemon with a configuration
-datastore and a set of internal clients: cli, restconf and netconf.
+The core of the Clixon architecture is a backend daemon with a
+configuration datastore and a set of internal clients: cli, restconf
+and netconf.
 
-The clients provide different frontend interfaces to external users,
-including an interactive CLI, RESTCONF over HTTP, and XML NETCONF over
-SSH.  Internally, the clients and backend communicate via NETCONF over
-a UNIX socket.
+The clients provide frontend interfaces to users, including an
+interactive CLI, RESTCONF over HTTP, and XML NETCONF over SSH.
+Internally, the clients and backend communicate via NETCONF over a
+UNIX socket.
 
 The backend manages a configuration datastore and implements a
 transaction mechanism for configuration operations (eg, create, read,
@@ -62,17 +63,19 @@ specify how configuration changes are made to your system.
 You can also design an interactive CLI using `CLIgen
 <http://www.cligen.se>`_, where you specify the CLI commands and write
 CLI plugins.  You will have to write CLI rules, but Clixon can
-generate the configuration part of the CLI,including set, delete, show
+generate the configuration part of the CLI, including set, delete, show
 commands for a specific syntax.
    
 
-Supported Platforms
--------------------
+Platforms
+---------
 
 Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work. Linux
 platforms include 32 and 64 bits Ubuntu, Alpine, Raspian, etc.
 
-Standards Clixon supports (some partially):
+Standards
+---------
+Clixon supports the following standards (some partially):
 
 * `RFC5277 <http://www.rfc-base.org/txt/rfc-5277.txt>`_ NETCONF Event Notifications.
 * `RFC5789 <http://www.rfc-base.org/txt/rfc-5289.txt>`_ PATCH Method for HTTP.

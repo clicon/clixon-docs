@@ -17,4 +17,4 @@ mechanism.
    overview
    install
    quickstart
-
+   standards

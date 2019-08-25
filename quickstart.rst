@@ -90,9 +90,30 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 Restconf
 --------
 
-Clixon also provides a Restconf interface. A reverse proxy needs to be configured. There are nginxsetup_ for Clixon.
+Clixon also provides a Restconf interface. A reverse proxy needs to be configured. 
 
-Start restconf daemon
+For example, using nginx on an Ubuntu release: install, and edit config file `/etc/nginx/sites-available/default`
+::
+
+   server {
+     ...
+     location /restconf {
+       fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
+       include fastcgi_params;
+     }
+   }
+
+Start nginx daemon
+::
+   
+   sudo /etc/init.d/nginx start
+
+or using systemd:
+::
+   
+  sudo systemctl start nginx.service
+   
+Start the restconf daemon
 ::
 
    sudo su -c "/www-data/clixon_restconf" -s /bin/sh www-data &
@@ -109,6 +130,24 @@ Start sending restconf commands (using Curl):
         }
       }
    }
+
+Run a container
+---------------
+You can run the hello example as a pre-built docker container, on a `x86_64` Linux.
+First, the container is started with the backend running:
+::
+
+  docker run --rm --name hello -d clixon/clixon clixon_backend -Fs init
+
+Then a CLI is started
+::
+   
+ $ sudo docker exec -it hello clixon_cli
+ cli> set ?
+  hello                 
+ cli> set hello world 
+ cli> show configuration 
+ hello world;
 
 Next steps
 ----------
