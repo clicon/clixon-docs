@@ -18,3 +18,7 @@ mechanism.
    install
    quickstart
    standards
+   configuration
+   backend
+   cli
+   advanced

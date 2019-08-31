@@ -28,19 +28,20 @@ System Architecture
 ::
    
                   +------------------------------------------+
-                  |  +----------+                            |
-                  |  |   cli    |--+                         |
+                  |                      +------------+      |
+                  |  +----------+        | configfile |      |
+                  |  |   cli    |--+     +------------+      |
                   |  +----------+   \ +----------+--------+  |
-                  |  +----------+    \|          |        |  |
-      User  <-->  |  | restconf |---- | backend  | plugin*|  |  <--> System
-                  |  +----------+    /| daemon   |        |  |
-                  |  +----------+   / +----------+--------+  |
-	          |  | netconf  |--+  | datastore|           |
-		  |  +----------+     +----------+           |
+                  |  +----------+    \| backend  | plugin |  |
+      User  <-->  |  | restconf |---- | daemon   | plugin |  |  <--> "System"
+                  |  +----------+    /+----------+--------+  |
+                  |  +----------+   /    +------------+      |
+	          |  | netconf  |--+     | datastores |      |
+		  |  +----------+        +------------+      |
                   +------------------------------------------+
 		 
-The core of the Clixon architecture is a backend daemon with a
-configuration datastore and a set of internal clients: cli, restconf
+The core of the Clixon architecture is a backend daemon with
+configuration datastores and a set of internal clients: cli, restconf
 and netconf.
 
 The clients provide frontend interfaces to users, including an
