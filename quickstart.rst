@@ -149,6 +149,14 @@ Then a CLI is started
  cli> show configuration 
  hello world;
 
+
+Or Netconf:
+::
+
+   $ sudo docker exec -it clixon/clixon clixon_netconf
+   <rpc><get-config><source><candidate/></source></get-config></rpc>]]>]]>
+   <rpc-reply><data/></rpc-reply>]]>]]>
+
 Next steps
 ----------
 The hello world example only has a Yang spec and a template CLI
