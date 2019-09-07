@@ -11,8 +11,8 @@ config file, although some configuration options are not valid for all processes
 
 Please consult the YANG spec directly if you want detailed description of config options.
 
-Example configuration
-^^^^^^^^^^^^^^^^^^^^^
+Example
+-------
 
 The following is the configuration file of the `hello world` example:
 ::
@@ -31,7 +31,9 @@ The following is the configuration file of the `hello world` example:
      <CLICON_MODULE_LIBRARY_RFC7895>false</CLICON_MODULE_LIBRARY_RFC7895>
    </clixon-config>
 
-For example, some options (of approximately 50) described below of `clixon-config.yang <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402019-06-05.yang>`_ are the following (descriptions are skipped):
+Specification
+-------------
+Some options (of approximately 50) described below of `clixon-config.yang <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402019-06-05.yang>`_ are the following (descriptions are skipped):
 ::
    
     container clixon-config {
@@ -40,9 +42,6 @@ For example, some options (of approximately 50) described below of `clixon-confi
 	}
 	leaf CLICON_YANG_MAIN_DIR {
 	    type string;
-	    description
-		"If given, load all modules in this directory (all .yang files)
-                 See also CLICON_YANG_DIR which specifies a path of dirs";
 	}
         leaf-list CLICON_FEATURE {
 	   type string;
@@ -52,8 +51,7 @@ For example, some options (of approximately 50) described below of `clixon-confi
 	    default posix;
 	}
 
-     
-The option `CLICON_CONFIGFILE` is special, since it must be available
+The option `CLICON_CONFIGFILE` is special, it must be available
 before the configuration file is found (see `Finding the
 configuration`_), which means that the value in the file is a no-op.
 

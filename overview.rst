@@ -3,13 +3,19 @@
 Overview
 ========
 
-Networking devices and other computer systems can use Clixon as a
-management frontend.  Clixon provides a datastore, CLI, NETCONF and
-RESTCONF interfaces all defined by YANG.
+Clixon is a management framework that can be used by networking
+devices and other computer systems.  Clixon provides a datastore, CLI,
+NETCONF and RESTCONF interfaces all defined by YANG.
 
-Most of the projects using Clixon are for networking devices. But
-Clixon can be used for other YANG-based systems as well due to a
-modular and pluggable architecture.
+Clixon links:
+
+  - `Source code at github <http://www.github.com/clicon/clixon>`_.
+  - `Project <http://www.clicon.org>`_.
+  - `Docs <https://clixon-docs.readthedocs.io/en/latest/>`_.
+
+Most of the projects using Clixon are for networking devices. But Clixon
+can be used for other YANG-based systems as well due to a modular and
+pluggable architecture.
 
 Clixon has a transaction mechanism that ensures configuration
 operations are atomic. It also features a generated interactive
