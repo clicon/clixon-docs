@@ -30,13 +30,18 @@ Install and build CLIgen:
   make;
   make install
 
-Add a user group, using groupadd and usermod:
+Add a clicon user and group, using useradd and usermod:
 ::
    
-  sudo groupadd clicon
+  sudo useradd clicon
   sudo usermod -a -G clicon <user>
   sudo usermod -a -G clicon www-data
 
+Or using adduser:
+::
+
+  sudo adduser -D -H clicon
+  sudo adduser <user> clicon
 
 Build from source
 ^^^^^^^^^^^^^^^^^
@@ -46,8 +51,6 @@ Build from source
      make                      # Compile
      sudo make install         # Install libs, binaries, and config-files
      sudo make install-include # Install include files (for compiling)
-
-
 
 FreeBSD
 -------

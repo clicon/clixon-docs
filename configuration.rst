@@ -52,8 +52,7 @@ Some options (of approximately 50) described below of `clixon-config.yang <https
 	}
 
 The option `CLICON_CONFIGFILE` is special, it must be available
-before the configuration file is found (see `Finding the
-configuration`_), which means that the value in the file is a no-op.
+before the configuration file is found (see `Finding the configuration`_), which means that the value in the file is a no-op.
 
 Finding the configuration
 -------------------------
