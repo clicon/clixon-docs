@@ -5,15 +5,15 @@ Backend
 
 ::
 
-                            +-------------+
-                            | config file |
-                            +-------------+
-                                   |
+                           +---------------+
+                           | configuration |
+                           +---------------+
+                                   |- XML
                                    v
-   Frontends:   netconf +----------+--------+
-   CLI,           |     | backend  | plugin |   <--> 
-   netconf      <--->   | daemon   |--------+         "System"
-   restconf             |          | plugin |   <--> 
+   Frontends:   Netconf +----------+--------+
+   CLI,           |     | backend  | plugin |   <-->  Underlying
+   netconf      <--->   | daemon   |--------+         System
+   restconf             |          | plugin |   <-->   
                         +----------+--------+
                                    ^
                                    |- XML
@@ -22,23 +22,19 @@ Backend
                | candidate |  |  running  |  |  startup  |
                +-----------+  +-----------+  +-----------+
 
-The backend daemon is the central Clixon component. The backend has four APIs:
+The backend daemon is the central Clixon component. It consists of a main module and a number of dynamically loaded plugins. The backend has four APIs:
 
-- The *configuration file* read at startup, possibly amended with `-o` options.
-- A *NETCONF internal interface* to the frontend clients. This is by default a UNIX domain socket but can also be an IPv4 or IPv6 TCP socket.
-- A file interface to the *XML datastores*. The three main datastores are `candidate`, `running` and `startup`. Datastores may use JSON format (experimental).
-- Backend *plugins* configure the underlying system with *application-dependent APIs*. This can be a config file or message-passing, for example.
-
-A typical usage is as follows:
-
-1. A user accesses the system via one of the frontend clients: CLI, NETCONF or RESTCONF.
-2. The frontend client uses the internal NETCONF interface to access the backend. Usually this is an `edit_config` for modifying values, or a `get_config` to get values. A RESTCONF or CLI command is usually a combination of many NETCONF commands, being more primitive.
-3. The backend receives the NETCONF message and reads or modifies one of the XML datastores. Reads are typically done from the `running` datastore, while writes are made on the `candidate` datastore. 
-4. After editing the `candidate` datastore, the user may `commit` the changes which triggers a validation and commit callback (see `transactions`_) to the plugins, which in turn may result in an action on the application-specific API:s, such as editing a config file and restaring a process. 
+*configuration*
+  An XML file read at startup, possibly amended with `-o` options.
+*Internal interface*
+  A NETCONF socket to frontend clients. This is by default a UNIX domain socket but can also be an IPv4 or IPv6 TCP socket.
+*Datastores*
+  XML files storing configuration. The three main datastores are `candidate`, `running` and `startup`. A user edits the candidate datastore, commits the changes to  running which triggers callbacks in the plugins.
+*Application*
+  Backend plugins configure the underlying system with application-specific APIs. These API:s depend on how the underlying system is configured, examples include configuration files or a socket, for example.
 
 Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon uses a datastore cache.
-
-
+   
 Command-line options
 --------------------
 
@@ -59,6 +55,7 @@ The backend have the following command-line options:
   -s <mode>       Specify backend startup mode: none|startup|running|init)
   -c <file>       Load extra xml configuration, but don't commit.
   -g <group>      Client membership required to this group (default: clicon)
+  -U <user>       Run backend daemon as this user AND drop privileges permanently
   -y <file>       Load yang spec file (override yang main module)
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
@@ -87,10 +84,14 @@ Startup modes
 ^^^^^^^^^^^^^
 There are four different backend startup modes selected by the `-s` option. The difference is in how the running state is handled, ie what state the machine is when you start the daemon and how loading the configuration affects it:
 
-- `none` - Do not touch running state. Typically after crash when running state and db are synched.
-- `init` - Initialize running state. Start with a completely clean running state.
-- `running` - Commit running db configuration into running state. Typically after reboot if a persistent running db exists.
-- `startup` - Commit startup configuration into running state. After reboot when no persistent running db exists.
+`none`
+   Do not touch running state. Typically after crash when running state and db are synched.
+`init`
+   Initialize running state. Start with a completely clean running state.
+`running`
+   Commit running db configuration into running state. Typically after reboot if a persistent running db exists.
+`startup`
+   Commit startup configuration into running state. After reboot when no persistent running db exists.
 
 You use the `-s` to select startup mode:
 ::
@@ -145,6 +146,53 @@ CLICON_BACKEND_REGEXP
 
 CLICON_BACKEND_PIDFILE
   Process-id file of backend daemon
+
+Plugins
+-------
+
+Backend plugins are the "glue" that binds the Clixon system to the
+underlying system. The backend invokes *callbacks* in the plugins when
+events occur. 
+
+Plugins are written in C as dynamically loaded modules (`.so` files). At startup, the backend daemon looks in the directory pointed to by the config option `CLICON_BACKEND_DIR`, and loads all files with `.so` suffixes from that dir in alphabetical order.
+
+For example, to load all backend plugins from: `/usr/local/lib/example/backend`:
+::
+
+   <CLICON_BACKEND_DIR>/usr/local/lib/example/backend</CLICON_BACKEND_DIR>
+
+You can filter which plugins to load by specifying a regular expression. For example, the following will only load backend plugins starting with "example":
+::
+
+   <CLICON_BACKEND_REGEXP>^example*.so$</CLICON_BACKEND_REGEXP>
+   
+A plugin must have a init function called `clixon_plugin_init`. If
+this function does not exist, the backend will fail.
+
+The backend calls `clixon_plugin_init` and expects it to return an API
+struct defining all callbacks. The init function may return `NULL` in
+which case the backend logs this and continues.
+
+Once the plugin is loaded, it awaits callbacks from the backend.
+
+Callbacks
+^^^^^^^^^
+
+The following callbacks are defined for backend plugins:
+
+init
+   Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called `clixon_plugin_init`. It returns a struct with the name of the plugin, and all other callback names.
+start
+   Called when application is "started", (almost) all initialization is complete and daemon is in the background. If daemon privileges are dropped (see `dropping privileges`_) this callback is called *before* privileges are dropped.
+exit
+   Called just before plugin is unloaded 
+extension
+  Called at parsing of yang modules containing an extension statement.  A plugin may identify the extension by its name, and perform actions on the yang statement, such as transforming the yang in-memory. A callback is made for every statement, which means that several calls per extension can be made.
+reset
+  Reset system status
+trans_begin, trans_validate, trans_complete, trans_commit, trans_revert, trans_end, trans_abort
+  Transaction callbacks which are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
+
 
 Transactions
 ------------

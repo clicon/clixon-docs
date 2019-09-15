@@ -4,6 +4,8 @@
 Advanced
 ********
 
+(Work in progress, these are sections that do not fit into the rest of the document)
+
 CLI
 ===
 

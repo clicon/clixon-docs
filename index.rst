@@ -21,4 +21,5 @@ mechanism.
    configuration
    backend
    cli
+   usecases
    advanced

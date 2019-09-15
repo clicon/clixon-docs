@@ -34,13 +34,13 @@ System Architecture
 ::
    
                   +------------------------------------------+
-                  |                      +------------+      |
+                  |  Frontends:          +------------+      |
                   |  +----------+        | configfile |      |
                   |  |   cli    |--+     +------------+      |
                   |  +----------+   \ +----------+--------+  |
                   |  +----------+    \| backend  | plugin |  |
-      User  <-->  |  | restconf |---- | daemon   | plugin |  |  <--> "System"
-                  |  +----------+    /+----------+--------+  |
+      User  <-->  |  | restconf |---- | daemon   | plugin |  |  <--> Underlying
+                  |  +----------+    /+----------+--------+  |       System
                   |  +----------+   /    +------------+      |
 	          |  | netconf  |--+     | datastores |      |
 		  |  +----------+        +------------+      |
@@ -82,22 +82,7 @@ platforms include 32 and 64 bits Ubuntu, Alpine, Raspian, etc.
 
 Standards
 ---------
-Clixon supports the following standards (some partially):
-
-* `RFC5277 <http://www.rfc-base.org/txt/rfc-5277.txt>`_ NETCONF Event Notifications.
-* `RFC5789 <http://www.rfc-base.org/txt/rfc-5289.txt>`_ PATCH Method for HTTP.
-* `RFC6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_ YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF).
-* `RFC6241 <http://www.rfc-base.org/txt/rfc-6241.txt>`_ NETCONF Configuration Protocol.
-* `RFC6242 <http://www.rfc-base.org/txt/rfc-6242.txt>`_ Using the NETCONF Configuration Protocol over Secure Shell (SSH)
-* `RFC7895 <http://www.rfc-base.org/txt/rfc-7895.txt>`_ YANG Module Library
-* `RFC7950 <http://www.rfc-base.org/txt/rfc-7950.txt>`_ The YANG 1.1 Data Modeling Language
-* `RFC7951 <http://www.rfc-base.org/txt/rfc-7951.txt>`_ JSON Encoding of Data Modeled with YANG
-* `RFC8040 <https://tools.ietf.org/html/rfc8040>`_ RESTCONF Protocol
-* `RFC8341 <http://www.rfc-base.org/txt/rfc-8341.txt>`_ Network Configuration Access Control Model
-* `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_
-* `Namespaces in XML 1.0 <https://www.w3.org/TR/2009/REC-xml-names-20091208>`_
-* `XPATH 1.0 <https://www.w3.org/TR/xpath-10>`_
-* `W3C XML XSD <http://www.w3.org/TR/2004/REC-xmlschema-2-20041028>`_
+Clixon supports standards including YANG, NETCONF, RESTCONF, XML and XPATH. See :ref:`clixon_standards` for more details.
 
 How to get Clixon
 -----------------

@@ -57,13 +57,26 @@ before the configuration file is found (see `Finding the configuration`_), which
 Finding the configuration
 -------------------------
 
-There are several ways to change where Clixon finds it config file, in priority order:
+There are several ways to change where Clixon finds it config file (FILE), in priority order:
 
-  - Provide `-f <FILE>` option when starting a program (eg `clixon_backend -f FILE`)
-  - Provide `--with-configfile=FILE` when configuring
-  - Provide `--with-sysconfig=<dir>` when configuring. Then FILE is `<dir>/clixon.xml`
-  - Provide `--sysconfig=<dir>` when configuring. Then FILE is `<dir>/etc/clixon.xml`
-  - If none of the above: FILE is `/usr/local/etc/clixon.xml`
+  1. Start a clixon program with the `-f <FILE>` option. For example:
+     ::
+
+	clixon_backend -f FILE
+
+  2. At install time, Use the `--with-configfile=FILE` option to configure:
+     ::
+
+	./configure -f FILE
+
+  3. At install time: `./configure --with-sysconfig=<dir>` when configuring. Then FILE is `<dir>/clixon.xml`
+  4. At install time: `./configure --sysconfig=<dir>` when configuring. Then FILE is `<dir>/etc/clixon.xml`
+  5. If none of the above: FILE is `/usr/local/etc/clixon.xml`
+
+Note that the configure file itself may have the option `CLICON_CONFIGFILE` but due to bootstrapping reasons, its value is meaningless but can be useful for documentation purposes:
+::
+
+   <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
 
 Runtime modification
 --------------------
@@ -111,11 +124,16 @@ loaded. Note:
 
 The following configuration file options control the loading of Yang files:
 
-- `CLICON_YANG_DIR` -  A list of directories (yang dir path) where Clixon searches for module and submodules.
-- `CLICON_YANG_MAIN_FILE` - Load a specific Yang module given by a file. 
-- `CLICON_YANG_MODULE_MAIN` - Specifies a single module to load. The module is searched for in the yang dir path.
-- `CLICON_YANG_MODULE_REVISION` : Specifies a revision to the main module. 
-- `CLICON_YANG_MAIN_DIR` - Load all yang modules in this directory.
+`CLICON_YANG_DIR`
+   A list of directories (yang dir path) where Clixon searches for module and submodules.
+`CLICON_YANG_MAIN_FILE`
+   Load a specific Yang module given by a file. 
+`CLICON_YANG_MODULE_MAIN`
+   Specifies a single module to load. The module is searched for in the yang dir path.
+`CLICON_YANG_MODULE_REVISION`
+   Specifies a revision to the main module. 
+`CLICON_YANG_MAIN_DIR`
+   Load all yang modules in this directory.
 
 Note that the special `YANG_INSTALLDIR` autoconf configure option, by default `/usr/local/share/clixon` should be included in the yang dir path for Clixon system files to be found.
 
@@ -135,8 +153,8 @@ Clixon will prefer the newest.
 Default values
 --------------
 
-`CLICON_YANG_REGEXP` which is not present in the `hello world` is an example of a configuration option with a default value of `posix`. More clearly, it could be provided in the file as a comment:
+`CLICON_YANG_REGEXP` which is not present in the `hello world` is an example of a configuration option with a default value of `posix`:
 ::
 
-   <!--CLICON_YANG_REGEXP>posix</CLICON_YANG_REGEXP-->
+   <CLICON_YANG_REGEXP>posix</CLICON_YANG_REGEXP>
 

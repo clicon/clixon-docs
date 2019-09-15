@@ -34,8 +34,10 @@ Regular expressions
 ^^^^^^^^^^^^^^^^^^^
 Clixon supports two regular expressions engines:
 
-* `Posix`, the default method, _translates_ XSD regexp:s to posix before matching with the standard Linux regex engine. This translation is not complete but can be considered "good-enough" for most yang use-cases. For reference, all standard `Yang models <https://github.com/YangModels/yang>`_ have been tested.
-* `Libxml2` which uses the XSD regex engine in Libxml2. This is a complete XSD engine but you need to compile and link with libxml2 which may add overhead.
+`Posix`
+   Posix is the default method, _translates_ XSD regexp:s to posix before matching with the standard Linux regex engine. This translation is not complete but can be considered "good-enough" for most yang use-cases. For reference, all standard `Yang models <https://github.com/YangModels/yang>`_ have been tested.
+`Libxml2`
+   Libxml2  uses the XSD regex engine. This is a complete XSD engine but you need to compile and link with libxml2 which may add overhead.
 
 To use libxml2 in clixon you need enable libxml2 in both cligen and clixon:
 ::
