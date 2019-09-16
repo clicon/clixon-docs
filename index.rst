@@ -20,6 +20,7 @@ mechanism.
    standards
    configuration
    backend
+   datastore
    cli
    usecases
    advanced
