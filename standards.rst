@@ -15,7 +15,7 @@ The YANG standards that Clixon follows include:
 
 * `YANG 1.0 RFC 6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_
 * `YANG 1.1 RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_
-* `RFC 7895: YANG module library <http://www.rfc-base.org/txt/rfc-7895.txt>`_
+* `RFC 7895: YANG module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_
 
 However, the following YANG syntax modules are not implemented (reference to RFC7950 in parenthesis):
 
@@ -76,11 +76,11 @@ NETCONF
 
 Clixon implements the following NETCONF RFC:s:
 
-* `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-base.org/txt/rfc-6241.txt>`_
-* `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-base.org/txt/rfc-6242.txt>`_
-* `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-base.org/txt/rfc-6243.txt>`_. Clixon implements "explicit" default handling, but does not implement the RFC.
-* `RFC 5277: NETCONF Event Notifications <http://www.rfc-base.org/txt/rfc-5277.txt>`_
-* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-base.org/txt/rfc-8341.txt>`_
+* `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
+* `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
+* `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_. Clixon implements "explicit" default handling, but does not implement the RFC.
+* `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
+* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
 
@@ -107,7 +107,7 @@ RESTCONF
 
 Clixon Restconf is a daemon based on FastCGI C-API. Instructions are available to
 run with NGINX.
-The implementatation is based on `RFC 8040: RESTCONF Protocol <https://tools.ietf.org/html/rfc8040>`_.
+The implementatation is based on `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
 
 The following features of RFC8040 are supported:
 

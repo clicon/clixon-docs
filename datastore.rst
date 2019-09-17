@@ -14,7 +14,7 @@ Datastore
          | candidate |  |  running  |  |  startup  |
          +-----------+  +-----------+  +-----------+
 
-Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCONF Configuration Protocol <https://tools.ietf.org/rfc/rfc6241.txt>`_):
+Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCONF Configuration Protocol <http://rfc-editor.org/rfc/rfc6241.txt>`_):
 
 `Candidate`
    A configuration datastore that can be manipulated without impacting the device's current configuration and that can be committed to the running configuration datastore.
@@ -70,7 +70,7 @@ Note that the format settings applies to all datastores.
 Module library support
 ----------------------
 
-Clixon can store Yang module-state information according to `RFC 7895: YANG module library <http://www.rfc-base.org/txt/rfc-7895.txt>`_ in the
+Clixon can store Yang module-state information according to `RFC 7895: YANG module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_ in the
 datastores. With module state, you know which Yang version the XML belongs to, and is useful when upgrading, for example.
 
 
