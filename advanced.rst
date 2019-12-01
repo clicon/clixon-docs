@@ -19,7 +19,7 @@ Clixon adds some features and structure to CLIgen which include:
 - The CLIgen `treename` syntax does not work.
 - A CLI specification file is enhanced with the following CLIgen variables:
 
-  - `CLICON_MODE`: A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to _all_ modes specified in the list.
+  - `CLICON_MODE`: A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to _all_ modes specified in the list. You can also use wildcards `*` and `?`.
   - `CLICON_PROMPT`: A string describing the CLI prompt using a very simple format with: `%H`, `%U` and `%T`.
   - `CLICON_PLUGIN`: the name of the object file containing callbacks in this file.
 
@@ -36,17 +36,6 @@ Example of `@datamodel` syntax:
 The commands (eg `cli_set`) will be called with the first argument an api-path to the referenced object.
 
 
-History
--------
-Clixon CLI supports persistent command history. There are two CLI history related configuration options: `CLICON_CLI_HIST_FILE` with default value `~/.clixon_cli_history` and `CLICON_CLI_HIST_SIZE` with default value 300.
-
-The design is similar to bash history but is simpler in some respects:
-   - The CLI loads/saves its complete history to a file on entry and exit, respectively
-   - The size (number of lines) of the file is the same as the history in memory
-   - Only the latest session dumping its history will survive (bash merges multiple session history).
-
-Further, tilde-expansion is supported and if history files are not found or lack appropriate access will not cause an exit but will be logged at debug level
-
 How to deal with large specs
 ----------------------------
 CLIgen is designed to handle large specifications in runtime, but it may be
@@ -56,11 +45,19 @@ Here are some techniques and hints on how to reduce the complexity of large CLI 
 
 Sub-modes
 ^^^^^^^^^
-The `CLICON_MODE` can be used to add the same syntax in multiple modes. For example, if you have major modes `configure` and `operation` and a set of commands that should be in both, you can add a sub-mode that will appear in both configure and operation mode.
+The `CLICON_MODE` is used to specify in which modes the syntax in a specific file should be added. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
+
+First, lets add a basic set in each:
 ::
    
-  CLICON_MODE="configure:operation";
-  show("Show") routing("routing");
+  CLICON_MODE="configure";
+  show configure;
+
+First, lets add a basic set in each:
+::
+   
+  CLICON_MODE="configure";
+  show configure;
 
 Note that CLI command trees are *merged* so that show commands in other files are shown together. Thus, for example:
 ::
@@ -68,9 +65,17 @@ Note that CLI command trees are *merged* so that show commands in other files ar
   CLICON_MODE="operation:files";
   show("Show") files("files");
 
-will result in both commands in the operation mode (not the others):
+will result in both commands in the operation mode:
 ::
-   
+
+  > clixon_cli -m operation 
+  cli> show <TAB>
+    routing      files
+
+but 
+::
+
+  > clixon_cli -m operation 
   cli> show <TAB>
     routing      files
   

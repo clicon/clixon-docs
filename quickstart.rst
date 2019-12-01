@@ -100,12 +100,21 @@ For example, using nginx on an Ubuntu release: install, and edit config file `/e
 ::
 
    server {
-     ...
-     location /restconf {
-       fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
-       include fastcgi_params;
-     }
+      ...
+      location / {
+         fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
+         include fastcgi_params;
+      }
+      # Enable this for restconf notification streams
+      location /streams {
+         fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
+	 include fastcgi_params;
+ 	 proxy_http_version 1.1;
+	 proxy_set_header Connection "";
+      }
    }
+
+Note that the second part is necessary only for notification streams.
 
 Start nginx daemon
 ::
