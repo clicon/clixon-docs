@@ -102,6 +102,12 @@ Clixon does *not* support the following NETCONF features:
 * edit-config config-text
 * edit-config operation
 
+Further, in `get-config` filter expressions, the RFC6241 XPath
+Capability is preferred over default subtrees. This has two reasons:
+
+1. XPATH has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retreived.
+2. Subtree filtering does not support namespaces yet.
+  
 RESTCONF
 --------
 

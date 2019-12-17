@@ -113,59 +113,97 @@ You can also add the C preprocessor as a first step. You can then define macros,
         $(CPP) -P -x assembler-with-cpp $(INCLUDES) -o $@ $<
 
 
-Api-path vs XPATH
-=================
+Path identifiers: Api-path vs XPath
+===================================
 
-One of the differences with NETCONF and RESTONF has to do with
-tree paths. There are two similar, but different ways to identify a XML (or
-JSON) sub-tree:
+NETCONF and RESTONF use different path identifiers, and Clixon uses both methods:
 
-* One is XML XPATH defined in `XPATH 1.0 <https://www.w3.org/TR/xpath-10>`_ as part of XML and used in NETCONF `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_.
-* Another is API-PATH defined in `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_
+* *XML Path Language* defined in `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_ as part of XML and used in NETCONF `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_.
+* *Api-path* defined and used in `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_
 
-Both use a denotation based on a tree path, such as `a/b`, but differ in two ways.
+Both use a denotation to find a path in tree, `a/b`, but differ in several ways.
 
-XPATH is much more expressive in its location paths and axes and node-test. For example, `/assembly[name="robot_4"]//shape/name[containts(text(),'bolt')]/surface/roughness` is a valid XPATH.
+Usage
+-----
+Example of XPath in a NETCONF get-config RPC using the XPath capability 
+::
 
-API-PATH is in comparison very limited to pure path expressions such
-as `a/b=3,4/c`, with a simplified key,value denotation: that is `a/b=3,4` as
-opposed to the XPATH equivalent: `a[i=3][j=4]`.
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <get-config>
+         <source>
+	    <candidate/>
+	 </source>
+	 <filter type="xpath" select="/interfaces/interface[name='eth0']/description" />
+      </get-config>
+   </rpc>
 
-Second, they differ in their treatment of namespaces.
+The XPath is "/interfaces/interface[name='eth0']/description".
+   
+Example of Api-path in a restconf GET request, doing the same as the NETCONF request abobe:
+::
 
-XPATH requires an XML namespace context using the `xmlns` attribute to
-define namespace and prefix bindings.  Note that an XML namespace
-context can specify both a default namespace (eg: "urn:example:default")
-as well as explicit namespace denoted by a prefix (eg: "ex" denoting
-"urn:example:example").  Note also that each symbol must
-be prefixed with a prefix (or default), as there is no inheritance.
+   curl -s -X GET http://localhost/restconf/data/ietf-interfaces:interfaces/interface=eth0/description
+
+The Api-path in the example abve is: "ietf-interfaces:interfaces/interface=eth0/description".
+
+Clixon uses Api-paths internally when accessing xml keys, but has functions to translate to XPaths.
+
+Scope
+-----
+
+XPath is a powerful language for addressing parts of an XML document, where a sub-part is locating paths. For example, the following is a valid XPath:
+::
+
+   /assembly[name="robot_4"]//shape/name[containts(text(),'bolt')]/surface/roughness
+
+Api-path is in comparison very limited to pure path expressions such
+as:
+::
+   
+   a/b=3,4/c
+
+which corresponds to the XPath eg: `a[i=3][j=4]`.
+
+Namespaces
+----------
+
+XPath uses `XML names <https://www.w3.org/TR/REC-xml-names/>`_, requiring an *XML namespace context* using the `xmlns` attribute to bind namespaces and prefixes.  An XML namespace
+context can specify both:
+
+  * A default namespace for unprefixed names (eg `/x/`), defined by for example: `xmlns="urn:example:default"`.
+  * An explicit namespace for prefixed names prefix (eg: `/ex:x/`), defined by for example: `xmlns:ex="urn:example:example"`.
+
+Further, XML prefixes are not *inherited*, each symbol must be prefixed with a prefix or default. That is, `/ex:x/y` is not the same as `/ex:x/ex:y`, unless `ex` is also default.
 
 Example:; Assume an XML namespace context:
 ::
    
    <a xmlns="urn:example:default" xmlns:ex="urn:example:example">
 
-with an associated XPATH:
+with an associated XPath:
 ::
 
    /x/ex:y/ex:z[ex:i='w']`,
 
-where x belong to "urn:example:default" and y, z and i belong to "urn:example:example".
+where the symbol x belongs to namespace: "urn:example:default" and symbols y, z and i belong to "urn:example:example".
 
-In contrast, the namespaces of an API-PATH is defined in a YANG
-context using _modulenames_ as prefixes instead of namespaces and
-prefixes. A module-name i also _inherited_, ie a child node inherits
-the prefix of a parent, and there are no defaults. Note that a module
-name defines a namespace in the YANG definition. In oher words, you
-must know the YANG spec in order to know what namespace a module name
-refers to.
+In contrast, the namespaces of an Api-path is defined implitly by a
+YANG context using *module-names* as prefixes.  The namespace is defined in the Yang module by the `namespace` keyword. Api-paths
+must have a Yang definition wheras XPaths can be compeletely defined
+in XML.
 
-Example: Assume two YANG modules MDEF and MEX with namespaces "urn:example:default" and "urn:example:example" respectively, with the following API-PATH (equivalent to the XPATJ example above):
+A module-name is also *inherited*, ie a child node inherits the prefix
+of a parent, and there are no defaults. For example, `/moda:x/y` is the same as `/moda:a/moda:y`.
+
+Finally, an Api-path uses a shorthand for defining list *indexes*. For example, `/modx:z=w` denotes the element in a list of `z`:s whose key is the value `w`. This assumes that `z` is a Yang list (or leaf-list) and the index value is known.
+
+Example: Assume two YANG modules `moda` and `modx` with namespaces "urn:example:default" and "urn:example:example" respectively, with the following Api-path (equivalent to the XPath example above):
 ::
 
-   /MDEF:x/MEX:y=w/z=w
+   /moda:x/modx:y/z=w
 
 where, as above, x belong to "urn:example:default" and y, and z belong to "urn:example:example".
+
 
 
   
