@@ -46,11 +46,11 @@ It is also possible to create a tree by parsing JSON syntax as an
 alternative to XML. You can also read XML or JSON from file.
 
 
-.. note Associating a YANG module
+Associating a YANG module
 
-  A yang specification `yt` is the second argument to the parse function. 
+A yang specification `yt` is the second argument to the parse function. 
 
-  In this example, the YANG module could look something like:
+In this example, the YANG module could look something like:
 ::
 
   module mod_a{
@@ -112,8 +112,8 @@ two equal parts depending on if the requested item is larger than, or
 less than, the middle of the interval.
 
 Binary search complexity is *O(log N)*, whereas linear search is is *O(n)*. 
-For example, a search in a vector of one million children will take ca
-`20` lookups, whereas linear search takes on average `500.000` lookups.
+For example, a search in a vector of one million children will take up to
+`20` lookups, whereas linear search takes up to `1.000.000` lookups.
 
 Therefore, if you have a large number of children and you need to make
 searches, it is important that you use indexes, either implicit, or explicit.
