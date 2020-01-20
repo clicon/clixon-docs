@@ -1,8 +1,8 @@
 .. _clixon_xml:
 
-********
-XML tree
-********
+==========
+ XML tree
+==========
 
 Clixon represents its internal data in an in "in-memory" tree
 representation. In the C API, this data structure is called `cxobj` and
@@ -10,65 +10,67 @@ is used to represent config and state data. Typically, a cxobj is
 parsed from or printed to XML or JSON, but is really a generic
 representation of a tree.
 
-Internal representation
-=======================
-
-A cxobj has several components, which are all accessible via the API. For example:
-
-* *name*   Name of node
-* *prefix* Optional prefix denoting a localname according to XML namespaces
-* *type*   A node is either an element, attribute or body text
-* *value*  Attributes and bodies may have values.
-* *children* Elements may have a set of XML children
-* *spec*   A pointer to a YANG specification of this XML node
-
-The most basic way to traverse an cxobj tree is to linearly iterate
-over all children from a parent element node.
-::
-
-   cxobj *x = NULL;
-   while ((x = xml_child_each(xt, x, CX_ELMNT)) != NULL) {
-     ...
-   }
-
-where `CX_ELMNT` selects element children (no attributes or body text).
-
-However, it is recommended to use the `Search API`_ for more efficient
-searching.
-  
 Parsing
--------
+=======
 
 A simple way to create an cxobj is to parse it from a string:
 ::
 
      cxobj *xt = NULL;
-     if (xml_parse_va(&xt, NULL, "<hello>%s</hello>", "world") < 0)
+     if (xml_parse_va(&xt, yt, "<x xmlns='urn:example:a'><k1>a</k2></x>") < 0)
         err;
 
-where ``xt`` is a top-level cxobj containing the "hello world" tree. 
-If printed with for example: ``xml_print(stdout,xt)`` the tree looks as follows:
+where
+
+* `xt` is a top-level cxobj containing the XML tree. 
+* `yt` is the yang spec corrresponding to `xt` (or NULL)
+* The third parameter is a "printf" like format string with the 
+
+If printed with for example: `xml_print(stdout,xt)` the tree looks as follows:
 ::
    
    <top>
-      <hello>world</hello>
+      <x xmlns="urn:example:a">
+         <k1>a</k2>
+      </x>
    </top>
 
-Note that a top-level node (`top`) is always be created to encapsulate all trees parsed.
-
-It is also possible to create a tree by parsing JSON, as well as from a file.
-
-You may also manually create a tree by ``xml_new()``, ``xml_addsub()`` and other functions, but this is much more work.
+Note that a top-level node (`top`) is always created to encapsulate
+all trees parsed and that the default namespace is "urn:example:a".
 
 
-Config
-------
+It is also possible to create a tree by parsing JSON syntax as an
+alternative to XML. You can also read XML or JSON from file.
 
-When configuration data is accessed, a user interacts with the cxobj first by accessing
-the datastore with the ``dbxml`` API which gets a handle to a ``cxobj``
-and can then make read-only operations on the in-memory tree.
+You may also manually create a tree by `xml_new()`, `xml_addsub()` and
+other functions, this is more efficient than parsing but more work to program.
 
-The following example code will get a copy of the whole running datastore to cxobj ``xt``:
+Associating a YANG module
+-------------------------
+
+A yang specification `yt` is the second argument to the parse function. 
+
+In this example, the YANG module could look something like:
+::
+
+  module mod_a{
+    prefix a;
+    namespace "urn:example:a";
+    list x{
+      leaf k1{
+        type string;
+      }
+    }
+  }
+
+
+Config data
+===========
+
+To access configuration data, a user can retrieve a copy of a datastore to get a cxobj handle.
+Read-only operations may then be done on the in-memory tree.
+
+The following example code gets a copy of the whole `running` datastore to cxobj `xt`:
 ::
 
      cxobj *xt = NULL;
@@ -78,25 +80,22 @@ The following example code will get a copy of the whole running datastore to cxo
 In the case of config data, in-memory trees are read-only *caches* of
 the datastore and can normally not be written back to the datastore.
 Changes to the config datastire should be made via the backend netconf API, eg using
-``edit-config``.
+`edit-config`.
 
 
 Search index
 ============
 
-Clixon search indexes are either implicitly created from the YANG
-specification, or explicitly created using the API.
+Clixon search indexes are either *implicitly* created from the YANG
+specification, or *explicitly* created using the API.
 
-From YANG it is only `leaf` or `leaf-list` that are candidates for
-optimized lookup, direct `leaf` or `container` lookup is always fast.
+From YANG it is only `list` and `leaf-list` that are candidates for
+optimized lookup, direct `leaf` and `container` lookup is fast either way.
 
-If indexes are used, binary search for specific children is much more efficient
-when there are a large number of children.
-
-The binary search works by ordering list items alphabetically (or
-numerically), and then divide the search in two equal paths depending
-on if the requested item is larger than, or less than the middle of
-the interval.
+*Binary* search is used by search indexes and works by ordering list
+items alphabetically (or numerically), and then dividing the search interval in
+two equal parts depending on if the requested item is larger than, or
+less than, the middle of the interval.
 
 Binary search complexity is *O(log N)*, whereas linear search is is *O(n)*. 
 For example, a search in a vector of one million children will take ca
@@ -179,14 +178,42 @@ In the following cases, implicit indexes are *not* created:
 In those cases where implicit YANG indexes cannot be used, explicit indexes can be created for fast access.
 
 Explicit indexes [#f1]_
-------------------------
+-----------------------
 
 You can register explicit indexes using the function `clixon_register_index()`.
 
 *This section is not completed* 
 
+Internal representation
+=======================
+
+A cxobj has several components, which are all accessible via the API. For example:
+
+* *name*   Name of node
+* *prefix* Optional prefix denoting a localname according to XML namespaces
+* *type*   A node is either an element, attribute or body text
+* *value*  Attributes and bodies may have values.
+* *children* Elements may have a set of XML children
+* *spec*   A pointer to a YANG specification of this XML node
+
+The most basic way to traverse an cxobj tree is to linearly iterate
+over all children from a parent element node.
+::
+
+   cxobj *x = NULL;
+   while ((x = xml_child_each(xt, x, CX_ELMNT)) != NULL) {
+     ...
+   }
+
+where `CX_ELMNT` selects element children (no attributes or body text).
+
+However, it is recommended to use the `Search API`_ for more efficient
+searching.
+  
+
+
 Search API  [#f1]_
-===================
+==================
 
 This section gives an overview of the C cxobj search API.
 
@@ -194,7 +221,7 @@ This section gives an overview of the C cxobj search API.
 Direct children
 ---------------
 
-The basic C API for searching direct children of a cxobj is the ``xml_find_index()`` API.
+The basic C API for searching direct children of a cxobj is the `xml_find_index()` API.
 
 An example call is as follows:
 ::
@@ -264,7 +291,7 @@ An example call using instance-id:s is as follows:
 The example shows the usage of implicit key indexes which makes this
 work in *O(logN)*, with the same exception rules as for direct children state in `Implicit indexes`_.
 
-The corresponding API for Api-paths is ``api_path_search()`` and ``xpath_vec()`` for XPath.
+The corresponding API for Api-paths is `api_path_search()` and `xpath_vec()` for XPath.
 
    
 Multiple keys
