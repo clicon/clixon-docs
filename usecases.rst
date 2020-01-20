@@ -41,7 +41,7 @@ The first usecase illustrates how a retrieval of a configured value from the sys
      </get-config>
    </rpc>
    
-3. The backend receives the internal Netconf message, reads the `running` datastore and filters the output according to the xpath expression.
+3. The backend receives the internal Netconf message, reads the `running` datastore and filters the output according to the XPath expression.
    
 4. The backend returns the filtered output to the client:
 ::

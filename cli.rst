@@ -3,7 +3,7 @@
 CLI
 ===
 
-The CLI using `CLIgen <https://github.com/olofhagsand/cligen>` is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/olofhagsand/cligen/blob/master/cligen_tutorial.pdf>`.
+The CLI uses `<https://github.com/olofhagsand/cligen>`_ is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/olofhagsand/cligen/blob/master/cligen_tutorial.pdf>`_.
 
 Using the CLI
 -------------
@@ -40,7 +40,7 @@ When defining a CLI frontend, there are two kinds of CLI specification files:
 
 The following example shows examples of both files taken from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_. First, a clispec file containing two commands:
 ::
-   
+
   show("Show state") config("Show configuration"), cli_show_config("candidate", "text", "/");
   example("Callback example") <var:int32>("any number"), mycallback("myarg");
 
@@ -122,6 +122,7 @@ CLICON_CLI_HIST_FILE
 CLICON_CLI_HIST_SIZE
   Max number of history line, default value is 300.
 
+
 The design is similar to bash history but is simpler in some respects:
    - The CLI loads/saves its complete history to a file on entry and exit, respectively
    - The size (number of lines) of the file is the same as the history in memory
@@ -166,12 +167,3 @@ CLICON_CLI_GENMODEL_COMPLETION
 CLICON_CLI_GENMODEL_TYPE
   How to generate and show CLI syntax: VARS|ALL
 
-
-
-CLICON_CLI_VARONLY
-
-CLICON_CLI_LINESCROLLING
-
-CLICON_CLI_TAB_MODE
-
-CLICON_CLI_UTF8

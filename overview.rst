@@ -82,7 +82,7 @@ platforms include 32 and 64 bits Ubuntu, Alpine, Raspian, etc.
 
 Standards
 ---------
-Clixon supports standards including YANG, NETCONF, RESTCONF, XML and XPATH. See :ref:`clixon_standards` for more details.
+Clixon supports standards including YANG, NETCONF, RESTCONF, XML and XPath. See :ref:`clixon_standards` for more details.
 
 How to get Clixon
 -----------------

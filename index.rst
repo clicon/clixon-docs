@@ -23,4 +23,6 @@ mechanism.
    datastore
    cli
    usecases
+   paths
+   xml
    advanced

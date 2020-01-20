@@ -26,7 +26,7 @@ However, the following YANG syntax modules are not implemented (reference to RFC
 * instance-identifier type (9.13)
 * status (7.21.2)
 * YIN (13)
-* Yang extended Xpath functions: re-match(), deref)(), derived-from(), derived-from-or-self(), enum-value(), bit-is-set() (10.2-10.6)
+* Yang extended XPath functions: re-match(), deref)(), derived-from(), derived-from-or-self(), enum-value(), bit-is-set() (10.2-10.6)
 * Default values on leaf-lists (7.7.2)
 * Lists without keys (non-config lists may lack keys)
 
@@ -50,17 +50,17 @@ You then need to set the following configure option:
   <CLICON_YANG_REGEXP>libxml2</CLICON_YANG_REGEXP>
 
 
-XML and XPATH
+XML and XPath
 -------------
-Clixon has its own implementation of XML and XPATH. See more in the detailed API reference.
+Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
 
 The XML-related standards include:
 
 * `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_. (DOCTYPE/ DTD not supported)
 * `Namespaces in XML 1.0 <https://www.w3.org/TR/2009/REC-xml-names-20091208>`_
-* `XPATH 1.0 <https://www.w3.org/TR/xpath-10>`_
+* `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_
        
-The following XPATH axes are supported:
+The following XPath axes are supported:
 
 * child,
 * descendant,
@@ -105,7 +105,7 @@ Clixon does *not* support the following NETCONF features:
 Further, in `get-config` filter expressions, the RFC6241 XPath
 Capability is preferred over default subtrees. This has two reasons:
 
-1. XPATH has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retreived.
+1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retreived.
 2. Subtree filtering does not support namespaces yet.
   
 RESTCONF
