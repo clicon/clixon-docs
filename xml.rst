@@ -69,12 +69,14 @@ Creating XML programmatically
 You may also manually create a tree by `xml_new()`, `xml_addsub()` and
 other functions, this is more efficient than parsing but more work to program.
 
-.. note:: expand on this.
+.. note::
+   expand on this.
 
 
 Using XML
 =========
-	  
+
+
 Config data
 ===========
 
@@ -88,11 +90,11 @@ The following example code gets a copy of the whole `running` datastore to cxobj
      if (xmldb_get(h, "running", NULL, NULL, &xt) < 0)
         err;
 
-.. note::  
-	In the case of config data, in-memory trees are read-only *caches* of
-	the datastore and can normally not be written back to the datastore.
-	Changes to the config datastire should be made via the backend netconf API, eg using
-	`edit-config`.
+.. note::
+        In the case of config data, in-memory trees are read-only *caches* of
+        the datastore and can normally not be written back to the datastore.
+        Changes to the config datastire should be made via the backend netconf API, eg using
+        `edit-config`.
 
 
 Search index
