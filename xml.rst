@@ -196,19 +196,27 @@ Explicit indexes [#f1]_
 
 You can register explicit indexes using the function `clixon_register_index()`.
 
-*This section is not completed* 
+.. note:: *This section is not completed* 
 
 Internal representation
 =======================
 
 A cxobj has several components, which are all accessible via the API. For example:
 
-* *name*   Name of node
-* *prefix* Optional prefix denoting a localname according to XML namespaces
-* *type*   A node is either an element, attribute or body text
-* *value*  Attributes and bodies may have values.
-* *children* Elements may have a set of XML children
-* *spec*   A pointer to a YANG specification of this XML node
++------------+-----------------------------------------------------------+
+| name       | Name of node                                              |
++------------+-----------------------------------------------------------+
+| *prefix*   | Optional prefix denoting a localname according to XML     |
+|            | namespaces                                                |
++------------+-----------------------------------------------------------+
+| *type*     |  A node is either an element, attribute or body text      |
++------------+-----------------------------------------------------------+
+| *value*    | Attributes and bodies may have values.                    |
++------------+-----------------------------------------------------------+
+| *children* | Elements may have a set of XML children                   |
++------------+-----------------------------------------------------------+
+| *spec*     | A pointer to a YANG specification of this XML node        |
++------------+-----------------------------------------------------------+
 
 The most basic way to traverse an cxobj tree is to linearly iterate
 over all children from a parent element node.
@@ -254,13 +262,21 @@ An example call is as follows:
 
 where
 
-* `xp` is an XML parent,
-* `yp` is the YANG specification of xp
-* `name` is the name of the wanted children
-* `cvk` is a vector of index name and value pairs
-* `xvec` is a result vector of XML nodes.
++--------+-------------------------------------------+
+| `xp`   | is an XML parent                          |
++--------+-------------------------------------------+
+| `yp`   | is the YANG specification of xp           |
++--------+-------------------------------------------+
+| `name` | is the name of the wanted children        |
++--------+-------------------------------------------+
+| `cvk`  | is a vector of index name and value pairs |
++--------+-------------------------------------------+
+| `xvec` | is a result vector of XML nodes.          |
++--------+-------------------------------------------+
 
-For example, using the previous XML tree and if `name=x` and  `cvk` contains the single pair: `k1=a`, then `xvec` will contain both `x` entries after calling the function:
+For example, using the previous XML tree and if `name=x` and  `cvk`
+contains the single pair: `k1=a`, then `xvec` will contain both `x`
+entries after calling the function:
 ::
 
      0: <x><k1>a</k1><k2>a</k2><y>cc</y><y>dd</y><z>foo</a></x>
@@ -275,9 +291,13 @@ If deeper searches are needed, i.e., not just to direct children,
 Clixon :ref:`clixon_paths` can be used to make a search request. There
 are three path variants, each with its own pros and cons:
 
-* XPath is most expressive, but only supports `O(logN)` search for YANG `list` entries (not leaf-lists), and adds overhead in terms of  memory and cycles.
-* Api-path is least expressive since it can only express YANG `list` and `leaf-list` key search.
-* Instance-identifier can express all optimized searches as well as non-key searches. This is the recommended option.
+* XPath is most expressive, but only supports `O(logN)` search for
+  YANG `list` entries (not leaf-lists), and adds overhead in terms of
+  memory and cycles.
+* Api-path is least expressive since it can only express YANG `list`
+  and `leaf-list` key search.
+* Instance-identifier can express all optimized searches as well as
+  non-key searches. This is the recommended option.
 
 Assume the same YANG as in the previous example, a path to find `y` entries with a specific value could be:
 
