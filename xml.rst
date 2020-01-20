@@ -10,8 +10,11 @@ is used to represent config and state data. Typically, a cxobj is
 parsed from or printed to XML or JSON, but is really a generic
 representation of a tree.
 
-Parsing
-=======
+Creating XML
+============
+
+Creating XML from a string
+--------------------------
 
 A simple way to create an cxobj is to parse it from a string:
 ::
@@ -36,21 +39,18 @@ If printed with for example: `xml_print(stdout,xt)` the tree looks as follows:
    </top>
 
 Note that a top-level node (`top`) is always created to encapsulate
-all trees parsed and that the default namespace is "urn:example:a".
-
+all trees parsed and that the default namespace in this example
+is "urn:example:a".
 
 It is also possible to create a tree by parsing JSON syntax as an
 alternative to XML. You can also read XML or JSON from file.
 
-You may also manually create a tree by `xml_new()`, `xml_addsub()` and
-other functions, this is more efficient than parsing but more work to program.
 
-Associating a YANG module
--------------------------
+.. note Associating a YANG module
 
-A yang specification `yt` is the second argument to the parse function. 
+  A yang specification `yt` is the second argument to the parse function. 
 
-In this example, the YANG module could look something like:
+  In this example, the YANG module could look something like:
 ::
 
   module mod_a{
@@ -63,7 +63,18 @@ In this example, the YANG module could look something like:
     }
   }
 
+Creating XML programmatically
+-----------------------------
 
+You may also manually create a tree by `xml_new()`, `xml_addsub()` and
+other functions, this is more efficient than parsing but more work to program.
+
+.. note:: expand on this.
+
+
+Using XML
+=========
+	  
 Config data
 ===========
 
