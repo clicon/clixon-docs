@@ -291,7 +291,7 @@ An example call using instance-id:s is as follows:
 
    cxobj **xvec = NULL;
    size_t  xlen;
-   if (clixon_instance_id_search(xt, yt, &xvec, &xlen,
+   if (clixon_find_instance_id(xt, yt, &xvec, &xlen,
           "/a:x[a:k1=\"a\"][k2=\"b\"]/a:y[.=\"bb\"") < 0) 
       goto err;
    for (i=0; i<xlen; i++){
@@ -302,9 +302,21 @@ An example call using instance-id:s is as follows:
 The example shows the usage of implicit key indexes which makes this
 work in *O(logN)*, with the same exception rules as for direct children state in `Implicit indexes`_.
 
-The corresponding API for Api-paths is `api_path_search()` and `xpath_vec()` for XPath.
+An example call using api-path:s instead is as follows:
+::
 
-   
+   cxobj **xvec = NULL;
+   size_t  xlen;
+   if (clixon_find_api_path(xt, yt, &xvec, &xlen, "/mod_a:x=a,b/y=bb") < 0) 
+      goto err;
+   for (i=0; i<xlen; i++){
+      x = xvec[i];
+         ...
+   }
+
+The corresponding API for XPath is `xpath_vec()`.
+
+
 Multiple keys
 -------------
 
