@@ -7,8 +7,8 @@ Paths
 
 Clixon uses paths to navigate in trees.  Clixon uses the following three methods:
 
-* *XML Path Language* defined in `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_ as part of XML and used in  `NETCONF <http://www.rfc-editor.org/rfc/rfc6241.txt>`_, for example.
-* *Instance-identifier*  defined in `RFC 7950: The YANG 1.1 Data Modeling Language <https://www.rfc-editor.org/rfc/rfc7950.txt>`_, a subset of XPath and used in `NACM <https://www.rfc-editor.org/rfc/rfc8341.txt>`_, for example.
+* *XML Path Language* defined in `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_ as part of XML and used in  `NETCONF <http://www.rfc-editor.org/rfc/rfc6241.txt>`_.
+* *Instance-identifier*  defined in `RFC 7950: The YANG 1.1 Data Modeling Language <https://www.rfc-editor.org/rfc/rfc7950.txt>`_, a subset of XPath and used in `NACM <https://www.rfc-editor.org/rfc/rfc8341.txt>`_,.
 * *Api-path* defined and used in `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_
 
 All three use similar notations to find a path in tree, such as `a/b`, but differ in some ways.
@@ -27,7 +27,7 @@ Example of XPath in a NETCONF `get-config` RPC using the XPath capability:
       </get-config>
    </rpc>
 
-XPath is a powerful language for addressing parts of an XML document, where a sub-part is locating paths. For example, the following is a valid XPath:
+XPath is a powerful language for addressing parts of an XML document, including types and expressions. The following is a valid but complex XPath:
 ::
 
    /assembly[name="robot_4"]//shape/name[containts(text(),'bolt')]/surface/roughness
@@ -45,7 +45,7 @@ context can specify both:
 
 Further, XML prefixes are *not inherited*, each symbol must be prefixed with a prefix or default. That is, `/ex:x/y` is not the same as `/ex:x/ex:y`, unless `ex` is also default.
 
-Example:; Assume an XML namespace context:
+Example: Assume an XML namespace context:
 ::
    
    <a xmlns="urn:example:default" xmlns:ex="urn:example:example">
@@ -75,7 +75,7 @@ Example of instance-id in NACM:
            /acme:interfaces/acme:interface[acme:name='dummy']
      </path>
 
-Namespaces in instance-identifiers are same as XPaths.
+Namespaces in instance-identifiers are the same as in XPaths.
 
 Api-path
 ========
@@ -118,4 +118,4 @@ Example: Assume two YANG modules `moda` and `modx` with namespaces "urn:example:
 
    /moda:x/modx:y/z=w
 
-where, as above, `x` belong to "urn:example:default" and `y`, and `z` belong to "urn:example:example".
+where, as above, `x` belongs to "urn:example:default" and `y`, and `z` belong to "urn:example:example".

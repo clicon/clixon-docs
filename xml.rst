@@ -229,7 +229,7 @@ An example call is as follows:
     size_t   xlen = 0;
     cvec    *cvk = NULL; vector of index keys 
     ... Populate cvk with key/values eg k1=a k2:b
-    if (clixon_find_index(xp, yp, name, cvk, &xvec, &xlen) < 0)
+    if (clixon_xml_find_index(xp, yp, name, cvk, &xvec, &xlen) < 0)
        err;
     /* Loop over found children*/
     for (i = 0; i < xlen; i++) {
@@ -291,7 +291,7 @@ An example call using instance-id:s is as follows:
 
    cxobj **xvec = NULL;
    size_t  xlen;
-   if (clixon_find_instance_id(xt, yt, &xvec, &xlen,
+   if (clixon_xml_find_instance_id(xt, yt, &xvec, &xlen,
           "/a:x[a:k1=\"a\"][k2=\"b\"]/a:y[.=\"bb\"") < 0) 
       goto err;
    for (i=0; i<xlen; i++){
@@ -307,7 +307,7 @@ An example call using api-path:s instead is as follows:
 
    cxobj **xvec = NULL;
    size_t  xlen;
-   if (clixon_find_api_path(xt, yt, &xvec, &xlen, "/mod_a:x=a,b/y=bb") < 0) 
+   if (clixon_xml_find_api_path(xt, yt, &xvec, &xlen, "/mod_a:x=a,b/y=bb") < 0) 
       goto err;
    for (i=0; i<xlen; i++){
       x = xvec[i];
