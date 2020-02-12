@@ -82,7 +82,7 @@ In a debugging mode, it can be useful to run in `once-only` mode, where the back
 
 Startup
 -------
-There are four different backend startup modes selected by the `-s` option. The difference is in how the running state is handled, ie what state the machine is when you start the daemon and how loading the configuration affects it:
+There are four different backend startup modes selected by the `-s` option. The difference is in how the running state is handled, ie what state the machine is in when you start the daemon and how loading the configuration affects it:
 
 `none`
    Do not touch running state. Typically after crash when running state and db are synched.
@@ -114,52 +114,6 @@ When loading the startup/tmp configuration, the following actions are performed 
 * If errors are detected, enter `failsafe` mode.
 
 
-Module-state
-^^^^^^^^^^^^
-
-Clixon has the ability to store Yang module-state information according to
-RFC7895 in the datastores. Including yang module-state in the
-datastores is enabled by the following entry in the Clixon
-configuration:
-::
-
-   <CLICON_XMLDB_MODSTATE>true</CLICON_XMLDB_MODSTATE>
-
-If the datastore does not contain module-state info, no
-module-specific upgrades can be made, only the general-purpose upgrade
-is available.
-
-A backend does not perform detection of mismatching XML/Yang if:
-
-1. The datastore was saved in a pre-3.10 system 
-2. `CLICON_XMLDB_MODSTATE` was not enabled when saving the file
-3. The backend configuration does not have `CLICON_XMLDB_MODSTATE` enabled.
-
-Note that the module-state detection is independent of the other steps
-of the startup operation: syntax errors, validation checks, failsafe mode, etc,
-are still made, even though module-state detection does not occur.
-
-Note also that a backend with `CLICON_XMLDB_MODSTATE` disabled
-will silently ignore the module state.
-
-Example of a (simplified) datastore with Yang module-state:
-::
-   
-   <config>
-     <a1 xmlns="urn:example:a">some text</a1>
-     <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
-       <module-set-id>42</module-set-id>
-       <module>
-         <name>A</name>
-         <revision>2019-01-01</revision>
-         <namespace>urn:example:a</namespace>
-       </module>
-     </modules-state>
-   </config>
-
-Note that the module-state is not available to the user, the backend
-datastore handler strips the module-state info. It is only shown in
-the datastore itself.
 
 
    
@@ -251,6 +205,50 @@ upgrade
 trans_begin, trans_validate, trans_complete, trans_commit, trans_revert, trans_end, trans_abort
   Transaction callbacks which are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
 
+Transactions
+------------
+Clixon follows NETCONF in its validate and commit semantics.
+Using the CLI or another frontend, you edit the `candidate` configuration, which is first
+`validated` for consistency and then `committed` to the `running`
+configuration.
+
+A clixon developer writes commit functions to incrementaly upgrade a
+system state based on configuration changes. Writing commit callbacks
+is the core functionality of a clixon system.
+
+The netconf validation and commit operation is implemented in
+Clixon by a transaction mechanism, which ensures that user-written
+plugin callbacks are invoked atomically and revert on error.  If you
+have two plugins, for example, a transaction sequence looks like the
+following:
+::
+   
+  Backend   Plugin1    Plugin2
+  |          |          |
+  +--------->+--------->+ begin
+  |          |          |
+  +--------->+--------->+ validate
+  |          |          |
+  +--------->+--------->+ commit
+  |          |          |
+  +--------->+--------->+ end
+
+
+If an error occurs in the commit call of plugin2, for example,
+the transaction is aborted and the commit reverted:
+::
+
+  Backend   Plugin1    Plugin2
+  |          |          |
+  +--------->+--------->+ begin
+  |          |          |
+  +--------->+--------->+ validate
+  |          |          |
+  +--------->+---->X    + commit error
+  |          |          |
+  +--------->+          + revert
+  |          |          |
+  +--------->+--------->+ abort
 
 
 Upgrade
@@ -334,12 +332,58 @@ and that it does not contain module-state. It then matches all nodes
 matching the XPath `/a:x/a:y` using canonical prefixes, which are then
 deleted.
   
+Module-state
+^^^^^^^^^^^^
+
+Clixon can store Yang module-state information according to `YANG Module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_ in the datastores. Including yang module-state in the
+datastores is enabled by the following entry in the Clixon
+configuration:
+::
+
+   <CLICON_XMLDB_MODSTATE>true</CLICON_XMLDB_MODSTATE>
+
+If the datastore does not contain module-state info, no
+module-specific upgrades can be made, only the general-purpose upgrade
+is available.
+
+A backend does not perform detection of mismatching XML/Yang if:
+
+1. The datastore was saved in a pre-3.10 system 
+2. `CLICON_XMLDB_MODSTATE` was not enabled when saving the file
+3. The backend configuration does not have `CLICON_XMLDB_MODSTATE` enabled.
+
+Note that the module-state detection is independent of the other steps
+of the startup operation: syntax errors, validation checks, failsafe mode, etc,
+are still made, even though module-state detection does not occur.
+
+Note also that a backend with `CLICON_XMLDB_MODSTATE` disabled
+will silently ignore the module state.
+
+Example of a (simplified) datastore with Yang module-state:
+::
+   
+   <config>
+     <a1 xmlns="urn:example:a">some text</a1>
+     <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+       <module-set-id>42</module-set-id>
+       <module>
+         <name>A</name>
+         <revision>2019-01-01</revision>
+         <namespace>urn:example:a</namespace>
+       </module>
+     </modules-state>
+   </config>
+
+Note that the module-state is not available to the user, the backend
+datastore handler strips the module-state info. It is only shown in
+the datastore itself.
+
 Module-specific upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^
 Module-specific upgrade is only available if `module-state`_ is enabled.
 
 If the module-state of the startup configuration does not match the
-module-state of the backend daemon, a set of module-.specifc upgrade callbacks are
+module-state of the backend daemon, a set of module-specific upgrade callbacks are
 made. This allows a user to program upgrade funtions in the backend
 plugins to automatically upgrade the XML to the current version.
 
@@ -549,51 +593,6 @@ Finally, the candidate is validate and committed:
 
 The example shown in this Section is also available as a regression [test script](../test/test_upgrade_repair.sh).
 
-
-Transactions
-------------
-Clixon follows NETCONF in its validate and commit semantics.
-Using the CLI or another frontend, you edit the `candidate` configuration, which is first
-`validated` for consistency and then `committed` to the `running`
-configuration.
-
-A clixon developer writes commit functions to incrementaly upgrade a
-system state based on configuration changes. Writing commit callbacks
-is the core functionality of a clixon system.
-
-The netconf validation and commit operation is implemented in
-Clixon by a transaction mechanism, which ensures that user-written
-plugin callbacks are invoked atomically and revert on error.  If you
-have two plugins, for example, a transaction sequence looks like the
-following:
-::
-   
-  Backend   Plugin1    Plugin2
-  |          |          |
-  +--------->+--------->+ begin
-  |          |          |
-  +--------->+--------->+ validate
-  |          |          |
-  +--------->+--------->+ commit
-  |          |          |
-  +--------->+--------->+ end
-
-
-If an error occurs in the commit call of plugin2, for example,
-the transaction is aborted and the commit reverted:
-::
-
-  Backend   Plugin1    Plugin2
-  |          |          |
-  +--------->+--------->+ begin
-  |          |          |
-  +--------->+--------->+ validate
-  |          |          |
-  +--------->+---->X    + commit error
-  |          |          |
-  +--------->+          + revert
-  |          |          |
-  +--------->+--------->+ abort
 
 
 
