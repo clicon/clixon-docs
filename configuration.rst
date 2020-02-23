@@ -5,8 +5,8 @@ Configuration
 
 The clixon configuration file is an XML file modelled by YANG. By
 default, it is installed in `/usr/local/etc/clixon.xml`.  The YANG
-specification for the configuration is `clixon-config.yang
-<https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402019-09-11.yang>`_. All Clixon processes (backend, cli, netconf, restconf) use the same
+specification for the configuration is `clixon config.yang
+<https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402020-02-22.yang>`_. All Clixon processes (backend, cli, netconf, restconf) use the same
 config file, although some configuration options are not valid for all processes.
 
 Please consult the YANG spec directly if you want detailed description of config options.
@@ -33,7 +33,7 @@ The following is the configuration file of the `hello world` example:
 
 Specification
 -------------
-Some options (of approximately 50) described below of `clixon-config.yang <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402019-06-05.yang>`_ are the following (descriptions are skipped):
+Some options (of approximately 50) described below of `clixon-config.yang <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402020-02-22.yang>`_ are the following (descriptions are skipped):
 ::
    
     container clixon-config {
