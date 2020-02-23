@@ -6,7 +6,7 @@ Configuration
 The clixon configuration file is an XML file modelled by YANG. By
 default, it is installed in `/usr/local/etc/clixon.xml`.  The YANG
 specification for the configuration is `clixon-config.yang
-<https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402019-06-05.yang>`_. All Clixon processes (backend, cli, netconf, restconf) use the same
+<https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config%402019-09-11.yang>`_. All Clixon processes (backend, cli, netconf, restconf) use the same
 config file, although some configuration options are not valid for all processes.
 
 Please consult the YANG spec directly if you want detailed description of config options.

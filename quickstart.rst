@@ -21,7 +21,7 @@ Content
 The hello example directory contains the following files:
 
 `hello.xml`
-   The configuration file. See `clixon-config.yang <https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2019-06-05.yang>`_ for the uang spec of hello.xml.
+   The configuration file. See `clixon-config.yang <https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2019-06-05.yang>`_ for the yang spec of hello.xml.
 `clixon-hello@2019-04-17.yang`
    The yang spec of the example.
 `hello_cli.cli`
@@ -177,7 +177,7 @@ spec. For more advanced applications, customized backend, CLI, netconf
 and restconf code callbacks becomes necessary.
 
 Further, you may want to add upgrade, RPC:s, state data, notification
-streams, authentication and authorization. The `main example <https://github.com/clicon/clixon/tree/master/example/main>`_. contains such capabilities.
+streams, authentication and authorization. The `main example <https://github.com/clicon/clixon/tree/master/example/main>`_ contains such capabilities.
 
 
 

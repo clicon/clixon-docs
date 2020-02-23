@@ -127,3 +127,7 @@ The following features are not implemented:
 * ETag/Last-Modified
 * Query parameters: "fields", "filter", "with-defaults"
 
+JSON
+----
+
+Clixon implements JSON according to  `ECMA JSON Data Interchange Syntax <http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf>`_ and  `RFC 7951 JSON Encoding of Data Modeled with YANG <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
