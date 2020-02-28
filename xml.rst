@@ -111,7 +111,7 @@ The following example code gets a copy of the whole `running` datastore to cxobj
 .. note::
         In the case of config data, in-memory trees are read-only *caches* of
         the datastore and can normally not be written back to the datastore.
-        Changes to the config datastire should be made via the backend netconf API, eg using
+        Changes to the config datastore should be made via the backend netconf API, eg using
         `edit-config`.
 
 
@@ -136,10 +136,10 @@ For example, a search in a vector of one million children will take up to
 Therefore, if you have a large number of children and you need to make
 searches, it is important that you use indexes, either implicit, or explicit.
 
-Implicit indexes
-----------------
+Auto-generated indexes
+----------------------
 
-Implicit YANG-based search indexes are based on `list` and `leaf-lists`. For
+Auto-generated (or implicit) YANG-based search indexes are based on `list` and `leaf-lists`. For
 any list with keys `k1,...kn`, a set of indexes are created and an optimized search
 can be made using the keys in the order they are defined. 
 
@@ -149,6 +149,9 @@ For example, assume the following YANG (this YANG is reused in later examples):
   module mod_a{
     prefix a;
     namespace "urn:example:a";
+    import clixon-config {
+      prefix "cc";
+    }
     list x{
       key "k1 k2";
       leaf k1{
@@ -163,6 +166,10 @@ For example, assume the following YANG (this YANG is reused in later examples):
       leaf z{
         type string;
       }
+      leaf w{
+        type string;
+	cc:search_index;
+      }
       ...
 
 Assume also an example XML tree as follows:
@@ -174,14 +181,16 @@ Assume also an example XML tree as follows:
        <k2>a</k2>
        <y>cc</y>
        <y>dd</y>
-       <z>foo</a>
+       <z>ee</z>
+       <w>ee</w>
      </x>
      <x>
        <k1>a</k1>
        <k2>b</k2>
        <y>cc</y>
        <y>dd</y>
-       <z>bar</a>
+       <z>ff</z>
+       <w>ff</w>
      </x>
      <x>
        <k1>b</k1>
@@ -194,7 +203,7 @@ they can be accessed with *O(log N)*  with e.g.:
 * XPath or Instance-id: `x[k1="a"][k2="b"]`.
 * Api-path: `x=a,b`.
 
-If other search variables are used, such as: `x[z="foo"]` the time complexity will be `O(n)` since there is no explicit index for `z`.  The same applies to using key variables in another order than they appear in the YANG specification, eg: `x[k2="b"][k1="a"]`.
+If other search variables are used, such as: `x[z="ff"]` the time complexity will be `O(n)` since there is no explicit index for `z`.  The same applies to using key variables in another order than they appear in the YANG specification, eg: `x[k2="b"][k1="a"]`.
 
 A search index is also generated for leaf-lists, using `x` as the base node, the following searches are optimized:
 
@@ -207,20 +216,25 @@ In the following cases, implicit indexes are *not* created:
 * The list represents `state` data
 * The list is `ordered-by user` instead of the default YANG `ordered-by system`.
 
-In those cases where implicit YANG indexes cannot be used, explicit indexes can be created for fast access.
+Explicit indexes
+----------------
 
-Explicit indexes [#f1]_
-------------------------
+In those cases where implicit YANG indexes cannot be used, indexes can
+be explicitly declared for fast access. Clixon uses a YANG extension to declare such indexes: `search_index` as shown in the example above for leaf `w`:
+::
 
-You can register explicit indexes using the function `clixon_index_register()`.
+      leaf w{
+        type string;
+	cc:search_index;
+      }
 
-.. note:: *This section is not completed* 
+gdgd      
 
 
 Direct children
 ---------------
 
-The basic C API for searching direct children of a cxobj is the `xml_find_index()` API.
+The basic C API for searching direct children of a cxobj is the `clixon_xml_find_index()` API.
 
 An example call is as follows:
 ::
@@ -229,7 +243,7 @@ An example call is as follows:
     size_t   xlen = 0;
     cvec    *cvk = NULL; vector of index keys 
     ... Populate cvk with key/values eg k1=a k2:b
-    if (clixon_xml_find_index(xp, yp, name, cvk, &xvec, &xlen) < 0)
+    if (clixon_xml_find_index(xp, yp, namespace, name, cvk, &xvec, &xlen) < 0)
        err;
     /* Loop over found children*/
     for (i = 0; i < xlen; i++) {
@@ -299,8 +313,8 @@ An example call using instance-id:s is as follows:
          ...
    }
 
-The example shows the usage of implicit key indexes which makes this
-work in *O(logN)*, with the same exception rules as for direct children state in `Implicit indexes`_.
+The example shows the usage of auto-generated key indexes which makes this
+work in *O(logN)*, with the same exception rules as for direct children state in `Auto-generated indexes`_.
 
 An example call using api-path:s instead is as follows:
 ::
@@ -373,6 +387,4 @@ However, it is recommended to use the `Searching in XML`_ for more efficient
 searching.
   
 
-Footnotes
----------
-.. [#f1] Is planned for Clixon 4.4
+
