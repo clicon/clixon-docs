@@ -5,7 +5,7 @@ Quick start
 
 .. This is a comment
    
-This section describes how to run the Hello world example available in the soure code at: `hello example <https://github.com/clicon/clixon/tree/master/example/hello>`_.
+This section describes how to run the Hello world example available in the soure code at: `hello example <https://github.com/clicon/clixon-examples>`_.
 
 Clixon is not a system in itself, it is a support system for an
 application. In this case, the "application" is hello world. The hello
@@ -21,7 +21,7 @@ Content
 The hello example directory contains the following files:
 
 `hello.xml`
-   The configuration file. See `clixon-config.yang <https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2019-06-05.yang>`_ for the yang spec of hello.xml.
+   The configuration file. See `clixon-config.yang <https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2020-02-22.yang>`_ for the yang spec of hello.xml.
 `clixon-hello@2019-04-17.yang`
    The yang spec of the example.
 `hello_cli.cli`
@@ -29,7 +29,7 @@ The hello example directory contains the following files:
 `Makefile.in`
    Example makefile where plugins are built and installed
 `README.md`
-   This file
+   Documentation
 
 Compile and run
 ---------------
@@ -150,7 +150,7 @@ You can run the hello example as a pre-built docker container, on a `x86_64` Lin
 First, the container is started with the backend running:
 ::
 
-  docker run --rm --name hello -d clixon/clixon clixon_backend -Fs init
+ $ sudo docker run --rm -p 8080:80 --name hello -d clixon/hello
 
 Then a CLI is started
 ::
@@ -162,7 +162,6 @@ Then a CLI is started
  cli> show configuration 
  hello world;
 
-
 Or Netconf:
 ::
 
@@ -170,6 +169,11 @@ Or Netconf:
    <rpc><get-config><source><candidate/></source></get-config></rpc>]]>]]>
    <rpc-reply><data/></rpc-reply>]]>]]>
 
+Or using restconf using curl on exposed port 8080:
+::
+   
+  $ curl -G http://localhost:8080/restconf/data/hello:system
+   
 Next steps
 ----------
 The hello world example only has a Yang spec and a template CLI

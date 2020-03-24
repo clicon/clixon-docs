@@ -91,19 +91,29 @@ example, add `usr/local/share/ietf` to the list of directories where yang files 
 Features
 --------
 `CLICON_FEATURE` is a list of values, describing how Clixon supports feature.
+
+A value is specified as one of the following:
+
+- `<module>:<feature>` : enable a specific feature in a specific module
+- `*:*` : enable all features in all modules
+- `<module>:*` : enable all features in the specified module
+- `*:<feature>` : enable the specific feature in all modules.
+
+Example:
+:: 
+
+      <CLICON_FEATURE>ietf-netconf:startup</CLICON_FEATURE>
+      <CLICON_FEATURE>ietf-netconf:*</CLICON_FEATURE>
+      <CLICON_FEATURE>*:*</CLICON_FEATURE>
+      
+Supplying the `-o` option adds a value to the feature list.
+      
 Clixon have three hardcoded features:
 
 - ietf-netconf:candidate (RFC6241 8.3)
 - ietf-netconf:validate (RFC6241 8.6)
 - ietf-netconf:xpath (RFC6241 8.9)
 
-Supplying the `-o` option will add a value to the list (not replace existing).  For example, if `-o CLICON_FEATURE=ietf-netconf:startup` is given at startup, the following options would be present in the configuration:
-::
-   
-      <CLICON_FEATURE>ietf-netconf:startup</CLICON_FEATURE>
-      <CLICON_FEATURE>*:*</CLICON_FEATURE>
-      
-(Which does not really make sense since `*:*` enables all features anayway.)
 
 
 Finding YANG files

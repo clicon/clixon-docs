@@ -10,6 +10,14 @@ is used to represent config and state data. Typically, a cxobj is
 parsed from or printed to XML or JSON, but is really a generic
 representation of a tree.
 
+Such a tree goes thorough three steps:
+
+1. Syntactic creation. This is done either via parsing or via manual API calls.
+2. Bind to YANG. Assure that the XML tree complies to a YANG specification.
+3. Semantic validation. Ensuring that the XML tree complies to the backend validation rules.
+
+Steps 2 and 3 are optional.
+  
 Creating XML
 ============
 
@@ -34,7 +42,7 @@ If printed with for example: `xml_print(stdout,xt)` the tree looks as follows:
    
    <top>
       <x xmlns="urn:example:a">
-         <k1>a</k2>
+         <k1>a</k1>
       </x>
    </top>
 
@@ -42,27 +50,9 @@ Note that a top-level node (`top`) is always created to encapsulate
 all trees parsed and that the default namespace in this example
 is "urn:example:a".
 
-
-XML and YANG
-------------
-
-If a yang specification (`yt`) is supplied to the parse function, the
-XML is bound to YANG. YANG binding is necessary for many Clixon
-functions including validation, optimized search, etc. But it is not
-mandatory.
-
-For the XML in the example above, the YANG module could look something like:
-::
-
-  module mod_a{
-    prefix a;
-    namespace "urn:example:a";
-    list x{
-      leaf k1{
-        type string;
-      }
-    }
-  }
+The XML parse API has several other functions, including:
+- `xml_parse_string()`
+- `xml_parse_file()`
 
 Creating JSON from a string
 ----------------------------
@@ -77,24 +67,93 @@ You can create an XML tree from JSON as well (note quotes are not escaped for cl
 
 yielding the same xt tree as in `Creating XML from a string`_.
 
-There are some differences in comparison with the XML parse function:
-
-* There is no variable argument format string
-* Namespace prefixes in JSON use YANG module names, making the JSON format dependent on a correct YANG specification. This is similar to prefix handling in Api-path described in :ref:`clixon_paths`.
-* Error return is `-1` and OK is `1`
-* If the return value of the function is `0`, the JSON is not validated correctly witrh respect to YANG, and an error message is returned in `xerr`.
+In JSON, namespace prefixes use YANG module names, making the JSON
+format dependent on a correct YANG specification. This is similar to
+prefix handling in Api-path described in :ref:`clixon_paths`.
 
   
 Creating XML programmatically
 -----------------------------
 
-You may also manually create a tree by `xml_new()`, `xml_addsub()` and
-other functions, this is more efficient than parsing but more work to program.
+You may also manually create a tree by `xml_new()`, `xml_new_body()`,
+`xml_addsub()` and other functions. Instead of parsing a string, a
+tree is built manually. This may be more efficient but more work to
+program.
+
+The following example creates the same XML tree as in the above examples using API calls.
+::
+
+   cxobj *xt, *x, *xa;
+   if ((xt = xml_new("top", NULL, CX_ELMNT)) == NULL)
+      goto done;
+   if ((x = xml_new("x", xt, CX_ELMNT)) == NULL)
+      goto done;
+   if ((xa = xml_new("xmlns", x, CX_ATTR)) == NULL)
+      goto done;
+   if (xml_value_set(xa, "urn:example:a") < 0)
+      goto done;
+   if (xml_new_body("k1", x, "a") == NULL)
+      goto done;
+      
+
+Binding YANG to XML
+-------------------
+
+A second step is to ensure that an XML tree complies to a YANG
+specification. This is an optional step since you can handle XML
+without YANG, but often necessary in Clixon, since some functions
+require YANG bidnings to be performed correctly. This includes sort,
+validate and insert functions, for example.
+
+For the XML in the example above, the YANG module could look something like:
+::
+
+  module mod_a{
+    prefix a;
+    namespace "urn:example:a";
+    list x{
+      leaf k1{
+        type string;
+      }
+    }
+  }
+  
+Binding is made with the `xml_bind_yang()` API. The bind API can be done in some different ways as follows:
+
+- TOP     Search for matching yang binding among top-level symbols of Yang modules. This is default.
+- PARENT  Assume yang binding of existing parent and match its children by name
+- NONE    Dont bind
+
+In the example above, the binding is `TOP` since the top-level symbol
+`x` is a top-level symbol of a module.
+
+But assume instead that the string `<k1 xmlns="urn:example:a">a</k1>`
+is parsed. You can determine which module it belongs to from the
+namespace, but there may be many `k1` symbols in that module, you do
+not know if the "leaf" one in the Yang spec above is the correct one.
 
 .. note::
-   expand on this.
+        If you create the XML tree manually, you may have to explicitly call a yang bind function.
 
+As an example of `PARENT` Yang binding, the "k1" subtree is inserted under an existing XML tree which has already been bound to YANG. Such as an XML tree with the "x" symbol.
 
+The following is an example of a `TOP` yang binding of an XML tree `xt`:
+::
+
+   cxobj *xt;
+   cxobj *xerr = NULL;
+   /* create xt as example above */
+   if ((ret = xml_bind_yang(xt, yspec, &xerr)) < 0)
+     goto done;
+   if (ret == 0)
+     goto noyang;
+     
+The return values from the bind API are same as parsing, as follows:
+
+- 1 : OK yang assignment made
+- 0 : Partial or no yang assigment made (at least one failed) and xerr set
+- -1 : Error
+   
 Config data
 -----------
 
@@ -239,15 +298,14 @@ The basic C API for searching direct children of a cxobj is the `clixon_xml_find
 An example call is as follows:
 ::
    
-    cxobj  **xvec = NULL;
-    size_t   xlen = 0;
-    cvec    *cvk = NULL; vector of index keys 
-    ... Populate cvk with key/values eg k1=a k2:b
-    if (clixon_xml_find_index(xp, yp, namespace, name, cvk, &xvec, &xlen) < 0)
+    clixon_xvec *xv = NULL;
+    cvec    *cvk = NULL;
+    /* Populate cvk with key/values eg k1=a k2:b */
+    if (clixon_xml_find_index(xp, yp, namespace, name, cvk, &xv) < 0)
        err;
     /* Loop over found children*/
-    for (i = 0; i < xlen; i++) {
-	x = xvec[i];
+    for (i = 0; i < clixon_xvec_len; i++) {
+	x = clixon_xpath_i(xvec, i);
         ...
     }
 
@@ -303,13 +361,13 @@ which results in the following result:
 An example call using instance-id:s is as follows:
 ::
 
-   cxobj **xvec = NULL;
-   size_t  xlen;
-   if (clixon_xml_find_instance_id(xt, yt, &xvec, &xlen,
+   cxobj **vec = NULL;
+   size_t  len = 0;
+   if (clixon_xml_find_instance_id(xt, yt, &vec, &len,
           "/a:x[a:k1=\"a\"][k2=\"b\"]/a:y[.=\"bb\"") < 0) 
       goto err;
-   for (i=0; i<xlen; i++){
-      x = xvec[i];
+   for (i=0; i<len; i++){
+      x = vec[i];
          ...
    }
 
@@ -319,12 +377,13 @@ work in *O(logN)*, with the same exception rules as for direct children state in
 An example call using api-path:s instead is as follows:
 ::
 
-   cxobj **xvec = NULL;
-   size_t  xlen;
-   if (clixon_xml_find_api_path(xt, yt, &xvec, &xlen, "/mod_a:x=a,b/y=bb") < 0) 
+   cxobj **vec = NULL;
+   size_t  len = 0;
+   if (clixon_xml_find_api_path(xt, yt, &vec, &len,
+          "/mod_a:x=a,b/y=bb") < 0) 
       goto err;
-   for (i=0; i<xlen; i++){
-      x = xvec[i];
+   for (i=0; i<len; i++){
+      x = vec[i];
          ...
    }
 
