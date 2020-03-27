@@ -5,7 +5,7 @@
 ==========
 
 Clixon represents its internal data in an in "in-memory" tree
-representation. In the C API, this data structure is called `cxobj` and
+representation. In the C API, this data structure is called ``cxobj`` and
 is used to represent config and state data. Typically, a cxobj is
 parsed from or printed to XML or JSON, but is really a generic
 representation of a tree.
@@ -28,17 +28,17 @@ A simple way to create an cxobj is to parse it from a string:
 ::
 
      cxobj *xt = NULL;
-     if (xml_parse_va(&xt, yt, "<x xmlns='urn:example:a'><k1>a</k2></x>") < 0)
+     if (clixon_xml_parse_string("<x xmlns='urn:example:a'><k1>a</k2></x>",
+                          YB_MODULE, yspec, &xt, NULL) < 0)
         err;
 
 where
 
-* `xt` is a top-level cxobj containing the XML tree. 
-* `yt` is the yang spec corrresponding to `xt` (or NULL)
-* The third parameter is a "printf" like format string followed by a variable argument list
+* ``YB_MODULE`` is the default Yang binding mode, see `Binding YANG to XML`_.
+* ``xt`` is a top-level cxobj containing the XML tree. 
+* ``yspec`` is the top-level yang spec obtained by e.g., ``clicon_dbspec_yang(h)``
 
-If printed with for example: `xml_print(stdout,xt)` the tree looks as follows:
-::
+If printed with for example: ``xml_print(stdout, xt)`` the tree looks as follows::
    
    <top>
       <x xmlns="urn:example:a">
@@ -46,42 +46,41 @@ If printed with for example: `xml_print(stdout,xt)` the tree looks as follows:
       </x>
    </top>
 
-Note that a top-level node (`top`) is always created to encapsulate
+Note that a top-level node (``top``) is always created to encapsulate
 all trees parsed and that the default namespace in this example
 is "urn:example:a".
 
 The XML parse API has several other functions, including:
-- `xml_parse_string()`
-- `xml_parse_file()`
+- ``clixon_xml_parse_file()``
+- ``clixon_xml_parse_va()``
 
 Creating JSON from a string
 ----------------------------
-You can create an XML tree from JSON as well (note quotes are not escaped for clarity):
-::
+You can create an XML tree from JSON as well::
 
      cxobj *xt = NUL;L
      cxobj *xerr = NULL;
 
-     if ((ret = json_parse_str(&xt, yt, "{"mod_a:x":{"k1":"a"}}", &xerr)) < 0)
+     if ((ret = clixon_json_parse_string("{\"mod_a:x\":{\"k1\":\"a\"}}",
+                     YB_MODULE, yspec, &xt, NULL)) < 0)
         err;
 
 yielding the same xt tree as in `Creating XML from a string`_.
 
 In JSON, namespace prefixes use YANG module names, making the JSON
-format dependent on a correct YANG specification. This is similar to
+format dependent on a correct YANG binding. This is similar to
 prefix handling in Api-path described in :ref:`clixon_paths`.
 
   
 Creating XML programmatically
 -----------------------------
 
-You may also manually create a tree by `xml_new()`, `xml_new_body()`,
-`xml_addsub()` and other functions. Instead of parsing a string, a
+You may also manually create a tree by ``xml_new()``, ``xml_new_body()``,
+``xml_addsub()``, ``xml_merge()`` and other functions. Instead of parsing a string, a
 tree is built manually. This may be more efficient but more work to
 program.
 
-The following example creates the same XML tree as in the above examples using API calls.
-::
+The following example creates the same XML tree as in the above examples using API calls::
 
    cxobj *xt, *x, *xa;
    if ((xt = xml_new("top", NULL, CX_ELMNT)) == NULL)
@@ -94,16 +93,22 @@ The following example creates the same XML tree as in the above examples using A
       goto done;
    if (xml_new_body("k1", x, "a") == NULL)
       goto done;
-      
+
+.. note::
+        If you create the XML tree manually, you may have to explicitly call a yang bind function.
 
 Binding YANG to XML
 -------------------
 
-A second step is to ensure that an XML tree complies to a YANG
+A further step is to ensure that the XML tree complies to a YANG
 specification. This is an optional step since you can handle XML
 without YANG, but often necessary in Clixon, since some functions
-require YANG bidnings to be performed correctly. This includes sort,
-validate and insert functions, for example.
+require YANG bindings to be performed correctly. This includes sort,
+validate, merge and insert functions, for example.
+
+Yang binding may be done already in the XML parsing phase, and is
+mandatory for JSON parsing. If XML is manually created, you need to
+explicitly call the Yang binding functions.
 
 For the XML in the example above, the YANG module could look something like:
 ::
@@ -118,41 +123,39 @@ For the XML in the example above, the YANG module could look something like:
     }
   }
   
-Binding is made with the `xml_bind_yang()` API. The bind API can be done in some different ways as follows:
+Binding is made with the ``xml_bind_yang()`` API. The bind API can be done in some different ways as follows:
 
-- TOP     Search for matching yang binding among top-level symbols of Yang modules. This is default.
-- PARENT  Assume yang binding of existing parent and match its children by name
-- NONE    Dont bind
+- ``YB_MODULE``  Search for matching yang binding among top-level symbols of Yang modules. This is default.
+- ``YB_PARENT``  Assume yang binding of existing parent and match its children by name
+- ``YB_NONE``    Dont bind
 
-In the example above, the binding is `TOP` since the top-level symbol
-`x` is a top-level symbol of a module.
+In the example above, the binding is ``YB_MODULE`` since the top-level symbol
+``x`` is a top-level symbol of a module.
 
-But assume instead that the string `<k1 xmlns="urn:example:a">a</k1>`
-is parsed. You can determine which module it belongs to from the
-namespace, but there may be many `k1` symbols in that module, you do
+But assume instead that the string ``<k1 xmlns="urn:example:a">a</k1>``
+is parsed or created manually. You can determine which module it belongs to from the
+namespace, but there may be many ``k1`` symbols in that module, you do
 not know if the "leaf" one in the Yang spec above is the correct one.
 
-.. note::
-        If you create the XML tree manually, you may have to explicitly call a yang bind function.
-
-As an example of `PARENT` Yang binding, the "k1" subtree is inserted under an existing XML tree which has already been bound to YANG. Such as an XML tree with the "x" symbol.
-
-The following is an example of a `TOP` yang binding of an XML tree `xt`:
+The following is an example of how to bind yang to an XML tree ``xt``:
 ::
 
    cxobj *xt;
    cxobj *xerr = NULL;
    /* create xt as example above */
-   if ((ret = xml_bind_yang(xt, yspec, &xerr)) < 0)
-     goto done;
+   if ((ret = xml_bind_yang(xt, YB_MODULE, yspec, NULL)) < 0)
+      goto done;   /* fatal error */
    if (ret == 0)
-     goto noyang;
+      goto noyang; /* yang binding error */
      
 The return values from the bind API are same as parsing, as follows:
 
 - 1 : OK yang assignment made
 - 0 : Partial or no yang assigment made (at least one failed) and xerr set
 - -1 : Error
+
+As an example of `YB_PARENT` Yang binding, the ``k1`` subtree is inserted under an existing XML tree which has already been bound to YANG. Such as an XML tree with the ``x`` symbol.
+
    
 Config data
 -----------
@@ -160,7 +163,7 @@ Config data
 To create a copy of configuration data, a user retrieve a copy from the datastore to get a cxobj handle.
 Read-only operations may then be done on the in-memory tree.
 
-The following example code gets a copy of the whole `running` datastore to cxobj `xt`:
+The following example code gets a copy of the whole `running` datastore to cxobj ``xt``:
 ::
 
      cxobj *xt = NULL;
@@ -171,7 +174,7 @@ The following example code gets a copy of the whole `running` datastore to cxobj
         In the case of config data, in-memory trees are read-only *caches* of
         the datastore and can normally not be written back to the datastore.
         Changes to the config datastore should be made via the backend netconf API, eg using
-        `edit-config`.
+        ``edit-config``.
 
 
 Searching in XML
@@ -180,8 +183,8 @@ Searching in XML
 Clixon search indexes are either *implicitly* created from the YANG
 specification, or *explicitly* created using the API.
 
-From YANG it is only `list` and `leaf-list` that are candidates for
-optimized lookup, direct `leaf` and `container` lookup is fast either way.
+From YANG it is only ``list`` and ``leaf-list`` that are candidates for
+optimized lookup, direct ``leaf`` and ``container`` lookup is fast either way.
 
 *Binary* search is used by search indexes and works by ordering list
 items alphabetically (or numerically), and then dividing the search interval in
@@ -198,8 +201,8 @@ searches, it is important that you use indexes, either implicit, or explicit.
 Auto-generated indexes
 ----------------------
 
-Auto-generated (or implicit) YANG-based search indexes are based on `list` and `leaf-lists`. For
-any list with keys `k1,...kn`, a set of indexes are created and an optimized search
+Auto-generated (or implicit) YANG-based search indexes are based on ``list`` and ``leaf-lists``. For
+any list with keys ``k1,...kn``, a set of indexes are created and an optimized search
 can be made using the keys in the order they are defined. 
 
 For example, assume the following YANG (this YANG is reused in later examples):
@@ -256,18 +259,18 @@ Assume also an example XML tree as follows:
        ...
    </top>
       
-Then there will be two implicit search indexes created for all XML nodes `x` so that
+Then there will be two implicit search indexes created for all XML nodes ``x`` so that
 they can be accessed with *O(log N)*  with e.g.:
 
-* XPath or Instance-id: `x[k1="a"][k2="b"]`.
-* Api-path: `x=a,b`.
+* XPath or Instance-id: ``x[k1="a"][k2="b"]``.
+* Api-path: ``x=a,b``.
 
-If other search variables are used, such as: `x[z="ff"]` the time complexity will be `O(n)` since there is no explicit index for `z`.  The same applies to using key variables in another order than they appear in the YANG specification, eg: `x[k2="b"][k1="a"]`.
+If other search variables are used, such as: ``x[z="ff"]`` the time complexity will be `O(n)` since there is no explicit index for ``z``.  The same applies to using key variables in another order than they appear in the YANG specification, eg: ``x[k2="b"][k1="a"]``.
 
-A search index is also generated for leaf-lists, using `x` as the base node, the following searches are optimized:
+A search index is also generated for leaf-lists, using ``x`` as the base node, the following searches are optimized:
 
-* XPath or Instance-id: `y[.="bb"]`.
-* Api-path: `y=bb`.
+* XPath or Instance-id: ``y[.="bb"]``.
+* Api-path: ``y=bb``.
   
 In the following cases, implicit indexes are *not* created:
 
@@ -279,7 +282,7 @@ Explicit indexes
 ----------------
 
 In those cases where implicit YANG indexes cannot be used, indexes can
-be explicitly declared for fast access. Clixon uses a YANG extension to declare such indexes: `search_index` as shown in the example above for leaf `w`:
+be explicitly declared for fast access. Clixon uses a YANG extension to declare such indexes: `search_index` as shown in the example above for leaf ``w``:
 ::
 
       leaf w{
@@ -293,7 +296,7 @@ gdgd
 Direct children
 ---------------
 
-The basic C API for searching direct children of a cxobj is the `clixon_xml_find_index()` API.
+The basic C API for searching direct children of a cxobj is the ``clixon_xml_find_index()`` API.
 
 An example call is as follows:
 ::
@@ -311,20 +314,20 @@ An example call is as follows:
 
 where
 
-+--------+-------------------------------------------+
-| `xp`   | is an XML parent                          |
-+--------+-------------------------------------------+
-| `yp`   | is the YANG specification of xp           |
-+--------+-------------------------------------------+
-| `name` | is the name of the wanted children        |
-+--------+-------------------------------------------+
-| `cvk`  | is a vector of index name and value pairs |
-+--------+-------------------------------------------+
-| `xvec` | is a result vector of XML nodes.          |
-+--------+-------------------------------------------+
++----------+-------------------------------------------+
+| ``xp``   | is an XML parent                          |
++----------+-------------------------------------------+
+| ``yp``   | is the YANG specification of xp           |
++----------+-------------------------------------------+
+| ``name`` | is the name of the wanted children        |
++----------+-------------------------------------------+
+| ``cvk``  | is a vector of index name and value pairs |
++----------+-------------------------------------------+
+| ``xvec`` | is a result vector of XML nodes.          |
++----------+-------------------------------------------+
 
-For example, using the previous XML tree and if `name=x` and  `cvk`
-contains the single pair: `k1=a`, then `xvec` will contain both `x`
+For example, using the previous XML tree and if ``name=x`` and  ``cvk``
+contains the single pair: ``k1=a``, then ``xvec`` will contain both ``x``
 entries after calling the function:
 ::
 
@@ -348,10 +351,10 @@ are three path variants, each with its own pros and cons:
 * Instance-identifier can express all optimized searches as well as
   non-key searches. This is the recommended option.
 
-Assume the same YANG as in the previous example, a path to find `y` entries with a specific value could be:
+Assume the same YANG as in the previous example, a path to find ``y`` entries with a specific value could be:
 
-* XPath or instance-id: `/a:x[a:k1="a"][a:k2="b"]/a:y[.="bb"]` 
-* Api-path: `/mod_a:x=a,b/y=bb`
+* XPath or instance-id: ``/a:x[a:k1="a"][a:k2="b"]/a:y[.="bb"]`` 
+* Api-path: ``/mod_a:x=a,b/y=bb``
 
 which results in the following result:
 ::
@@ -387,7 +390,7 @@ An example call using api-path:s instead is as follows:
          ...
    }
 
-The corresponding API for XPath is `xpath_vec()`.
+The corresponding API for XPath is ``xpath_vec()``.
 
 
 Multiple keys
@@ -440,7 +443,7 @@ over all children from a parent element node.
      ...
    }
 
-where `CX_ELMNT` selects element children (no attributes or body text).
+where ``CX_ELMNT`` selects element children (no attributes or body text).
 
 However, it is recommended to use the `Searching in XML`_ for more efficient
 searching.
