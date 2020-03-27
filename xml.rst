@@ -51,8 +51,9 @@ all trees parsed and that the default namespace in this example
 is "urn:example:a".
 
 The XML parse API has several other functions, including:
-- ``clixon_xml_parse_file()``
-- ``clixon_xml_parse_va()``
+
+- ``clixon_xml_parse_file()``  Parse a file containing XML
+- ``clixon_xml_parse_va()``    Parse a string using variable argument strings
 
 Creating JSON from a string
 ----------------------------
@@ -68,8 +69,11 @@ You can create an XML tree from JSON as well::
 yielding the same xt tree as in `Creating XML from a string`_.
 
 In JSON, namespace prefixes use YANG module names, making the JSON
-format dependent on a correct YANG binding. This is similar to
-prefix handling in Api-path described in :ref:`clixon_paths`.
+format dependent on a correct YANG binding. 
+
+The JSON parse API also includes:
+
+- ``clixon_json_parse_file()``  Parse a file containing JSON
 
   
 Creating XML programmatically
@@ -150,9 +154,9 @@ The following is an example of how to bind yang to an XML tree ``xt``:
      
 The return values from the bind API are same as parsing, as follows:
 
-- 1 : OK yang assignment made
-- 0 : Partial or no yang assigment made (at least one failed) and xerr set
-- -1 : Error
+- ``1``  OK yang assignment made
+- ``0``  Partial or no yang assigment made (at least one failed) and xerr set
+- ``-1``  Error
 
 As an example of `YB_PARENT` Yang binding, the ``k1`` subtree is inserted under an existing XML tree which has already been bound to YANG. Such as an XML tree with the ``x`` symbol.
 
@@ -265,7 +269,7 @@ they can be accessed with *O(log N)*  with e.g.:
 * XPath or Instance-id: ``x[k1="a"][k2="b"]``.
 * Api-path: ``x=a,b``.
 
-If other search variables are used, such as: ``x[z="ff"]`` the time complexity will be `O(n)` since there is no explicit index for ``z``.  The same applies to using key variables in another order than they appear in the YANG specification, eg: ``x[k2="b"][k1="a"]``.
+If other search variables are used, such as: ``x[z="ff"]`` the time complexity will be *O(n)* since there is no explicit index for ``z``.  The same applies to using key variables in another order than they appear in the YANG specification, eg: ``x[k2="b"][k1="a"]``.
 
 A search index is also generated for leaf-lists, using ``x`` as the base node, the following searches are optimized:
 
@@ -282,16 +286,15 @@ Explicit indexes
 ----------------
 
 In those cases where implicit YANG indexes cannot be used, indexes can
-be explicitly declared for fast access. Clixon uses a YANG extension to declare such indexes: `search_index` as shown in the example above for leaf ``w``:
-::
+be explicitly declared for fast access. Clixon uses a YANG extension to declare such indexes: `search_index` as shown in the example above for leaf ``w``::
 
       leaf w{
         type string;
 	cc:search_index;
       }
 
-gdgd      
-
+In this example, ``w`` can be used as a search index with *O(log N)* in the search API.
+      
 
 Direct children
 ---------------
@@ -334,7 +337,7 @@ entries after calling the function:
      0: <x><k1>a</k1><k2>a</k2><y>cc</y><y>dd</y><z>foo</a></x>
      1: <x><k1>a</k1><k2>b</k2><y>cc</y><y>dd</y><z>bar</a></x>
 
-and the search was done using `O(logN)`.
+and the search was done using *O(logN)*.
      
 Paths
 -----
@@ -343,7 +346,7 @@ If deeper searches are needed, i.e., not just to direct children,
 Clixon :ref:`clixon_paths` can be used to make a search request. There
 are three path variants, each with its own pros and cons:
 
-* XPath is most expressive, but only supports `O(logN)` search for
+* XPath is most expressive, but only supports *O(logN)* search for
   YANG `list` entries (not leaf-lists), and adds overhead in terms of
   memory and cycles.
 * Api-path is least expressive since it can only express YANG `list`
@@ -396,7 +399,7 @@ The corresponding API for XPath is ``xpath_vec()``.
 Multiple keys
 -------------
 
-Optimized `O(logN)` lookup works with multiple key YANG `lists` but not
+Optimized *O(logN)* lookup works with multiple key YANG `lists` but not
 for explicit indexes. Further, less significant keys can be omitted
 which may result multiple result nodes.
 
