@@ -193,7 +193,7 @@ The following callbacks are defined for backend plugins:
 init
    Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called `clixon_plugin_init`. It returns a struct with the name of the plugin, and all other callback names.
 start
-   Called when application is "started", (almost) all initialization is complete and daemon is in the background. If daemon privileges are dropped (see `dropping privileges`_) this callback is called *before* privileges are dropped.
+   Called when application is started and initialization is complete, but before the application will be placed in the background and drop privileges (see `dropping privileges`_), if those operations are requested.
 exit
    Called just before plugin is unloaded 
 extension
