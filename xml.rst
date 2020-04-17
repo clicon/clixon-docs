@@ -194,8 +194,8 @@ Modifying XML
 =============
 Once an XML tree has been created and bound to YANG, it can be modified in several ways.
 
-Merging two trees
------------------
+Merging
+-------
 If you have two trees, you can merge them with ``xml_merge`` as follows::
 
 	if ((ret = xml_merge(xt, x2, yspec, &reason)) < 0) 
@@ -226,8 +226,8 @@ the result tree ``xt`` after merge is::
       </y>
    </top>
 
-Inserting sub-tree
-------------------
+Inserting
+---------
 
 Inserting a subtree can be made in several ways. The most straightforward is using parsing and the ``YB_PARENT`` YANG binding::
 
@@ -252,6 +252,43 @@ specify where the new child is insrteed (last in the example), but
 this only applies if ``ordered-by user`` is specified in
 YANG. Otherwise, the system will order the insertion of the subtree automatically.
        
+Removing
+--------
+
+There are several ways to remove subtrees, essentially grouped into
+whether you want to permanently a delete it, or if you want to prune
+and graft subtrees.
+
+Permanently deleting a (sub)tree ``x`` and remove or from its parent is done as follows::
+
+  xml_purge(x);
+
+Removing a subtree ``x`` from its parent is done as follows::
+
+  xml_rm(x);
+
+or alternatively remove child number ``i`` from parent ``xp``::
+
+    xml_child_rm(xp, i);
+
+In both these cases, the child ``x`` can be used inserted under another parent.
+
+Copying
+-------
+
+An XML tree ``x0`` can be copied as follows::
+
+   cxobj *x1;
+   x1 = xml_new("new", NULL, xml_type(x0));
+   if (xml_copy(x0, x1) < 0)
+      err;
+
+Alternatively, a tree can be duplicated as follows::
+
+   x1 = xml_dup(x0);
+
+In these cases, the new object ``x1`` can be inserted into other trees.
+  
 Searching in XML
 =================
 
