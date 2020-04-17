@@ -28,9 +28,11 @@ A simple way to create an cxobj is to parse it from a string:
 ::
 
      cxobj *xt = NULL;
-     if (clixon_xml_parse_string("<x xmlns='urn:example:a'><k1>a</k2></x>",
-                          YB_MODULE, yspec, &xt, NULL) < 0)
+     if ((ret = clixon_xml_parse_string("<y xmlns='urn:example:a'><x><k1>a</k2></x></y>",
+                          YB_MODULE, yspec, &xt, NULL)) < 0)
         err;
+     if (ret == 0)
+        err; /* yang error */
 
 where
 
@@ -41,9 +43,11 @@ where
 If printed with for example: ``xml_print(stdout, xt)`` the tree looks as follows::
    
    <top>
-      <x xmlns="urn:example:a">
-         <k1>a</k1>
-      </x>
+      <y xmlns="urn:example:a">
+        <x>
+          <k1>a</k1>
+        </x>
+      </y>
    </top>
 
 Note that a top-level node (``top``) is always created to encapsulate
@@ -62,7 +66,7 @@ You can create an XML tree from JSON as well::
      cxobj *xt = NUL;L
      cxobj *xerr = NULL;
 
-     if ((ret = clixon_json_parse_string("{\"mod_a:x\":{\"k1\":\"a\"}}",
+     if ((ret = clixon_json_parse_string("{\"mod_a:y\":{\"x\":{\"k1\":\"a\"}}}",
                      YB_MODULE, yspec, &xt, NULL)) < 0)
         err;
 
@@ -86,14 +90,16 @@ program.
 
 The following example creates the same XML tree as in the above examples using API calls::
 
-   cxobj *xt, *x, *xa;
+   cxobj *xt, *xy, *x, *xa;
    if ((xt = xml_new("top", NULL, CX_ELMNT)) == NULL)
       goto done;
-   if ((x = xml_new("x", xt, CX_ELMNT)) == NULL)
+   if ((xy = xml_new("y", xt, CX_ELMNT)) == NULL)
       goto done;
-   if ((xa = xml_new("xmlns", x, CX_ATTR)) == NULL)
+   if ((xa = xml_new("xmlns", y, CX_ATTR)) == NULL)
       goto done;
    if (xml_value_set(xa, "urn:example:a") < 0)
+      goto done;
+   if ((x = xml_new("xy", xt, CX_ELMNT)) == NULL)
       goto done;
    if (xml_new_body("k1", x, "a") == NULL)
       goto done;
@@ -120,9 +126,12 @@ For the XML in the example above, the YANG module could look something like:
   module mod_a{
     prefix a;
     namespace "urn:example:a";
-    list x{
-      leaf k1{
-        type string;
+    container y {
+      list x{
+        key k1;
+        leaf k1{
+          type string;
+        }
       }
     }
   }
@@ -164,7 +173,7 @@ As an example of `YB_PARENT` Yang binding, the ``k1`` subtree is inserted under 
 Config data
 -----------
 
-To create a copy of configuration data, a user retrieve a copy from the datastore to get a cxobj handle.
+To create a copy of configuration data, a user retrieve a copy from the datastore to get a cxobj handle. This tree is fully bound, sorted and defaults set.
 Read-only operations may then be done on the in-memory tree.
 
 The following example code gets a copy of the whole `running` datastore to cxobj ``xt``:
@@ -181,6 +190,68 @@ The following example code gets a copy of the whole `running` datastore to cxobj
         ``edit-config``.
 
 
+Modifying XML
+=============
+Once an XML tree has been created and bound to YANG, it can be modified in several ways.
+
+Merging two trees
+-----------------
+If you have two trees, you can merge them with ``xml_merge`` as follows::
+
+	if ((ret = xml_merge(xt, x2, yspec, &reason)) < 0) 
+	  err;
+	if (ret == 0)
+	  err; /* yang failure */
+
+where both ``xt`` and ``x2`` are root XML trees (directly under a module) and fully YANG bound. For example, if ``x2`` is::
+
+   <top>
+      <y xmlns="urn:example:a">
+        <x>
+          <k1>z</k1>
+        </x>
+      </y>
+   </top>
+
+the result tree ``xt`` after merge is::
+
+   <top>
+      <y xmlns="urn:example:a">
+        <x>
+          <k1>a</k1>
+        </x>
+        <x>
+          <k1>z</k1>
+        </x>
+      </y>
+   </top>
+
+Inserting sub-tree
+------------------
+
+Inserting a subtree can be made in several ways. The most straightforward is using parsing and the ``YB_PARENT`` YANG binding::
+
+       cxobj *xy;
+       xy = xpath_first(xt, NULL, "%s", "y");
+       if ((ret = clixon_xml_parse_string("<x><k1>z</k2></x>",
+                          YB_PARENT, yspec, &xy, NULL)) < 0)
+       if (ret == 0)
+          err; /* yang error */
+
+with the same result as in tree merge.
+
+Note that ``xy`` in this example points at the ``y`` node and is where the new tree is pasted. Neither tree need to be a root tree.
+
+Another way to insert a subtree is to use ``xml_insert``::
+
+       if (xml_insert(xy, xi, INS_LAST, NULL, NULL) < 0)
+          err;
+
+where both ``xy`` and ``xi`` are YANG bound trees. It is possible to
+specify where the new child is insrteed (last in the example), but
+this only applies if ``ordered-by user`` is specified in
+YANG. Otherwise, the system will order the insertion of the subtree automatically.
+       
 Searching in XML
 =================
 

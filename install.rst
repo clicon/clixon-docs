@@ -45,8 +45,7 @@ Build from source
    
      configure	       	       # Configure clixon to platform
      make                      # Compile
-     sudo make install         # Install libs, binaries, and config-files
-     sudo make install-include # Install include files (for compiling)
+     sudo make install         # Install libs, binaries, config-files and include-files
 
 FreeBSD
 -------
