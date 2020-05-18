@@ -5,21 +5,134 @@
 ==========
 
 Clixon represents its internal data in an in "in-memory" tree
-representation. In the C API, this data structure is called ``cxobj`` and
-is used to represent config and state data. Typically, a cxobj is
-parsed from or printed to XML or JSON, but is really a generic
-representation of a tree.
+representation. In the C API, this data structure is called ``cxobj``
+(Clixon XML object) and is used to represent config and state
+data. Typically, a cxobj is parsed from or printed to XML or JSON, but
+is really a generic representation of a tree.
 
-Such a tree goes thorough three steps:
+This section describes this internal ``cxobj`` representation.
+
+Structure
+=========
+
+XML objects are typed as follows `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_:
+
+* Element: non-terminal node with child nodes
+* Attribute: name value pair
+* Body: text between tags
+
+Elements and attributes have names. An element has a set of children
+while body and attribute have values.
+
+For example, the following XML tree::
+
+   <y xmlns="urn:example:a">
+      <x>
+         <k>a</k>
+      </x>
+   </y>
+
+can have an internal tree representation as follows (``e`` represents XML element, ``b`` body and ``a`` attribute::
+
+   y:e ---------> xmlns:a (value:"urn:example:a")
+        \
+          +-----> x:e ---------> k:e ---------> :b (value:"a") 
+
+Yang binding
+------------
+
+Typically, XML elements are associated with a YANG data node
+specification(``yang_stmt``). A YANG data node is either a
+container, leaf, leaf-list, list, or anydata.
+
+A YANG bound XML node have some constraints with respect to children as follows:
+
+* All elements may have attributes
+* A leaf or leaf-list has at most one body child.
+* A leaf or leaf-list have no elements children
+* A container or list have no body children
+* A container or list may have one or many element children
+* An anydata node may have both elements and one body child(?>
+
+The XML example given earlier could have the following YANG specification::
+
+  module mod_a{
+    prefix a;
+    namespace "urn:example:a";
+    container y {
+      list x{
+        key k;
+        leaf k{
+          type string;
+        }
+      }
+    }
+  }
+
+Annotating the tree representation with YANG specification, could yield the following YANG bound tree::
+
+   container y    
+   y:e ---------> xmlns:a (value:"urn:example:a")
+      \
+       \          list x         leaf k
+         +------> x:e ---------> k:e ---------> :b (value:"a")
+
+
+Sorted tree
+-----------
+
+Once an XML tree is bound to YANG, it can be sorted. 
+
+The tree is sorted using a "multi-layered" approach:
+
+1. XML type: attributes come before elements and bodies.
+2. Yang nodename: XML nodes with same nodename are adjacent and follow the order they are given in the Yang specification.
+3. Lists and leaf-lists: children are sorted according to key value. Key value comparison is typed: if the key type is string, strcmp is used, if the key value is an integer, integer `<>=` is used, etc.
+
+Extending the example above slightly with a new list ``x2`` as follows::
+
+      list x2{
+        key k2;
+        leaf k2{
+          type int32;
+        }
+      }
+
+could give the following sorted XML tree::
+      
+             ---> xmlns:a (value:"urn:example:a)"
+           /
+          /       list x         leaf k
+         / -----> x:e ---------> k:e ---------> :b (value:"a")
+        /
+   container y    list x         leaf k
+   y:e ---------> x:e ---------> k:e ---------> :b (value:"b")
+       \
+        \         list x2        leaf k2
+         \------> x2:e --------> k2:e --------> :b (value:9)
+          \
+           \      list x2        leaf k2
+             ---> x2:e --------> k2:e --------> :b (value:100)
+
+Note that among ``y``:s children, the attribute is the first (layer
+1), then follows the group of ``x`` elements and the group of ``x2``
+elements as they are given in the YANG specification (layer
+2). Finally, the lists are internally sorted according to key values.
+
+
+.. note::
+        Sorting is necessary to achieve fast searching as described in Section `Searching in XML`_.
+
+Creating XML
+============
+
+The creation of and XML tree goes thorough three steps:
 
 1. Syntactic creation. This is done either via parsing or via manual API calls.
 2. Bind to YANG. Assure that the XML tree complies to a YANG specification.
 3. Semantic validation. Ensuring that the XML tree complies to the backend validation rules.
 
 Steps 2 and 3 are optional.
-  
-Creating XML
-============
 
 Creating XML from a string
 --------------------------
@@ -226,6 +339,8 @@ the result tree ``xt`` after merge is::
       </y>
    </top>
 
+Note that the result tree is sorted and YANG bound as well.
+   
 Inserting
 ---------
 
@@ -233,8 +348,7 @@ Inserting a subtree can be made in several ways. The most straightforward is usi
 
        cxobj *xy;
        xy = xpath_first(xt, NULL, "%s", "y");
-       if ((ret = clixon_xml_parse_string("<x><k1>z</k2></x>",
-                          YB_PARENT, yspec, &xy, NULL)) < 0)
+       if ((ret = clixon_xml_parse_string("<x><k1>z</k2></x>", YB_PARENT, yspec, &xy, NULL)) < 0)
        if (ret == 0)
           err; /* yang error */
 
@@ -248,15 +362,14 @@ Another way to insert a subtree is to use ``xml_insert``::
           err;
 
 where both ``xy`` and ``xi`` are YANG bound trees. It is possible to
-specify where the new child is insrteed (last in the example), but
+specify where the new child is inserted (last in the example), but
 this only applies if ``ordered-by user`` is specified in
 YANG. Otherwise, the system will order the insertion of the subtree automatically.
        
 Removing
 --------
 
-There are several ways to remove subtrees, essentially grouped into
-whether you want to permanently a delete it, or if you want to prune
+A subtree can be permanently removed, or just pruned in order to insert it somewhere else.
 and graft subtrees.
 
 Permanently deleting a (sub)tree ``x`` and remove or from its parent is done as follows::
@@ -271,7 +384,8 @@ or alternatively remove child number ``i`` from parent ``xp``::
 
     xml_child_rm(xp, i);
 
-In both these cases, the child ``x`` can be used inserted under another parent.
+In both these cases, the child ``x`` can be used as a stand-alone
+tree, or being inserted under another parent. 
 
 Copying
 -------
@@ -287,7 +401,7 @@ Alternatively, a tree can be duplicated as follows::
 
    x1 = xml_dup(x0);
 
-In these cases, the new object ``x1`` can be inserted into other trees.
+In these cases, the new object ``x1`` can be use as a separate tree for insertion, for example.
   
 Searching in XML
 =================
@@ -402,7 +516,8 @@ be explicitly declared for fast access. Clixon uses a YANG extension to declare 
       }
 
 In this example, ``w`` can be used as a search index with *O(log N)* in the search API.
-      
+
+The corresponding direct API call is: ``yang_list_index_add()``
 
 Direct children
 ---------------
@@ -414,14 +529,19 @@ An example call is as follows:
    
     clixon_xvec *xv = NULL;
     cvec    *cvk = NULL;
+
+    if ((xv = clixon_xvec_new()) == NULL)
+       goto done;
     /* Populate cvk with key/values eg k1=a k2:b */
-    if (clixon_xml_find_index(xp, yp, namespace, name, cvk, &xv) < 0)
+    if (clixon_xml_find_index(xp, yp, namespace, name, cvk, xv) < 0)
        err;
     /* Loop over found children*/
-    for (i = 0; i < clixon_xvec_len; i++) {
+    for (i = 0; i < clixon_xvec_len(xv); i++) {
 	x = clixon_xpath_i(xvec, i);
         ...
     }
+    if (xv)
+       clixon_xvec_free(xv);
 
 where
 

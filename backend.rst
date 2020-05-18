@@ -194,6 +194,8 @@ init
    Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called `clixon_plugin_init`. It returns a struct with the name of the plugin, and all other callback names.
 start
    Called when application is started and initialization is complete, but before the application will be placed in the background and drop privileges (see `dropping privileges`_), if those operations are requested.
+daemon
+   Called after the server has daemonized and dropped privileges. 
 exit
    Called just before plugin is unloaded 
 extension
@@ -202,7 +204,7 @@ reset
   Reset system status
 upgrade
   General-purpose upgrade called once when loading the startup datastore
-trans_begin, trans_validate, trans_complete, trans_commit, trans_revert, trans_end, trans_abort
+trans_{begin,validate,complete,commit,commit_done,revert,end,abort}
   Transaction callbacks which are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
 
 Transactions
