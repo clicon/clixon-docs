@@ -87,8 +87,9 @@ The tree is sorted using a "multi-layered" approach:
 
 1. XML type: attributes come before elements and bodies.
 2. Yang nodename: XML nodes with same nodename are adjacent and follow the order they are given in the Yang specification.
-3.
-  a) Ordered-by-system: This is the default. Lists and leaf-lists: children are sorted according to key value. Key value comparison is typed: if the key type is string, strcmp is used, if the key value is an integer, integer `<>=` is used, etc.
+3. Sorting lists and leaf-lists. There are two variants:
+
+  a) Ordered-by-system: This is the default. Elements are sorted according to key value. Key value comparison is typed: if the key type is string, strcmp is used, if the key value is an integer, integer `<>=` is used, etc.
   b) Ordered-by-user: the list items follow the ordered they were entered, regardless of list keys. Ordered-by-user is not recommended in clixon since the optimized searching algorithms uses sorted lists. 
 
 Extending the example above slightly with a new list ``x2`` as follows::
