@@ -71,6 +71,10 @@ The following XPath axes are supported:
 The following xpath axes are *not* supported: preceeding, preceeding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute 
 
 
+Unicode
+-------
+Unicode is not supported in YANG and XML
+
 NETCONF
 -------
 

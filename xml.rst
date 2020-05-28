@@ -87,7 +87,9 @@ The tree is sorted using a "multi-layered" approach:
 
 1. XML type: attributes come before elements and bodies.
 2. Yang nodename: XML nodes with same nodename are adjacent and follow the order they are given in the Yang specification.
-3. Lists and leaf-lists: children are sorted according to key value. Key value comparison is typed: if the key type is string, strcmp is used, if the key value is an integer, integer `<>=` is used, etc.
+3.
+  a) Ordered-by-system: This is the default. Lists and leaf-lists: children are sorted according to key value. Key value comparison is typed: if the key type is string, strcmp is used, if the key value is an integer, integer `<>=` is used, etc.
+  b) Ordered-by-user: the list items follow the ordered they were entered, regardless of list keys. Ordered-by-user is not recommended in clixon since the optimized searching algorithms uses sorted lists. 
 
 Extending the example above slightly with a new list ``x2`` as follows::
 
@@ -99,26 +101,26 @@ Extending the example above slightly with a new list ``x2`` as follows::
       }
 
 could give the following sorted XML tree::
-      
-             ---> xmlns:a (value:"urn:example:a)"
-           /
-          /       list x         leaf k
-         / -----> x:e ---------> k:e ---------> :b (value:"a")
-        /
-   container y    list x         leaf k
-   y:e ---------> x:e ---------> k:e ---------> :b (value:"b")
-       \
-        \         list x2        leaf k2
-         \------> x2:e --------> k2:e --------> :b (value:9)
-          \
-           \      list x2        leaf k2
-             ---> x2:e --------> k2:e --------> :b (value:100)
 
+   <y xmlns="urn:example:a">
+      <x>
+         <k>a</k>
+      </x>
+       <x>
+         <k>b</k>
+      </x>
+      <x2>
+         <k2>9</k2>
+      </x2>
+      <x2>
+         <k2>100</k2>
+      </x2>
+   </y>
+  
 Note that among ``y``:s children, the attribute is the first (layer
 1), then follows the group of ``x`` elements and the group of ``x2``
 elements as they are given in the YANG specification (layer
 2). Finally, the lists are internally sorted according to key values.
-
 
 .. note::
         Sorting is necessary to achieve fast searching as described in Section `Searching in XML`_.
