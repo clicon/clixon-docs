@@ -118,8 +118,7 @@ The backend service is installed at /etc/systemd/system/example.service, for exa
 
 Systemd restconf
 ^^^^^^^^^^^^^^^^
-The Restconf service is installed at /etc/systemd/system/example_restconf.service, for example. 
-::
+The Restconf service is installed at /etc/systemd/system/example_restconf.service, for example::
    
    [Unit]
    Description=Starts and stops an example clixon restconf service on this system
@@ -133,6 +132,25 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    ExecStart=/www-data/clixon_restconf -f /usr/local/etc/example.xml
    [Install]
    WantedBy=multi-user.target
+
+Docker
+------
+Clixon can run as docker containers.  As an example the `docker` directory has code for building and running the clixon test suite::
+
+  cd docker/main
+  make docker
+  make test
+
+The docker tests are run in the [clixon travis CI](https://travis-ci.org/github/clicon/clixon).
+
+Vagrant
+-------
+
+Clixon uses vagrant in testing. For example to start a freebsd vagrant host, install Clixon and run the test suite, do  ::
+
+  cd test/vagrant
+  ./vagrant.sh freebsd/FreeBSD-12.1-STABLE
+
 
 Advanced install
 ----------------
