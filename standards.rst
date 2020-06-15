@@ -112,7 +112,8 @@ Capability is preferred over default subtrees. This has two reasons:
 2. Subtree filtering does not support namespaces yet.
 
 Default values
---------------
+^^^^^^^^^^^^^^
+
 Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retreival. This means that get-config will report all default values, not only those explicitly set. 
 
 `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes descriibed in the RFC, Clixon implements "report-all" with-respect to GET and GET-CONFIG operations, but "explicit" with reespect to how configurations are saved in datastores.

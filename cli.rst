@@ -5,13 +5,14 @@ CLI
 
 The CLI uses `<https://github.com/olofhagsand/cligen>`_ is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/olofhagsand/cligen/blob/master/cligen_tutorial.pdf>`_.
 
+Once the backend is started, the easiest way to use Clixon is via
+the CLI. Clixon comes with a generated CLI, the *auto-cli*, where all
+configuration-related syntax is generated from YANG. You can also create a completely manually-made CLI.
+
 Using the CLI
 -------------
 
-Once the backend is started, the easiest way to use Clixon is via the CLI. 
-
-The following example shows how to add an interface in candidate, validate and commit it to running, then look at it (as xml) and finally delete it:
-::
+The following example shows an auto-cli session from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_ how to add an interface in candidate, validate and commit it to running, then look at it as xml and cli and finally delete it::
    
    clixon_cli -f /usr/local/etc/example.xml 
    cli> set interfaces interface eth9 ?
@@ -28,7 +29,11 @@ The following example shows how to add an interface in candidate, validate and c
        <enabled>true</enabled>
      </interface>
    </interfaces>
- cli> delete interfaces interface eth9
+   cli> show configuration cli
+   set interfaces interface eth9 
+   set interfaces interface eth9 type ex:eth
+   set interfaces interface eth9 enabled true
+   cli> delete interfaces interface eth9
 
 CLI specs and plugins
 ---------------------
@@ -38,14 +43,12 @@ When defining a CLI frontend, there are two kinds of CLI specification files:
 * *Clispecs*: CLI specification files (clispecs) written in `CLIgen <https://github.com/olofhagsand/cligen/blob/master/cligen_tutorial.pdf>`_ syntax.
 * *Plugins*: Dynamic loadable plugin files loaded by `clixon_cli` at startup. Callbacks from clispec files are resolved and need to exist as symbols either in the CLixon libs or in the plugin file.
 
-The following example shows examples of both files taken from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_. First, a clispec file containing two commands:
-::
+The following example shows examples of both files taken from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_. First, a clispec file containing two commands::
 
   show("Show state") config("Show configuration"), cli_show_config("candidate", "text", "/");
   example("Callback example") <var:int32>("any number"), mycallback("myarg");
 
-In the CLI, these will generate CLI commands such as:
-::
+In the CLI, these will generate CLI commands such as::
 
    show config
    example 23
@@ -67,8 +70,6 @@ CLICON_CLISPEC_DIR
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
 
-
-
 Modes
 -----
 The CLI can have different *modes* which is controlled by a config option and some internal clispec variables. The config option is:
@@ -78,34 +79,28 @@ CLICON_CLI_MODE
 
 Inside the clispec files `CLICON_MODE` is used to specify to which modes the syntax in a specific file defines. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
 
-First, lets add a single command in the configure mode:
-::
+First, lets add a single command in the configure mode::
    
   CLICON_MODE="configure";
   show configure;
 
-Then add syntax to both modes:
-::
+Then add syntax to both modes::
 
   CLICON_MODE="operation:configure";
   show("Show") files("files");
 
-Finally, add a command to all modes:
-
-::
+Finally, add a command to all modes::
 
   CLICON_MODE="*";
   show("Show") all("all");
    
-Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes will be three commands in total for the *configure* mode:
-::
+Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes will be three commands in total for the *configure* mode::
 
   > clixon_cli -m configure
   cli> show <TAB>
     all     routing      files
 
-but only two commands  in the *operation* mode:
-::
+but only two commands  in the *operation* mode::
 
   > clixon_cli -m operation 
   cli> show <TAB>
@@ -132,8 +127,7 @@ Further, tilde-expansion is supported and if history files are not found or lack
 
 Sub-trees
 ^^^^^^^^^
-You use sub-trees using the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes:
-::
+You use sub-trees using the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes::
    
   CLICON_MODE="subtree";
   subcommand{
@@ -141,8 +135,7 @@ You use sub-trees using the tree operator `@`. Every mode gets assigned a tree w
     b, b();
   }
 
-then access that subtree from other modes:
-::
+then access that subtree from other modes::
    
   CLICON_MODE="configure";
   main @subtree;
@@ -150,20 +143,94 @@ then access that subtree from other modes:
 
 The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks will be overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` will be invoked.
 
-Generated config syntax
-^^^^^^^^^^^^^^^^^^^^^^^
-A special kind of sub-tree is the system-generated syntax tree.
+The Auto-CLI
+------------
+
+The auto-cli contains parts that are *generated* from a YANG specification.
+
+
+YANG
+^^^^
+Consider a YANG specification, such as::
+
+  container x{
+    list y{
+      key k;
+      leaf k{
+        type string;
+      }
+    }
+  }
+
+If the ``clixon_cli`` is started with ``-G -o CLICON_CLI_GENMODEL=1`` it prints the following cli-spec::
+  
+    x,overwrite_me("/example:x");{
+      y (<k:string> |
+         <k:string expand_dbvar("candidate","/example:x/y=%s/k")>),
+	     overwrite_me("/example:x/y=%s/");{
+      }
+   }
+
+This cli-spec forms the basis of the auto-cli and contains the following:
+  - Keywords for the YANG symbole (eg ``x`` and ``y``).
+  - Variable syntax for leafs (eg ``<k:string>``)
+  - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content will be shown as alternatives.
+  - ``overwrite_me`` is a callback template which is overwritten by an actual callback in the clispec (eg ``cli_set()``)
+
+The auto-cli syntax can be copied and loaded seperately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
+
+  set @datamodel, cli_set();                                  # Set/replace a configure item
+  delete @datamodel, cli_del();                               # Delete a configure item
+  show {
+    config, cli_show_config("candidate", "cli", "/", 0, "set ");
+    config @datamodel, cli_show_auto("candidate", "cli", "set "); # Show config as CLI
+    xml, cli_show_config("candidate", "xml", "/");
+    xml @datamodel, cli_show_auto("candidate", "xml");     # Show config as XML
+  }
+
+Example
+^^^^^^^
+
+An example run of the above example is::
+
+  > clixon_cli
+  cli> set x ?
+  <cr>
+  y                
+  cli> set x y ?
+  <k>
+  cli> set x y 23
+  cli> set x y         
+  23                    
+  <k>  
+  cli> show config ?
+  set x y 23 
+  cli> show xml x y 23 
+  <y>
+     <k>23</k>
+  </y>
+  
+The example shows an automated cli generated by the YANG model, with
+completion as well as config to cli syntax.
+
+Options
+^^^^^^^
 The config options for generated config tree is:
 
-CLICON_CLI_GENMODEL
-  If set, generate CLI specification for CLI completion of loaded Yang modules. This CLI tree can be accessed in CLI spec files using the tree reference syntax (eg @datamodel). Default 1.
+CLICON_CLI_GENMODEL, a numeric that can have the following values:
+  0. Do not generate CLISPEC syntax for the auto-cli.
+  1. Generate a CLI specification for CLI completion of all loaded Yang modules. This CLI tree can be accessed in CLI-spec files using the tree reference syntax (eg ``@datamodel``).
+  2. Same including state syntax in a tree called ``@datamodelstate``.
 
 CLICON_CLI_MODEL_TREENAME
-  If set, CLI specs can reference the model syntax using this reference. Example: set @datamodel, cli_set();
+  A string treename. CLI specs can reference the model syntax using this reference. Example: set ``@mydatamodel``, cli_set();
   
 CLICON_CLI_GENMODEL_COMPLETION
-  Generate code for CLI completion of existing db symbols
+  Generate code for CLI completion of existing db symbols. If set to 0, the ``expand`` rules will not be generated.
   
-CLICON_CLI_GENMODEL_TYPE
-  How to generate and show CLI syntax: VARS|ALL
+CLICON_CLI_GENMODEL_TYPE, How to generate and show CLI syntax. 
+  - ``NONE`` No keywords on non-keys: ``x y <k>`` (example has only a key so same as VARS)
+  - ``VARS`` Keywords on non-key variables: ``x y <k>``
+  - ``ALL``  Keywords on all variables: ``x y k <k>``
+  - ``HIDE`` Keywords on non-key variables and hide container around lists: ``y <k>``
 
