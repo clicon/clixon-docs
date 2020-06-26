@@ -3,7 +3,7 @@
 CLI
 ===
 
-The CLI uses `<https://github.com/olofhagsand/cligen>`_ is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/olofhagsand/cligen/blob/master/cligen_tutorial.pdf>`_.
+The CLI uses `<https://github.com/clicon/cligen>`_ is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_.
 
 Once the backend is started, the easiest way to use Clixon is via
 the CLI. Clixon comes with a generated CLI, the *auto-cli*, where all
@@ -40,7 +40,7 @@ CLI specs and plugins
 
 When defining a CLI frontend, there are two kinds of CLI specification files:
 
-* *Clispecs*: CLI specification files (clispecs) written in `CLIgen <https://github.com/olofhagsand/cligen/blob/master/cligen_tutorial.pdf>`_ syntax.
+* *Clispecs*: CLI specification files (clispecs) written in `CLIgen <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_ syntax.
 * *Plugins*: Dynamic loadable plugin files loaded by `clixon_cli` at startup. Callbacks from clispec files are resolved and need to exist as symbols either in the CLixon libs or in the plugin file.
 
 The following example shows examples of both files taken from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_. First, a clispec file containing two commands::
@@ -106,7 +106,20 @@ but only two commands  in the *operation* mode::
   cli> show <TAB>
     all      files
 
-    
+Terminal
+--------
+Clixon CLI have the following terminal related options:
+
+CLICON_CLI_LINESCROLLING
+  Set to 0 if you want CLI to wrap to next line.
+  Set to 1 if you  want CLI to scroll sideways when approaching right margin (default).
+
+CLICON_CLI_LINES_DEFAULT
+   Set to number of CLI terminal rows for pageing/scrolling. 0 means unlimited.  The number is set statically UNLESS:
+   - there is no terminal, such as file input, in which case nr lines is 0
+   - there is a terminal sufficiently powerful to read the number of lines from ioctl calls.
+   In other words, this setting is used ONLY on raw terminals such as serial consoles.
+
 History
 -------
 Clixon CLI supports persistent command history. There are two CLI history related configuration options:

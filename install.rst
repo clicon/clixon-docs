@@ -24,7 +24,7 @@ Install packages:
 Install and build CLIgen:
 ::
 
-  git clone https://github.com/olofhagsand/cligen.git
+  git clone https://github.com/clicon/cligen.git
   cd cligen;
   configure;
   make;

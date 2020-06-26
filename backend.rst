@@ -114,8 +114,6 @@ When loading the startup/tmp configuration, the following actions are performed 
 * If errors are detected, enter `failsafe` mode.
 
 
-
-
    
 Socket
 ------
@@ -348,11 +346,7 @@ If the datastore does not contain module-state info, no
 module-specific upgrades can be made, only the general-purpose upgrade
 is available.
 
-A backend does not perform detection of mismatching XML/Yang if:
-
-1. The datastore was saved in a pre-3.10 system 
-2. `CLICON_XMLDB_MODSTATE` was not enabled when saving the file
-3. The backend configuration does not have `CLICON_XMLDB_MODSTATE` enabled.
+A backend does not perform detection of mismatching XML/Yang if: `CLICON_XMLDB_MODSTATE` was not enabled when saving the file or if is disabled in the running system.
 
 Note that the module-state detection is independent of the other steps
 of the startup operation: syntax errors, validation checks, failsafe mode, etc,
@@ -389,83 +383,57 @@ module-state of the backend daemon, a set of module-specific upgrade callbacks a
 made. This allows a user to program upgrade funtions in the backend
 plugins to automatically upgrade the XML to the current version.
 
-A user registers upgrade callbacks based on module and revision
-ranges. A user can register many callbacks, or choose wildcards.
-When an upgrade occurs, the callbacks will be called if they match the
-module and revision ranges registered.
+A user registers upgrade callbacks per YANG module. A user can
+register many callbacks, or choose wildcards.  When an upgrade occurs,
+the callbacks will be called if they match the module and the modules
+have changed.
 
-Different strategies can be used for upgrade functions. One
-coarse-grained method is to register a single callback to handle all
-modules and all revisions. 
-
-A fine-grained method is to register a separate _stepwise_ upgrade
-callback per module and revision range that will be called in a series.
+A module has changed if one of the following is true:
+- A module present in the startup is no longer present in the system (DEL)
+- A module in the system is not present in the startup (ADD)
+- A module present in both the startup and the system has a different revision date (CHANGE)
 
 Registering a callback
 ^^^^^^^^^^^^^^^^^^^^^^
 A user registers upgrade callbacks in the backend `clixon_plugin_init()` function. The signature of upgrade callback is as follows:
 ::
    
-  upgrade_callback_register(h, cb, namespace, from, revision, arg);
+  upgrade_callback_register(h, cb, ns, arg);
 
 where:
 
 * `h` is the Clicon handle,
 * `cb` is the name of the callback function,
-* `namespace` defines a Yang module. NULL denotes all modules. Note that module `name` is not used (XML uses namespace, whereas JSON uses name, XML is more common).
-* `from` is a revision date indicated an optional start date of the upgrade. This allows for defining a partial upgrade. It can also be `0` to denote any version.
-* `revision` is the revision date "to" where the upgrade is made. It is either the same revision as the Clixon system module, or an older version. In the latter case, you can provide another upgrade callback to the most recent revision. 
+* `ns` defines the namespace of a Yang module. NULL denotes all modules.
 * `arg` is a user defined argument which can be passed to the callback.
 
-One example of registering a "catch-all" upgrade: 
+One example of registering an upgrade of an interface module: 
 ::
 
-   upgrade_callback_register(h, xml_changelog_upgrade, NULL, 0, 0, NULL);
+   upgrade_callback_register(h, upgrade_interfaces, "urn:example:interfaces", NULL);
 
-
-Another example are fine-grained stepwise upgrades of a single module [upgrade example](#example-upgrade):
-::
-   
-   upgrade_callback_register(h, upgrade_2016, "urn:example:interfaces",
-                             20140508, 20160101, NULL);
-   upgrade_callback_register(h, upgrade_2018, "urn:example:interfaces",
-                             20160101, 20180220, NULL);
-
-      20140508       20160101       20180220
-   ------+--------------+--------------+-------->
-         upgrade_2016   upgrade_2018
-
-In the latter case, the first callback upgrades
-from revision 2014-05-08 to 2016-01-01; while the second makes upgrades from
-2016-01-01 to 2018-02-20. These are run in series.
 
 Upgrade callback
 ^^^^^^^^^^^^^^^^
 When Clixon loads a startup datastore with outdated modules, the matching
 upgrade callbacks will be called.
 
-Note the following:
+The signature of an upgrade callback is as follows::
 
-* Upgrade callbacks _will_ _not_ be called for data that is up-to-date with the current system
-* Upgrade callbacks _will_ _not_ be called if there is no module-state in the datastore, or if module-state support is disabled.
-* Upgrade callbacks _will_ be called if the datastore contains a version of a module that is older than the module loaded in Clixon.
-* Upgrade callbacks _will_ also be called if the datastore contains a version of a module that is not present in Clixon - an obsolete module.
+  int upgrade_interfaces(h, xt, ns, op, from, to, arg, cbret)
 
-Re-using the previous stepwise example, if a datastore is loaded based on revision 20140508 by a system supporting revision 2018-02-20, the following two callbacks are made:
-::
+where:
 
-  upgrade_2016(h, <xml>, "urn:example:interfaces", 20140508, 20180220, NULL, cbret);
-  upgrade_2018(h, <xml>, "urn:example:interfaces", 20140508, 20180220, NULL, cbret);
+* `xt` is the XML tree to be upgraded
+* `ns` is the namespace of the YANG module.
+* `op` is a flag indicating upgrading operation, one of: ``XML_FLAG_ADD``, ``XML_FLAG_DEL``, ``XML_FLAG_CHANGE``.
+* `from` is the revision date in the startup file of the module. It is zero if the operation is ``ADD``
+* `to` is the revision date of the YANG module in the system. It is zero if the operation is ``DEL``
+  
 
-Note that the example shown is a template for an upgrade function. It
-gets the nodes of an yang module given by `namespace` and the
-(outdated) `from` revision, and iterates through them. 
+If no action is made by the upgrade calback, and thus the XML is not upgraded, the next step is XML/Yang validation.
 
-If no action is made by the upgrade calback, and thus the XML is not
-upgraded, the next step is XML/Yang validation.
-
-An out-dated XML may still pass validation and the system will go up
-in normal state.
+An out-dated XML may still pass validation and the system will go up in normal state.
 
 However, if the validation fails, the backend will try to enter the
 failsafe mode so that the user may perform manual upgarding of the
@@ -473,23 +441,20 @@ configuration.
 
 Example upgrade
 ^^^^^^^^^^^^^^^
+The `Clixon main example <https://github.com/clicon/clixon/blob/master/example/main/example_backend.c>`_ shows code for upgrading of an interface module. The example is inspired by the ietf-interfaces module that made a subset of the upgrades shown in the examples.
 
-The example and  shows the code for upgrading of an interface module. The example is inspired by the ietf-interfaces module that made a subset of the upgrades shown in the examples.
+The code is split in two steps.
+The `upgrade_2014_to_2016` callback does the following transforms:
 
-The code is split in two steps. The `upgrade_2016` callback does the following transforms:
+  * Move ``/if:interfaces-state/if:interface/if:admin-status`` to ``/if:interfaces/if:interface/``
+  * Move ``/if:interfaces-state/if:interface/if:statistics`` to ``if:interfaces/if:interface/``
+  * Rename ``/interfaces/interface/description`` to ``/interfaces/interface/descr``
 
-  * Move /if:interfaces-state/if:interface/if:admin-status to /if:interfaces/if:interface/
-  * Move /if:interfaces-state/if:interface/if:statistics to if:interfaces/if:interface/
-  * Rename /interfaces/interface/description to /interfaces/interface/descr
+The `upgrade_2016_to_2018` callback does the following transforms:
+  * Delete ``/if:interfaces-state``
+  * Wrap ``/interfaces/interface/descr`` to ``/interfaces/interface/docs/descr``
+  * Change type ``/interfaces/interface/statistics/in-octets`` to ``decimal64`` and divide all values with 1000
 
-The `upgrade_2018` callback does the following transforms:
-  * Delete /if:interfaces-state
-  * Wrap /interfaces/interface/descr to /interfaces/interface/docs/descr
-  * Change type /interfaces/interface/statistics/in-octets to decimal64 and divide all values with 1000
-
-Please consult the `upgrade_2016` and `upgrade_2018` functions in [the
-example](../example/example_backend.c) and
-[test](../test/test_upgrade_interfaces.sh) for more details.
 
 Extra XML
 ^^^^^^^^^
