@@ -71,17 +71,17 @@ Module library support
 ----------------------
 
 Clixon can store Yang module-state information according to `RFC 7895: YANG module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_ in the
-datastores. With module state, you know which Yang version the XML belongs to, and is useful when upgrading, for example.
+datastores. With module state, you know which Yang version the XML belongs to, which is useful when upgrading, see :ref:`upgrade <clixon_upgrade>`.
 
 
-Including yang module-state in the
-datastores is enabled by the following entry in the Clixon
-configuration:
+To enable yang module-state in the datastores add the following entry in the Clixon configuration:
 ::
 
    <CLICON_XMLDB_MODSTATE>true</CLICON_XMLDB_MODSTATE>
 
-A backend performs detection of mismatching XML/Yang if `CLICON_XMLDB_MODSTATE` was not enabled when saving the file so that it contains module-state information; and the backend configuration has `CLICON_XMLDB_MODSTATE` enabled.
+If the datastore does not contain module-state, general-purpose upgrade is the only upgrade mechanism available.
+
+A backend with `CLICON_XMLDB_MODSTATE` disabled will silently ignore module state.
 
 Example of a (simplified) datastore with Yang module-state:
 ::
@@ -98,6 +98,9 @@ Example of a (simplified) datastore with Yang module-state:
      <a1 xmlns="urn:example:a">some text</a1>
    </config>
 
+Note that the module-state is not available to the user, the backend
+datastore handler strips the module-state info. It is only shown in
+the datastore itself.
 
 Datastore caching
 -----------------

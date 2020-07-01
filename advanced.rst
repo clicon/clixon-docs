@@ -6,8 +6,43 @@ Advanced
 
 (Work in progress, these are sections that do not fit into the rest of the document)
 
+
+
 CLI
 ===
+
+Translators
+-----------
+
+CLIgen supports wrapper functions that can take the output of a
+callback and transform it to something else.
+
+The CLI can perform variable translation. This is useful if you want to
+process the input, such as hashing, encrypting or in other way
+translate the input.
+
+Yang example::
+
+  list translate{
+     leaf value{
+        type string;
+     }
+  }
+
+CLI specification::
+
+  translate value (<value:string translate:incstr()>),cli_set("/translate/value");
+
+If you run this example using the `incstr()` function which increments the characters in the input, you get this result::
+
+  cli> translate value HAL
+  cli> show configuration
+  translate {
+      value IBM;
+  }
+
+You can perform translation on any type, not only strings.
+
 
 Differences to CLIgen
 ---------------------
@@ -112,3 +147,70 @@ You can also add the C preprocessor as a first step. You can then define macros,
    %.cli : %.cpp
         $(CPP) -P -x assembler-with-cpp $(INCLUDES) -o $@ $<
 
+
+Automatic upgrades
+==================
+There is an EXPERIMENTAL xml changelog feature based on
+"draft-wang-netmod-module-revision-management-01" (Zitao Wang et al)
+where changes to the Yang model are documented and loaded into
+Clixon. The implementation is not complete.
+
+When upgrading, the system parses the changelog and tries to upgrade
+the datastore automatically. This feature is experimental and has
+several limitations.
+
+You enable the automatic upgrading by registering the changelog upgrade method in ``clixon_plugin_init()`` using wildcards::
+
+   upgrade_callback_register(h, xml_changelog_upgrade, NULL, 0, 0, NULL);
+
+The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a nnew. Example from [test_upgrade_auto.sh](../test/test_upgrade_auto.sh)::
+
+  <changelogs xmlns="http://clicon.org/xml-changelog">
+    <changelog>
+      <namespace>urn:example:b</namespace>
+      <revfrom>2017-12-01</revfrom>
+      <revision>2017-12-20</revision>
+      ...
+    <changelog>
+  </changelogs>
+
+Each changelog consists of set of (orderered) steps::
+
+    <step>
+      <name>1</name>
+      <op>insert</op>
+      <where>/a:system</where>
+      <new><y>created</y></new>
+    </step>
+    <step>
+      <name>2</name>
+      <op>delete</op>
+      <where>/a:system/a:x</where>
+    </step>
+
+Each step has an (atomic) operation:
+
+* rename - Rename an XML tag
+* replace - Replace the content of an XML node
+* insert - Insert a new XML node
+* delete - Delete and existing node
+* move - Move a node to a new place
+
+A *step* has the following arguments:
+
+* where - An XPath node-vector pointing at a set of target nodes. In most operations, the vector denotes the target node themselves, but for some operations (such as insert) the vector points to parent nodes.
+* when - A boolean XPath determining if the step should be evaluated for that (target) node.
+
+Extended arguments:
+
+* tag - XPath string argument (rename)
+* new - XML expression for a new or transformed node (replace, insert)
+* dst - XPath node expression (move)
+
+Step summary:
+
+* rename(where:targets, when:bool, tag:string)
+* replace(where:targets, when:bool, new:xml)
+* insert(where:parents, when:bool, new:xml)
+* delete(where:parents, when:bool)
+* move(where:parents, when:bool, dst:node)

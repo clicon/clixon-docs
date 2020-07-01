@@ -21,6 +21,7 @@ mechanism.
    configuration
    backend
    datastore
+   upgrade
    cli
    usecases
    paths
