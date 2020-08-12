@@ -81,7 +81,7 @@ deleted.
   
 Module-specific upgrade
 -----------------------
-Module-specific upgrade is only available if module-state is enabled, see `Module library support <clixon_datastore>`.
+Module-specific upgrade is only available if module-state is enabled, see :ref:`Module library support <clixon_datastore>`.
 
 If the module-state of the startup configuration does not match the
 module-state of the backend daemon, a set of module-specific upgrade callbacks are
@@ -117,7 +117,6 @@ One example of registering an upgrade of an interface module:
 
    upgrade_callback_register(h, upgrade_interfaces, "urn:example:interfaces", NULL);
 
-
 Upgrade callback
 ^^^^^^^^^^^^^^^^
 When Clixon loads a startup datastore with outdated modules, the matching
@@ -139,8 +138,8 @@ If no action is made by the upgrade calback, and thus the XML is not upgraded, t
 
 An out-dated XML may still pass validation and the system will go up in normal state.
 
-irHowever, if the validation fails, the backend will try to enter the
-failsafe mode so that the user may perform manual upgarding of the
+However, if the validation fails, the backend will try to enter the
+failsafe mode so that the user may perform manual upgrading of the
 configuration.
 
 Example upgrade
@@ -193,7 +192,7 @@ in ``<CLICON_XMLDB_DIR>/failsafe_db``. If such a config is not found, the
 backend terminates. In this mode, running and startup mode are
 unchanged.
 
-If the failsafe is found, the failsafe config is loaded and
+If the failsafe is found, the running-db is copied to tmp-db and the failsafe config is loaded and
 committed into the running db.
 
 If the startup mode was `startup`, the `startup` database will
@@ -262,5 +261,4 @@ Finally, the candidate is validate and committed:
     <commit/>
   </rpc>
 
-The example shown in this Section is also available as a regression [test script](../test/test_upgrade_repair.sh).
-
+The example shown in this Section is also available as a regression `repair test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_repair.sh>`_.

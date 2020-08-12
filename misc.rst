@@ -1,12 +1,10 @@
-.. _clixon_advanced:
+.. _clixon_misc:
 
-********
-Advanced
-********
+****
+Misc
+****
 
-(Work in progress, these are sections that do not fit into the rest of the document)
-
-
+These are sections that do not fit into the rest of the document.
 
 CLI
 ===
@@ -163,7 +161,7 @@ You enable the automatic upgrading by registering the changelog upgrade method i
 
    upgrade_callback_register(h, xml_changelog_upgrade, NULL, 0, 0, NULL);
 
-The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a nnew. Example from [test_upgrade_auto.sh](../test/test_upgrade_auto.sh)::
+The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a nnew. Example from `auto upgrade test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_auto.sh>`_::  
 
   <changelogs xmlns="http://clicon.org/xml-changelog">
     <changelog>
@@ -214,3 +212,43 @@ Step summary:
 * insert(where:parents, when:bool, new:xml)
 * delete(where:parents, when:bool)
 * move(where:parents, when:bool, dst:node)
+
+Internal NETCONF
+================
+
+Clixon uses NETCONF as the protocol between its clients
+(cli/netconf/restconf) and the backend. This _internal_ Netconf
+protocol have a couple of extensions to the Netconf protocol as follows:
+
+* *content* - for ``get`` command with values "config", "nonconfig" or "all", to indicate which parts of state and config are requested. This option is taken from RESTCONF. Example::
+
+    <rpc><get content="nonconfig"/></rpc>
+    
+* *depth* - for ``get`` and ``get-config`` how deep a tree is requested. ALso from RESTCONF. Example::
+
+    <rpc><get depth="2"/></rpc>
+    
+* *username* - for top-level ``rpc`` command. Indicates which user the client represents ("pseudo-user"). This is either the actual user logged in as the client (eg "peer-user") or can represent another user. The credentials mode determines the trust-level of the pseudo-username. Example::
+
+    <rpc username="root"><close-session/></rpc>
+    
+* *autocommit* - for ``edit-config``. If true, perform a ``commit`` operation immediately after an edit. If this fails, make a ``discard`` operation. Example::
+
+    <rpc><edit-config autocommit="true"><target><candidate/></target><config>...</config></edit-config></rpc>
+    
+* *copystartup* - for ``edit-config`` combined with autocommit. If true, copy the running db to the startup db after a commit. The combination with autocommit is the default for RESTCONF operations. Example::
+
+     <rpc><edit-config autocommit="true" copystartup="true"><target><candidate/></target><config>...</config></edit-config></rpc>
+
+* *objectcreate* and *objectexisted* - in the data field of ``edit-config`` XML data tree. In the request set objectcreate to false/true whether an object should be created if it does not exist or not. If such a request exists, then the ok reply should contain "objectexists" to indicate whether the object existed or not (eg prior to the operation). The reason for this protocol is to implement some RESTCONF PATCH and PUT functionalities. Example::
+
+      <rpc><edit-config objectcreate="false"><target><candidate/></target>
+         <config>
+            <protocol objectcreate="true">tcp</protocol>
+         </config>
+      </edit-config></rpc>]]>]]>
+      <rpc-reply><ok objectexisted="true"/></rpc-reply>]]>]]>
+
+The reason for introducing the objectcreate/objectexisted attributes are as follows:
+      * RFC 8040 4.5 PUT: if the PUT request creates a new resource, a "201 Created" status-line is returned.  If an existing resource is modified, a "204 No Content" status-line is returned.
+      * RFC 8040 4.6 PATCH: If the target resource instance does not exist, the server MUST NOT create it.

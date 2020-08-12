@@ -29,6 +29,7 @@ However, the following YANG syntax modules are not implemented (reference to RFC
 * Yang extended XPath functions: re-match(), deref)(), derived-from(), derived-from-or-self(), enum-value(), bit-is-set() (10.2-10.6)
 * Default values on leaf-lists (7.7.2)
 * Lists without keys (non-config lists may lack keys)
+* if-feature-expr is restricted to single layer expressions with and/or: "x and y" and "x or y" is allowed but "x or (not y and z)" is not. (7.20.2)
 
 Regular expressions
 ^^^^^^^^^^^^^^^^^^^
@@ -77,13 +78,12 @@ Unicode is not supported in YANG and XML
 
 NETCONF
 -------
-
 Clixon implements the following NETCONF RFC:s:
 
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
 * `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
-* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_. Except notification.
+* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
 
@@ -118,7 +118,6 @@ Clixon only stores explicit set default values in datastores, while unset values
 
 `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes descriibed in the RFC, Clixon implements "report-all" with-respect to GET and GET-CONFIG operations, but "explicit" with reespect to how configurations are saved in datastores.
 
-   
 RESTCONF
 --------
 

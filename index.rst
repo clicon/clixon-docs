@@ -21,9 +21,9 @@ mechanism.
    configuration
    backend
    datastore
-   upgrade
-   cli
    usecases
-   paths
+   cli
    xml
-   advanced
+   nacm
+   upgrade
+   misc

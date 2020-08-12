@@ -86,16 +86,27 @@ Clixon supports standards including YANG, NETCONF, RESTCONF, XML and XPath. See 
 
 How to get Clixon
 -----------------
+Get the Clixon source code from `Github <http://github.com/clicon/clixon>`_::
 
-Get the Clixon source code from `Github <http://github.com/clicon/clixon>`_
+   git clone git@github.com:clicon/clixon.git
 
 Support
 -------
-For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_
+For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_. Please ask for access.
 
 Bug reports
 -----------
-
 Report bugs via `Github issues <https://github.com/clicon/clixon/issues>`_
+
+Reference docs
+--------------
+You need to check out the source code, and type ``make doc``, eg::
+
+  git clone git@github.com:clicon/clixon.git
+  cd clixon
+  ./configure
+  make doc
+
+direct your browser to ``file:///<your home path>/clixon/doc/html/index.html``
 
 

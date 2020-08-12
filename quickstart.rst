@@ -5,7 +5,7 @@ Quick start
 
 .. This is a comment
    
-This section describes how to run the Hello world example available in the soure code at: `hello example <https://github.com/clicon/clixon-examples>`_.
+This section describes how to run the Hello world example available in soure code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_.
 
 Clixon is not a system in itself, it is a support system for an
 application. In this case, the "application" is hello world. The hello
@@ -18,23 +18,17 @@ hello world application.
 
 Content
 -------
-The hello example directory contains the following files:
+Files relevant to the hello example are:
 
-`hello.xml`
-   The configuration file. See `clixon-config.yang <https://github.com/clicon/clixon/tree/master/yang/clixon/clixon-config@2020-02-22.yang>`_ for the yang spec of hello.xml.
-`clixon-hello@2019-04-17.yang`
-   The yang spec of the example.
-`hello_cli.cli`
-   CLIgen specification.
-`Makefile.in`
-   Example makefile where plugins are built and installed
-`README.md`
-   Documentation
+* `hello.xml <https://github.com/clicon/clixon-examples/tree/master/hello/src/hello.xml>`_: the XML configuration file
+* `clixon-hello@2019-04-17.yang <https://github.com/clicon/clixon-examples/tree/master/hello/yang/clixon-hello@2019-04-17.yang>`_: the YANG spec
+* `hello_cli.cli <https://github.com/clicon/clixon-examples/tree/master/hello/src/hello_cli.cli>`_: the CLIgen spec
+* `Makefile <https://github.com/clicon/clixon-examples/tree/master/hello/src/Makefile.in>`_: where plugins are built and installed
 
 Compile and run
 ---------------
 
-Before you start, go through the install instructions.
+Before you start, go through the :ref:`install instructions <clixon_install>` for your platform.
 ::
 
     make && sudo make install
@@ -94,7 +88,15 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 Restconf
 --------
 
-Clixon also provides a Restconf interface. A reverse proxy needs to be configured. 
+Clixon can use different Restconf modules
+*  Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication
+*  Native web-server such as `libevhtp <https://github.com/criticalstack/libevhtp>`_.
+
+The libevhtp web server is integrated with the clixon restconf daemon
+and needs no extra installations, but a reverse proxy needs to be configured.
+
+Nginx
+^^^^^
 
 For example, using nginx on an Ubuntu release: install, and edit config file `/etc/nginx/sites-available/default`
 ::
@@ -125,11 +127,14 @@ or using systemd:
 ::
    
   sudo systemctl start nginx.service
-   
-Start the restconf daemon
+
+Start and run
+^^^^^^^^^^^^^
+
+Regardless of which restconf variant is used, next step is to start the restconf daemon:
 ::
 
-   sudo su -c "/www-data/clixon_restconf" -s /bin/sh www-data &
+   sudo /www-data/clixon_restconf
 
 Start sending restconf commands (using Curl):
 ::
@@ -144,9 +149,11 @@ Start sending restconf commands (using Curl):
       }
    }
 
+   
 Run a container
 ---------------
-You can run the hello example as a pre-built docker container, on a `x86_64` Linux.
+You can run the hello example as a pre-built docker container, on a `x86_64` Linux. See instructions in the `clixon docker hello example <https://github.com/clicon/clixon-examples/tree/master/hello/docker>`_.
+
 First, the container is started with the backend running:
 ::
 
@@ -172,7 +179,7 @@ Or Netconf:
 Or using restconf using curl on exposed port 8080:
 ::
    
-  $ curl -G http://localhost:8080/restconf/data/hello:system
+  $ curl -X GET http://localhost:8080/restconf/data/hello:system
    
 Next steps
 ----------
