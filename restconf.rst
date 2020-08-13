@@ -7,14 +7,6 @@ RESTCONF
    
 Clixon can use different Restconf modules:
    
-Configuration
--------------
-
-RESTCONF can be configured as follows:
-  --without-restconf      No RESTCONF
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
-  --with-restconf=evhtp   RESTCONF using native http with libevhtp
-
 Architecture
 ------------
 ::
@@ -31,10 +23,12 @@ Architecture
         (2)                    +----------+--------+          +----------+
 
 The restconf deamon provides a http/https RESTCONF interface to the
-Clixon backend.  It comes in two variants: (1) using a reverse proxy
-and FCGI; (2) native http using libevhtp as seen in the two variants shown in the figure above.
+Clixon backend.  It comes in two variants, as shown by the two variants in the figure above:
 
-The restconf daemon communicates with the backend daemon using
+  1. A reverse proxy (such as NGINX) and FCGI
+  2. Native http using libevhtp
+
+The restconf daemon communicates with the backend using
 internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
 
 As other Clixon daemons and clients, the daemon reads its config options from the configuration file on startup.
@@ -42,9 +36,20 @@ As other Clixon daemons and clients, the daemon reads its config options from th
 You can add plugins to the restconf daemon, where the primary usecase is authentication, using the ``ca_auth`` callback.
 
 
+Configuration
+-------------
+
+The RESTCONF daemon can be configured (by autotools) as follows:
+  --without-restconf      No RESTCONF
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
+  --with-restconf=evhtp   RESTCONF using native http with libevhtp
+  --with-wwwuser=<user>   Set www user different from www-data
+
+The restconf daemon can be started as root, but in that case drops privileges to wwwuser.
+  
 Config options
 --------------
-The configuration options related to RESTCONF are as follows:
+The configuration file options related to RESTCONF are as follows:
 
 CLICON_RESTCONF_DIR
    Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
@@ -70,14 +75,10 @@ CLICON_STREAM_DISCOVERY_RFC8040
 CLICON_STREAM_PATH  
   Stream path appended to CLICON_STREAM_URL to form stream subscription URL (only fcgi)
 
-Privileges
-----------
-The restconf daemon can be started as root, but in that case drops priveleges to ``www-data``. Change this user at config time:
-  --with-wwwuser=<user>   Set www user different from www-data
 
 Plugin callbacks
 ----------------
-Restconf plugins implement callbacks, some are same as for backend. Most important is the ``auth`` callback where user authentication can be implemented.
+Restconf plugins implement callbacks, some are same as for :ref:`backend plugins <clixon_backend>`. Most important is the ``auth`` callback where user authentication can be implemented.
 
 init
    Clixon plugin init function, called immediately after plugin is loaded into the restconf daemon.
@@ -88,8 +89,7 @@ exit
 extension
   Called at parsing of yang modules containing an extension statement.
 auth
-  Called by restconf on each incoming request to check credentials and return username. This is done after cert validation, if any. For example, http basic authentication, oauth2 or just matching client certs with username is done here.
-
+  Called by restconf on each incoming request to check credentials and return username. This is done after cert validation, if any. For example, http basic authentication, oauth2 or just matching client certs with username can be implemented here.
 
 NGINX
 -----
@@ -107,25 +107,28 @@ where ``fastcgi_pass`` setting must match ``CLICON_RESTCONF_PATH``.
 
 SSL Certificates
 ----------------
-If you use native RESTCONF you need to ensure you have server/client
+If you use native RESTCONF you may want to have server/client
 certs. If you use FCGI, certs are configured according to the reverse
-proxy documentation, such as NGINX.
+proxy documentation, such as NGINX. The rest of this section applies to native restconf only.
 
-If you already have server certs, ensure CLICON_SSL_SERVER_CERT and CLICON_SSL_SERVER_KEY points to them.
+If you already have certified server certs, ensure ``CLICON_SSL_SERVER_CERT`` and ``CLICON_SSL_SERVER_KEY`` points to them.
 
-If you do not have them, you can generate self-signed certs as follows (for example)::
+If you do not have them, you can generate self-signed certs, for example as follows::
 
    openssl req -x509 -nodes -newkey rsa:4096 -keyout /etc/ssl/private/clixon-server-key.pem -out /etc/ssl/certs/clixon-server-crt.pem -days 365
 
-You can generate client certs using ``CLICON_SSL_CA_CERT``. Example using client certs and curl for client `andy`::
+You can also generate client certs (not shown here) using ``CLICON_SSL_CA_CERT``. Example using client certs and curl for client `andy`::
   
-   curl $CURLOPTS -Ssik --key andy.key --cert andy.crt -X GET https://localhost/restconf/data/example:x
+   curl -Ssik --key andy.key --cert andy.crt -X GET https://localhost/restconf/data/example:x
 
 RESTCONF streams
 ----------------
 
 Clixon has an experimental RESTCONF event stream implementations following
-RFC8040 Section 6 using Server-Sent Events (SSE).  Currently this is implemented in FCGI/Nginx.
+RFC8040 Section 6 using Server-Sent Events (SSE).  Currently this is implemented in FCGI/Nginx only (not evhtp).
+
+.. note::
+        RESTCONF streams are experimental and only implemented for FCGI.
 
 Example: set the Clixon configuration options::
 
@@ -133,13 +136,11 @@ Example: set the Clixon configuration options::
   <CLICON_STREAM_URL>https://example.com</CLICON_STREAM_URL>
   <CLICON_STREAM_RETENTION>3600</CLICON_STREAM_RETENTION>
 
-In this example, the stream EXAMPLE would be accessed with ``https://example.com/streams/EXAMPLE``.
+In this example, the stream ``example`` is accessed with ``https://example.com/streams/example``.
 
-The retention is configured to 1 hour, i.e., the stream replay function will only save timeseries one hour.
+Clixon defines an internal in-memory (not persistent) replay function controlled by the configure option above.  In this example, the retention is configured to 1 hour, i.e., the stream replay function will only save timeseries one hour, but if the restconf daemon is restarted, the hisstory will be lost.
 
-Clixon defines an internal in-memory (not persistent) replay function controlled by the configure option above.
-
-In Nginx, add the following to extend the nginx configuration file with the following statements (for example)::
+In the Nginx configuration, add the following to extend the nginx configuration file with the following statements (for example)::
 
 	location /streams {
 	    fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
