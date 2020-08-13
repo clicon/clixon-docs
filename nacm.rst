@@ -8,6 +8,8 @@ Clixon implements the `Network Configuration Access Control Model
 <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM / RFC8341).
 NACM rpc and datanode access validation is supported, not outgoing notifications.
 
+NACM rules apply to all datastores.
+
 Config options
 ==============
 The following configuration options are related to NACM:
@@ -32,10 +34,6 @@ Mode
 
 NACM rules are either internal or external. If external, rules are loaded from a separate file, specified by the option ``CLICON_NACM_FILE``.
 
-NACM rules applies to all datastores.
-
-Internal
---------
 If the NACM mode is internal, the NACM configuration is a part of the
 regular candidate/running datastore. NACM rules are read from the
 `running` datastore, ie they need to be committed. 
