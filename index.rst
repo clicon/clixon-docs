@@ -23,6 +23,7 @@ mechanism.
    datastore
    usecases
    cli
+   restconf
    xml
    nacm
    upgrade

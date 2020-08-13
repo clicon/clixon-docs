@@ -161,7 +161,6 @@ The Auto-CLI
 
 The auto-cli contains parts that are *generated* from a YANG specification.
 
-
 YANG
 ^^^^
 Consider a YANG specification, such as::

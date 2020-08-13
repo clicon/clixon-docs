@@ -1,0 +1,160 @@
+.. _clixon_restconf:
+
+RESTCONF
+========
+
+.. This is a comment
+   
+Clixon can use different Restconf modules:
+   
+Configuration
+-------------
+
+RESTCONF can be configured as follows:
+  --without-restconf      No RESTCONF
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
+  --with-restconf=evhtp   RESTCONF using native http with libevhtp
+
+Architecture
+------------
+::
+
+                                      +---------------------------------+
+                                      |        clixon options           |
+                                      +---------------------------------+
+                                          |- XML                   |- XML
+                        FCGI              v                        v
+        (1)  +-------+    |    +----------+--------+  Netconf +----------+
+ User  <-->  | nginx |  <--->  | restconf | plugin |    |     | backend  |
+             +-------+         | daemon   |--------+  <--->   | daemon   |
+ User  <-------------------->  |          | plugin |          |          |
+        (2)                    +----------+--------+          +----------+
+
+The restconf deamon provides a http/https RESTCONF interface to the
+Clixon backend.  It comes in two variants: (1) using a reverse proxy
+and FCGI; (2) native http using libevhtp as seen in the two variants shown in the figure above.
+
+The restconf daemon communicates with the backend daemon using
+internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
+
+As other Clixon daemons and clients, the daemon reads its config options from the configuration file on startup.
+
+You can add plugins to the restconf daemon, where the primary usecase is authentication, using the ``ca_auth`` callback.
+
+
+Config options
+--------------
+The configuration options related to RESTCONF are as follows:
+
+CLICON_RESTCONF_DIR
+   Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
+
+CLICON_RESTCONF_PATH
+   FCGI unix socket. Should be specified in webserver (only fcgi)
+
+CLICON_RESTCONF_PRETTY
+   RESTCONF return value is pretty-printed or not
+
+CLICON_SSL_SERVER_CERT
+  SSL server cert for restconf https (only evhtp)
+
+CLICON_SSL_SERVER_KEY
+  SSL server private key for restconf https (only evhtp)
+
+CLICON_SSL_CA_CERT
+  SSL CA cert for client authentication (only evhtp)
+
+CLICON_STREAM_DISCOVERY_RFC8040
+  Enable monitoring information for the RESTCONF protocol from RFC 804 (only fcgi)
+
+CLICON_STREAM_PATH  
+  Stream path appended to CLICON_STREAM_URL to form stream subscription URL (only fcgi)
+
+Privileges
+----------
+The restconf daemon can be started as root, but in that case drops priveleges to ``www-data``. Change this user at config time:
+  --with-wwwuser=<user>   Set www user different from www-data
+
+Plugin callbacks
+----------------
+Restconf plugins implement callbacks, some are same as for backend. Most important is the ``auth`` callback where user authentication can be implemented.
+
+init
+   Clixon plugin init function, called immediately after plugin is loaded into the restconf daemon.
+start
+   Called when application is started and initialization is complete, and after drop privileges.
+exit
+   Called just before plugin is unloaded 
+extension
+  Called at parsing of yang modules containing an extension statement.
+auth
+  Called by restconf on each incoming request to check credentials and return username. This is done after cert validation, if any. For example, http basic authentication, oauth2 or just matching client certs with username is done here.
+
+
+NGINX
+-----
+If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical configuration is as follows::
+
+  server {
+    ...
+    location / {
+      fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
+      include fastcgi_params;
+    }
+  }
+
+where ``fastcgi_pass`` setting must match ``CLICON_RESTCONF_PATH``.
+
+SSL Certificates
+----------------
+If you use native RESTCONF you need to ensure you have server/client
+certs. If you use FCGI, certs are configured according to the reverse
+proxy documentation, such as NGINX.
+
+If you already have server certs, ensure CLICON_SSL_SERVER_CERT and CLICON_SSL_SERVER_KEY points to them.
+
+If you do not have them, you can generate self-signed certs as follows (for example)::
+
+   openssl req -x509 -nodes -newkey rsa:4096 -keyout /etc/ssl/private/clixon-server-key.pem -out /etc/ssl/certs/clixon-server-crt.pem -days 365
+
+You can generate client certs using ``CLICON_SSL_CA_CERT``. Example using client certs and curl for client `andy`::
+  
+   curl $CURLOPTS -Ssik --key andy.key --cert andy.crt -X GET https://localhost/restconf/data/example:x
+
+RESTCONF streams
+----------------
+
+Clixon has an experimental RESTCONF event stream implementations following
+RFC8040 Section 6 using Server-Sent Events (SSE).  Currently this is implemented in FCGI/Nginx.
+
+Example: set the Clixon configuration options::
+
+  <CLICON_STREAM_PATH>streams</CLICON_STREAM_PATH>
+  <CLICON_STREAM_URL>https://example.com</CLICON_STREAM_URL>
+  <CLICON_STREAM_RETENTION>3600</CLICON_STREAM_RETENTION>
+
+In this example, the stream EXAMPLE would be accessed with ``https://example.com/streams/EXAMPLE``.
+
+The retention is configured to 1 hour, i.e., the stream replay function will only save timeseries one hour.
+
+Clixon defines an internal in-memory (not persistent) replay function controlled by the configure option above.
+
+In Nginx, add the following to extend the nginx configuration file with the following statements (for example)::
+
+	location /streams {
+	    fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
+	    include fastcgi_params;
+ 	    proxy_http_version 1.1;
+	    proxy_set_header Connection "";
+        }
+
+An example of a stream access is as follows::
+
+  curl -H "Accept: text/event-stream" -s -X GET http://localhost/streams/EXAMPLE
+  data: <notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2018-11-04T14:47:11.373124</eventTime><event><event-class>fault</event-class><reportingEntity><card>Ethernet0</card></reportingEntity><severity>major</severity></event></notification>
+  data: <notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2018-11-04T14:47:16.375265</eventTime><event><event-class>fault</event-class><reportingEntity><card>Ethernet0</card></reportingEntity><severity>major</severity></event></notification>
+
+You can also specify start and stop time. Start-time enables replay of existing samples, while stop-time is used both for replay, but also for stopping a stream at some future time::
+
+   curl -H "Accept: text/event-stream" -s -X GET http://localhost/streams/EXAMPLE?start-time=2014-10-25T10:02:00&stop-time=2014-10-25T12:31:00
+

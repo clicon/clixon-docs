@@ -84,22 +84,17 @@ Clixon also provides a Netconf interface. The following example starts a netconf
    <rpc-reply><data><hello xmlns="urn:example:hello"><world/></hello></data></rpc-reply>]]>]]>
    olof@vandal> 
 
-
 Restconf
 --------
 
-Clixon can use different Restconf modules
-*  Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication
-*  Native web-server such as `libevhtp <https://github.com/criticalstack/libevhtp>`_.
+Clixon can use different Restconf modules:
+  
+*  `FCGI` : Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication.  A reverse proxy needs to be configured.
+*  `Native http`: web-server using `libevhtp <https://github.com/criticalstack/libevhtp>`_. The libevhtp web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
 
-The libevhtp web server is integrated with the clixon restconf daemon
-and needs no extra installations, but a reverse proxy needs to be configured.
-
-Nginx
-^^^^^
-
-For example, using nginx on an Ubuntu release: install, and edit config file `/etc/nginx/sites-available/default`
-::
+FCGI
+^^^^
+In the case of the FCGI solution, a reverse proxy such as nginx needs to be installed, and edit config file `/etc/nginx/sites-available/default`::
 
    server {
       ...
@@ -118,20 +113,17 @@ For example, using nginx on an Ubuntu release: install, and edit config file `/e
 
 Note that the second part is necessary only for notification streams.
 
-Start nginx daemon
-::
+Start nginx daemon::
    
    sudo /etc/init.d/nginx start
 
-or using systemd:
-::
+or using systemd::
    
   sudo systemctl start nginx.service
-
+  
 Start and run
 ^^^^^^^^^^^^^
-
-Regardless of which restconf variant is used, next step is to start the restconf daemon:
+Regardless of which RESTCONF variant is used, next step is to start the restconf daemon:
 ::
 
    sudo /www-data/clixon_restconf
@@ -149,7 +141,7 @@ Start sending restconf commands (using Curl):
       }
    }
 
-   
+
 Run a container
 ---------------
 You can run the hello example as a pre-built docker container, on a `x86_64` Linux. See instructions in the `clixon docker hello example <https://github.com/clicon/clixon-examples/tree/master/hello/docker>`_.
@@ -189,8 +181,3 @@ and restconf code callbacks becomes necessary.
 
 Further, you may want to add upgrade, RPC:s, state data, notification
 streams, authentication and authorization. The `main example <https://github.com/clicon/clixon/tree/master/example/main>`_ contains such capabilities.
-
-
-
-
-

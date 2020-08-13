@@ -15,35 +15,37 @@ Ubuntu Linux
 Installing dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Install packages:
-::
+Install packages::
 
-  sudo apt-get update
-  sudo apt-get install flex bison fcgi-dev curl-dev
+  sudo apt-get install flex bison
 
-Install and build CLIgen:
-::
+There are two RESTCONF variants. Either a reverse proxy solution using fcgi and (for example) nginx::
+
+  sudo apt-get install fcgi-dev nginx
+
+For RESTCONF using the native http solution `libevhtp`_ needs to be built from source as well as::
+
+  sudo apt-get install libevent-2.1
+
+Install and build CLIgen::
 
   git clone https://github.com/clicon/cligen.git
   cd cligen;
-  configure;
+  configure
   make;
   make install
 
-Add a clicon user and group, using useradd and usermod:
-::
+Add a clicon user and group, using useradd and usermod::
    
-  sudo useradd clicon
-  sudo usermod -a -G clicon <user>
+  sudo useradd -M -U clicon
+  sudo usermod -a -G clicon <youruser>
   sudo usermod -a -G clicon www-data
-
-Or using adduser, with somewhat different syntax on different platforms.
 
 Build from source
 ^^^^^^^^^^^^^^^^^
 ::
    
-     configure	       	       # Configure clixon to platform
+     configure	       	       # or: configure --with-restconf=evhtp
      make                      # Compile
      sudo make install         # Install libs, binaries, config-files and include-files
 
@@ -133,6 +135,17 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    [Install]
    WantedBy=multi-user.target
 
+
+Libevhtp
+--------
+For RESTCONF using native http build evhtp from source as follows::
+
+  sudo git clone https://github.com/criticalstack/libevhtp.git
+  cd libevhtp/build; 
+  sudo cmake -DEVHTP_DISABLE_REGEX=ON -DEVHTP_DISABLE_EVTHR=ON ..
+  sudo make
+  sudo make install
+
 Docker
 ------
 Clixon can run as docker containers.  As an example the `docker` directory has code for building and running the clixon test suite::
@@ -151,6 +164,7 @@ Clixon uses vagrant in testing. For example to start a freebsd vagrant host, ins
   cd test/vagrant
   ./vagrant.sh freebsd/FreeBSD-12.1-STABLE
 
+Other platforms include: ubuntu/bionic64 and generic/centos8
 
 Advanced install
 ----------------
@@ -162,7 +176,9 @@ These include (standard options are omitted)
   --disable-optyangs      Include optional yang files in clixon install used for example and testing, default: no
   --enable-publish        Enable publish of notification streams using SSE and curl
   --with-cligen=dir       Use CLIGEN here
-  --without-restconf      disable support for restconf
+  --without-restconf      No RESTCONF
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
+  --with-restconf=evhtp   RESTCONF using native http with libevhtp
   --with-wwwuser=<user>   Set www user different from www-data
   --with-configfile=FILE  set default path to config file
   --with-libxml2          use gnome/libxml2 regex engine
