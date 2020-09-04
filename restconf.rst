@@ -60,6 +60,12 @@ CLICON_RESTCONF_PATH
 CLICON_RESTCONF_PRETTY
    RESTCONF return value is pretty-printed or not
 
+CLICON_RESTCONF_ADDRESS
+   RESTCONF default address to bind to, default is ipv4:0.0.0.0. (only evhtp)
+
+CLICON_SSL_SERVER_CERT
+  SSL server cert for restconf https (only evhtp)
+  
 CLICON_SSL_SERVER_CERT
   SSL server cert for restconf https (only evhtp)
 

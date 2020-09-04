@@ -141,14 +141,14 @@ Libevhtp
 For RESTCONF using native http build evhtp from source as follows::
 
   sudo git clone https://github.com/criticalstack/libevhtp.git
-  cd libevhtp/build; 
-  sudo cmake -DEVHTP_DISABLE_REGEX=ON -DEVHTP_DISABLE_EVTHR=ON ..
-  sudo make
+  cd libevhtp/build
+  cmake -DEVHTP_DISABLE_REGEX=ON -DEVHTP_DISABLE_EVTHR=ON ..
+  make
   sudo make install
 
 Docker
 ------
-Clixon can run as docker containers.  As an example the `docker` directory has code for building and running the clixon test suite::
+Clixon can run in a docker container.  As an example the `docker` directory has code for building and running the clixon test suite::
 
   cd docker/main
   make docker

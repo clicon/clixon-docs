@@ -87,12 +87,12 @@ First, lets add a single command in the configure mode::
 Then add syntax to both modes::
 
   CLICON_MODE="operation:configure";
-  show("Show") files("files");
+  show("Show") files("Show files");
 
 Finally, add a command to all modes::
 
   CLICON_MODE="*";
-  show("Show") all("all");
+  show("Show") all("Show all");
    
 Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes will be three commands in total for the *configure* mode::
 
@@ -112,13 +112,15 @@ Clixon CLI have the following terminal related options:
 
 CLICON_CLI_LINESCROLLING
   Set to 0 if you want CLI to wrap to next line.
-  Set to 1 if you  want CLI to scroll sideways when approaching right margin (default).
+  Set to 1 if you want CLI to scroll sideways when approaching right margin (default).
 
 CLICON_CLI_LINES_DEFAULT
    Set to number of CLI terminal rows for pageing/scrolling. 0 means unlimited.  The number is set statically UNLESS:
-   - there is no terminal, such as file input, in which case nr lines is 0
-   - there is a terminal sufficiently powerful to read the number of lines from ioctl calls.
-   In other words, this setting is used ONLY on raw terminals such as serial consoles.
+
+   * there is no terminal, such as file input, in which case nr lines is 0
+   * there is a terminal sufficiently powerful to read the number of lines from ioctl calls.
+
+In other words, this setting is used ONLY on raw terminals such as serial consoles.
 
 History
 -------
@@ -129,7 +131,6 @@ CLICON_CLI_HIST_FILE
 
 CLICON_CLI_HIST_SIZE
   Max number of history line, default value is 300.
-
 
 The design is similar to bash history but is simpler in some respects:
    - The CLI loads/saves its complete history to a file on entry and exit, respectively
@@ -155,6 +156,27 @@ then access that subtree from other modes::
   other @subtree,c();
 
 The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks will be overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` will be invoked.
+
+Help strings
+------------
+Help strings are specified using the following example syntax: ``("help string")``. help strings are shown at queries, eg "?"::
+
+    cli> show <?>
+       all       Show all
+       routing   Show routing
+       files     Show files
+
+For long or multi-line help strings the following options exists:
+
+CLICON_CLI_HELPSTRING_TRUNCATE
+  Set to 0 to wrap long help strings to the next line. (default)
+  Set to 1 to truncate long help strings at the right margin
+
+CLICON_CLI_HELPSTRING_LINES
+  Set to 0 to have no limit on the number of help string lines per command
+  Set to <n> to limit the the number of help string lines
+
+Long and multi-line help strings may especially be needed in the auto-cli, see `The Auto-CLI`_.
 
 The Auto-CLI
 ------------

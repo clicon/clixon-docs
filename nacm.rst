@@ -10,6 +10,13 @@ NACM rpc and datanode access validation is supported, not outgoing notifications
 
 NACM rules apply to all datastores.
 
+Restrictions
+============
+
+Access notification authorization (Sec 3.4.6) is NOT implemented.
+
+Data-node paths, eg ``<rule>...<path>ex:table/ex:parameter</path></rule>`` inmstance-identifiers are restricted to canonical namespace identifiers for both XML and JSON encoding. That is, if asymbol (such as ``table`` above) is a symbol in a module with prefix ``ex``, another prefix cannot be used, even though defined with a ``xmlns`` rule.
+
 Config options
 ==============
 The following configuration options are related to NACM:
