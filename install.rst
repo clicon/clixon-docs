@@ -23,7 +23,7 @@ There are two RESTCONF variants. Either a reverse proxy solution using fcgi and 
 
   sudo apt-get install fcgi-dev nginx
 
-For RESTCONF using the native http solution `libevhtp`_ needs to be built from source as well as::
+For RESTCONF using the native http solution `libevhtp`_ needs to be built from source . It also requires openssl 1.1 API (not 1.0) and libevent-2::
 
   sudo apt-get install libevent-2.1
 
@@ -145,6 +145,10 @@ For RESTCONF using native http build evhtp from source as follows::
   cmake -DEVHTP_DISABLE_REGEX=ON -DEVHTP_DISABLE_EVTHR=ON ..
   make
   sudo make install
+
+You may need to install cmake and libevent2.
+
+Evhtp requires openssl 1.1 API.
 
 Docker
 ------

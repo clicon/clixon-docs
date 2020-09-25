@@ -87,7 +87,7 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 Restconf
 --------
 
-Clixon can use different Restconf modules:
+Clixon can use two RESTCONF compile-time variants:
   
 *  `FCGI` : Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication.  A reverse proxy needs to be configured.
 *  `Native http`: web-server using `libevhtp <https://github.com/criticalstack/libevhtp>`_. The libevhtp web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.

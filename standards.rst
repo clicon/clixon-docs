@@ -15,9 +15,11 @@ The YANG standards that Clixon follows include:
 
 * `YANG 1.0 RFC 6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_
 * `YANG 1.1 RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_
-* `RFC 7895: YANG module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_
+* `YANG module library RFC 7895 <http://www.rfc-editor.org/rfc/rfc7895.txt>`_
 
-However, the following YANG syntax modules are not implemented (reference to RFC7950 in parenthesis):
+However, Clixon deviates from the YANG standard as follows (reference to RFC7950 in parenthesis):
+
+Not implemented:
 
 * deviation (7.20.3)
 * action (7.15)
@@ -26,9 +28,17 @@ However, the following YANG syntax modules are not implemented (reference to RFC
 * instance-identifier type (9.13)
 * status (7.21.2)
 * YIN (13)
-* Yang extended XPath functions: re-match(), deref)(), derived-from(), derived-from-or-self(), enum-value(), bit-is-set() (10.2-10.6)
 * Default values on leaf-lists (7.7.2)
 * Lists without keys (non-config lists may lack keys)
+
+Further:
+
+* Clixon supports the following extended XPath functions (10)
+  * current()
+  * deref()
+  * derived-from(),
+  * derived-from-or-self() 
+* The following extended XPath functions are not supported: re-match(), enum-value(), bit-is-set() (10)
 * if-feature-expr is restricted to single layer expressions with and/or: "x and y" and "x or y" is allowed but "x or (not y and z)" is not. (7.20.2)
 
 Regular expressions
@@ -69,8 +79,18 @@ The following XPath axes are supported:
 * self
 * parent
 
-The following xpath axes are *not* supported: preceeding, preceeding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute 
+The following xpath axes are *not* supported: preceeding, preceeding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
 
+The following XPath functions as defined in Section 4 of the XPath 1.0 standard are supported:
+
+* count
+* name
+* contains
+* not
+
+The remaining XPath functions are not supported. 
+
+The following nodetype nodetests are not supported: processing-instruction, comment.
 
 Unicode
 -------
@@ -111,6 +131,8 @@ Capability is preferred over default subtrees. This has two reasons:
 1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retreived.
 2. Subtree filtering does not support namespaces yet.
 
+Further, the capability negotiation (hello protocol) as defined in RFC6241 Sec 8.1 and RFC7950 Sec 5.6.4 is only partly implemeted.
+   
 Default values
 ^^^^^^^^^^^^^^
 
@@ -121,9 +143,7 @@ Clixon only stores explicit set default values in datastores, while unset values
 RESTCONF
 --------
 
-Clixon Restconf is a daemon based on FastCGI C-API. Instructions are available to
-run with NGINX.
-The implementatation is based on `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
+Clixon supports the two RESTCONF compile-time variants: *FCGI* and *Native*. Both implements `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
 
 The following features of RFC8040 are supported:
 
@@ -137,6 +157,10 @@ The following features are not implemented:
 * ETag/Last-Modified
 * Query parameters: "fields", "filter", "with-defaults"
 
+RESTCONF event notification as described in RFC7950 section 6 is supported as follows:
+* is supported by *FCGI* 
+* is *not* supported by *native* 
+  
 JSON
 ----
 

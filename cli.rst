@@ -218,8 +218,10 @@ The auto-cli syntax can be copied and loaded seperately (in another mode file), 
   show {
     config, cli_show_config("candidate", "cli", "/", 0, "set ");
     config @datamodel, cli_show_auto("candidate", "cli", "set "); # Show config as CLI
+    state, cli_show_config_state("running", "cli", "/", 0, "set ");
+    state @datamodelstate, cli_show_auto_state("running", "cli", "/"); # Show config as CLI
     xml, cli_show_config("candidate", "xml", "/");
-    xml @datamodel, cli_show_auto("candidate", "xml");     # Show config as XML
+    xml @datamodelshow, cli_show_auto("candidate", "xml");     # Show config as XML
   }
 
 Example
@@ -257,7 +259,7 @@ CLICON_CLI_GENMODEL, a numeric that can have the following values:
   2. Same including state syntax in a tree called ``@datamodelstate``.
 
 CLICON_CLI_MODEL_TREENAME
-  A string treename. CLI specs can reference the model syntax using this reference. Example: set ``@mydatamodel``, cli_set();
+  A string treename. CLI specs can reference the model syntax using this reference. Example: set ``@mydatamodel``, cli_set(); Default is ``datamodel``. Note that there are two variants of this tree: ``datamodelshow`` and ``datamodelstate``.
   
 CLICON_CLI_GENMODEL_COMPLETION
   Generate code for CLI completion of existing db symbols. If set to 0, the ``expand`` rules will not be generated.

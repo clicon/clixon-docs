@@ -5,7 +5,7 @@ RESTCONF
 
 .. This is a comment
    
-Clixon can use different Restconf modules:
+Clixon supports two RESTCONF compile-time variants: *FCGI* and *Native*. 
    
 Architecture
 ------------
@@ -20,7 +20,7 @@ Architecture
  User  <-->  | nginx |  <--->  | restconf | plugin |    |     | backend  |
              +-------+         | daemon   |--------+  <--->   | daemon   |
  User  <-------------------->  |          | plugin |          |          |
-        (2)                    +----------+--------+          +----------+
+        (2)     "native"       +----------+--------+          +----------+
 
 The restconf deamon provides a http/https RESTCONF interface to the
 Clixon backend.  It comes in two variants, as shown by the two variants in the figure above:
@@ -110,6 +110,10 @@ If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical
   }
 
 where ``fastcgi_pass`` setting must match ``CLICON_RESTCONF_PATH``.
+
+Native http
+-----------
+You need to have ``libevhtp`` installed. See :ref:`clixon_install`.
 
 SSL Certificates
 ----------------

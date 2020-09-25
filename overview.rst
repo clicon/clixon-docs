@@ -37,10 +37,10 @@ System Architecture
                   |  Frontends:          +------------+      |
                   |  +----------+        | configfile |      |
                   |  |   cli    |--+     +------------+      |
-                  |  +----------+   \ +----------+--------+  |
-                  |  +----------+    \| backend  | plugin |  |
-      User  <-->  |  | restconf |---- | daemon   | plugin |  |  <--> Underlying
-                  |  +----------+    /+----------+--------+  |       System
+                  |  +----------+   \ +----------+---------+ |
+                  |  +----------+    \| backend  | plugins | |
+      User  <-->  |  | restconf |---- | daemon   |         | |  <--> Underlying
+                  |  +----------+    /+----------+---------+ |       System
                   |  +----------+   /    +------------+      |
 	          |  | netconf  |--+     | datastores |      |
 		  |  +----------+        +------------+      |
@@ -100,13 +100,17 @@ Report bugs via `Github issues <https://github.com/clicon/clixon/issues>`_
 
 Reference docs
 --------------
-You need to check out the source code, and type ``make doc``, eg::
+The user-manual is this document.
+For reference documentation of the C-code, Doxygen is used. To build the reference doumentation you need to check out the source code, and type ``make doc``, eg::
 
   git clone git@github.com:clicon/clixon.git
   cd clixon
   ./configure
   make doc
 
-direct your browser to ``file:///<your home path>/clixon/doc/html/index.html``
+direct your browser to::
+
+  file:///<your home path>/clixon/doc/html/index.html
+  
 
 
