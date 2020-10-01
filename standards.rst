@@ -60,7 +60,6 @@ You then need to set the following configure option:
 
   <CLICON_YANG_REGEXP>libxml2</CLICON_YANG_REGEXP>
 
-
 XML and XPath
 -------------
 Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
