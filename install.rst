@@ -21,6 +21,20 @@ Install packages::
 
   sudo apt-get install flex bison
 
+Install and build CLIgen::
+
+  git clone https://github.com/clicon/cligen.git
+  cd cligen;
+  configure
+  make;
+  make install
+
+Add a clicon user and group, using useradd and usermod::
+   
+  sudo useradd -M -U clicon
+  sudo usermod -a -G clicon <youruser>
+  sudo usermod -a -G clicon www-data # Only if RESTCONF
+  
 If you do not require RESTCONF, then continue with `Build from source`_.
 
 RESTCONF reverse proxy
@@ -40,20 +54,6 @@ RESTCONF native http
 For RESTCONF using the native http solution you may need to `build libevhtp from source`_ since few platforms have it as package (freebsd is one exception). It also requires openssl 1.1 API (not 1.0) and libevent-2::
 
   sudo apt-get install libevent-dev
-
-Install and build CLIgen::
-
-  git clone https://github.com/clicon/cligen.git
-  cd cligen;
-  configure
-  make;
-  make install
-
-Add a clicon user and group, using useradd and usermod::
-   
-  sudo useradd -M -U clicon
-  sudo usermod -a -G clicon <youruser>
-  sudo usermod -a -G clicon www-data
 
 Build from source
 ^^^^^^^^^^^^^^^^^
