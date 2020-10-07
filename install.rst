@@ -14,8 +14,8 @@ Ubuntu Linux
 
 This section can be used for many other Linux distributions.
 
-Installing dependencies
-^^^^^^^^^^^^^^^^^^^^^^^
+Prerequisites
+^^^^^^^^^^^^^
 
 Install packages::
 
@@ -57,6 +57,10 @@ For RESTCONF using the native http solution you may need to `build libevhtp from
 
 Build from source
 ^^^^^^^^^^^^^^^^^
+Download clixon source code::
+
+     git clone https://github.com/clicon/clixon.git
+  
 Configure Clixon using one of the following RESTCONF variants::
 
      configure --without-restconf

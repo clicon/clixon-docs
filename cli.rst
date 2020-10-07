@@ -178,6 +178,24 @@ CLICON_CLI_HELPSTRING_LINES
 
 Long and multi-line help strings may especially be needed in the auto-cli, see `The Auto-CLI`_.
 
+Running CLI scripts
+-------------------
+
+The CLI can run scripts using either the ``-1`` option for single commands::
+
+  clixon_cli -1 show version
+  4.8.0.PRE
+
+Or using the ``-F <file>`` command-line option to redirect input from file
+
+  clixon_cli -F file
+
+Or using "shebang"::
+
+  #!/usr/local/bin/clixon_cli -F
+  show version
+  quit
+
 The Auto-CLI
 ------------
 
