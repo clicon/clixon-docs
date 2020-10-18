@@ -59,7 +59,22 @@ In this way, a designer writes cli command specifications which
 invokes C-callbacks. If there are no appropriate callbacks the
 designer must write a new callback function.
    
-The following config options are related to clispec and plugin files:
+Cli spec variables
+^^^^^^^^^^^^^^^^^^
+A CLI specification file typically starts with the following variables:
+
+CLICON_MODE
+  A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to _all_ modes specified in the list. You can also use wildcards `*` and `?`.
+
+CLICON_PROMPT
+  A string describing the CLI prompt using a very simple format with: ``%H`` (host) , ``%U`` (user) , ``%T`` (tty),  ``%W`` (working path).
+
+CLICON_PLUGIN
+  The name of the object file containing callbacks in this file.
+
+Clixon config options
+^^^^^^^^^^^^^^^^^^^^^
+The following config options are related to clispec and plugin files (clixon config options), ie they are set in the XML Clixon config file:
 
 CLICON_CLI_DIR
   Directory containing frontend cli loadable plugins. Load all `.so` plugins in this directory as CLI object plugins.
@@ -70,14 +85,15 @@ CLICON_CLISPEC_DIR
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
 
+  
 Modes
 -----
 The CLI can have different *modes* which is controlled by a config option and some internal clispec variables. The config option is:
 
 CLICON_CLI_MODE
-  Startup CLI mode. This should match a CLICON_MODE variable setting in one of the clispec files. Default is "base".
+  Startup CLI mode. This should match a ``CLICON_MODE`` variable setting in one of the clispec files. Default is "base".
 
-Inside the clispec files `CLICON_MODE` is used to specify to which modes the syntax in a specific file defines. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
+Inside the clispec files ``CLICON_MODE`` is used to specify to which modes the syntax in a specific file defines. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
 
 First, lets add a single command in the configure mode::
    
@@ -226,43 +242,43 @@ If the ``clixon_cli`` is started with ``-G -o CLICON_CLI_GENMODEL=1`` it prints 
 This cli-spec forms the basis of the auto-cli and contains the following:
   - Keywords for the YANG symbole (eg ``x`` and ``y``).
   - Variable syntax for leafs (eg ``<k:string>``)
+  - Edit autoamtic modes and prompt showing path
   - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content will be shown as alternatives.
   - ``overwrite_me`` is a callback template which is overwritten by an actual callback in the clispec (eg ``cli_set()``)
 
 The auto-cli syntax can be copied and loaded seperately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
 
-  set @datamodel, cli_set();                                  # Set/replace a configure item
-  delete @datamodel, cli_del();                               # Delete a configure item
-  show {
-    config, cli_show_config("candidate", "cli", "/", 0, "set ");
-    config @datamodel, cli_show_auto("candidate", "cli", "set "); # Show config as CLI
-    state, cli_show_config_state("running", "cli", "/", 0, "set ");
-    state @datamodelstate, cli_show_auto_state("running", "cli", "/"); # Show config as CLI
-    xml, cli_show_config("candidate", "xml", "/");
-    xml @datamodelshow, cli_show_auto("candidate", "xml");     # Show config as XML
-  }
+CLICON_PROMPT="%U@%H %W> ";
+edit @datamodel, cli_auto_edit("datamodel", "candidate");
+up, cli_auto_up("datamodel", "candidate");
+top, cli_auto_top("datamodel", "candidate");
+set @datamodel, cli_auto_set();
+merge @datamodel, cli_auto_merge();
+create @datamodel, cli_auto_create();
+delete("Delete a configuration item") @datamodel, cli_auto_del();
+delete("Delete a configuration item") all("Delete whole candidate configuration"), delete_all("candidate");
+show("Show a particular state of the system"){
+    configuration("Show configuration"), cli_auto_show("datamodel", "candidate", "xml", false, false);
+    state("Show configuration and state"), cli_auto_show("datamodel", "running", "xml", false, true);
+}
 
 Example
 ^^^^^^^
 
 An example run of the above example is::
 
-  > clixon_cli
-  cli> set x ?
-  <cr>
-  y                
-  cli> set x y ?
-  <k>
-  cli> set x y 23
-  cli> set x y         
-  23                    
-  <k>  
-  cli> show config ?
-  set x y 23 
-  cli> show xml x y 23 
-  <y>
-     <k>23</k>
-  </y>
+  olof@alarik> clixon_cli -f /usr/local/etc/example.xml
+  olof@alarik /> set x 
+    <cr>
+    y                    
+  olof@alarik /> set x y 23
+  olof@alarik /> show configuration 
+  <x xmlns="urn:example:clixon"><y><k>23</k></y></x>
+  olof@alarik /> edit x  
+  olof@alarik /clixon-example:x> show configuration 
+  <y><k>23</k></y>
+  olof@alarik /clixon-example:x> up
+  olof@alarik /> 
   
 The example shows an automated cli generated by the YANG model, with
 completion as well as config to cli syntax.

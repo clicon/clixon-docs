@@ -50,12 +50,7 @@ Clixon adds some features and structure to CLIgen which include:
 - A plugin framework for both textual CLI specifications(.cli) and object files (.so)
 - Object files contains compiled C functions referenced by callbacks in the CLI specification. For example, in the cli spec command: `a,fn()`, `fn` must exist in the object file as a C function.
 - The CLIgen `treename` syntax does not work.
-- A CLI specification file is enhanced with the following CLIgen variables:
-
-  - `CLICON_MODE`: A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to _all_ modes specified in the list. You can also use wildcards `*` and `?`.
-  - `CLICON_PROMPT`: A string describing the CLI prompt using a very simple format with: `%H`, `%U` and `%T`.
-  - `CLICON_PLUGIN`: the name of the object file containing callbacks in this file.
-
+- A CLI specification file is enhanced with the CLIgen variables `CLICON_MODE`, `CLICON_PROMPT`, `CLICON_PLUGIN`.
 - Clixon generates a command syntax from the Yang specification that can be referenced as `@datamodel`. This is useful if you do not want to hand-craft CLI syntax for configuration syntax.
 
 Example of `@datamodel` syntax:
