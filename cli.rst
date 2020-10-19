@@ -242,9 +242,11 @@ If the ``clixon_cli`` is started with ``-G -o CLICON_CLI_GENMODEL=1`` it prints 
 This cli-spec forms the basis of the auto-cli and contains the following:
   - Keywords for the YANG symbol (eg ``x`` and ``y``).
   - Variable syntax for leafs (eg ``<k:string>``)
-  - Edit autoamtic modes and prompt showing path
+  - Non-terminal nodes can be entered as automatic modes with prompt showing the current path
   - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content will be shown as alternatives.
+  - Output syntax as cli, xml, json, as netconf commands
   - ``overwrite_me`` is a callback template which is overwritten by an actual callback in the clispec (eg ``cli_set()``)
+
 
 The auto-cli syntax can be copied and loaded seperately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
 
@@ -258,8 +260,12 @@ The auto-cli syntax can be copied and loaded seperately (in another mode file), 
   delete("Delete a configuration item") @datamodel, cli_auto_del();
   delete("Delete a configuration item") all("Delete whole candidate configuration"), delete_all("candidate");
   show("Show a particular state of the system"){
-    configuration("Show configuration"), cli_auto_show("datamodel", "candidate", "xml", false, false);
-    state("Show configuration and state"), cli_auto_show("datamodel", "running", "xml", false, true);
+    configuration("Show configuration"), cli_auto_show("datamodel", "candidate", "text", true, false);{
+	    xml("Show configuration as XML"), cli_auto_show("datamodel", "candidate", "xml", true, false);
+	    cli("Show configuration as CLI commands"), cli_auto_show("datamodel", "candidate", "cli", true, false, "set ");
+    }
+    state("Show configuration and state"), cli_auto_show("datamodel", "running", "text", true, true); {
+    	    xml("Show configuration and state as XML"), cli_auto_show("datamodel", "running", "xml", true, true);
   }
 
 Example
