@@ -240,7 +240,7 @@ If the ``clixon_cli`` is started with ``-G -o CLICON_CLI_GENMODEL=1`` it prints 
    }
 
 This cli-spec forms the basis of the auto-cli and contains the following:
-  - Keywords for the YANG symbole (eg ``x`` and ``y``).
+  - Keywords for the YANG symbol (eg ``x`` and ``y``).
   - Variable syntax for leafs (eg ``<k:string>``)
   - Edit autoamtic modes and prompt showing path
   - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content will be shown as alternatives.
@@ -248,19 +248,19 @@ This cli-spec forms the basis of the auto-cli and contains the following:
 
 The auto-cli syntax can be copied and loaded seperately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
 
-CLICON_PROMPT="%U@%H %W> ";
-edit @datamodel, cli_auto_edit("datamodel", "candidate");
-up, cli_auto_up("datamodel", "candidate");
-top, cli_auto_top("datamodel", "candidate");
-set @datamodel, cli_auto_set();
-merge @datamodel, cli_auto_merge();
-create @datamodel, cli_auto_create();
-delete("Delete a configuration item") @datamodel, cli_auto_del();
-delete("Delete a configuration item") all("Delete whole candidate configuration"), delete_all("candidate");
-show("Show a particular state of the system"){
+  CLICON_PROMPT="%U@%H %W> ";
+  edit @datamodel, cli_auto_edit("datamodel", "candidate");
+  up, cli_auto_up("datamodel", "candidate");
+  top, cli_auto_top("datamodel", "candidate");
+  set @datamodel, cli_auto_set();
+  merge @datamodel, cli_auto_merge();
+  create @datamodel, cli_auto_create();
+  delete("Delete a configuration item") @datamodel, cli_auto_del();
+  delete("Delete a configuration item") all("Delete whole candidate configuration"), delete_all("candidate");
+  show("Show a particular state of the system"){
     configuration("Show configuration"), cli_auto_show("datamodel", "candidate", "xml", false, false);
     state("Show configuration and state"), cli_auto_show("datamodel", "running", "xml", false, true);
-}
+  }
 
 Example
 ^^^^^^^
