@@ -190,8 +190,10 @@ init
    Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called `clixon_plugin_init`. It returns a struct with the name of the plugin, and all other callback names.
 start
    Called when application is started and initialization is complete, but before the application is placed in the background and drop privileges (see `dropping privileges`_), if those operations are requested.
+pre_daemon
+   Called just before server daemonizes(forks). Not called if in foreground.
 daemon
-   Called after the server has daemonized and dropped privileges. 
+   Called after the server has daemonized and before privileges are dropped. 
 exit
    Called just before plugin is unloaded 
 extension

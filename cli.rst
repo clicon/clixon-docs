@@ -268,6 +268,15 @@ The auto-cli syntax can be copied and loaded seperately (in another mode file), 
     	    xml("Show configuration and state as XML"), cli_auto_show("datamodel", "running", "xml", true, true);
   }
 
+Operations
+^^^^^^^^^^
+The operations used in the autocli are based on `RFC 6241: NETCONF Configuration Protocol <http://rfc-editor.org/rfc/rfc6241.html#section-7.2>`_:
+
+  - ``merge``: merge with configuration at the corresponding level
+  - ``set`` (actually ``replace``): replace existing configuration
+  - ``create``: added to configuration
+  - ``delete``: deleted from configuration
+
 Example
 ^^^^^^^
 

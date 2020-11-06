@@ -23,15 +23,15 @@ Architecture
         (2)     "native"       +----------+--------+          +----------+
 
 The restconf deamon provides a http/https RESTCONF interface to the
-Clixon backend.  It comes in two variants, as shown by the two variants in the figure above:
+Clixon backend.  It comes in two variants, as shown by (1) and (2) in the figure above:
 
-  1. A reverse proxy (such as NGINX) and FCGI
-  2. Native http using libevhtp
+  1. A reverse proxy (such as NGINX) and fastCGI where web and restconf function is separated
+  2. Native http using libevhtp, which combines a web server and restconf handler.
 
 The restconf daemon communicates with the backend using
 internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
 
-As other Clixon daemons and clients, the daemon reads its config options from the configuration file on startup.
+The restconf daemon reads its initial config options from the configuration file on startup. The native http variant can read config options from the backend using the -b option as an alternative to reading everything from clixon options.
 
 You can add plugins to the restconf daemon, where the primary usecase is authentication, using the ``ca_auth`` callback.
 
@@ -43,7 +43,7 @@ The RESTCONF daemon can be configured (by autotools) as follows:
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
   --with-restconf=evhtp   RESTCONF using native http with libevhtp
-  --with-wwwuser=<user>   Set www user different from www-data
+  --with-wwwuser=<user>   Set www user different from ``www-data``
 
 The restconf daemon can be started as root, but in that case drops privileges to wwwuser.
   
@@ -60,20 +60,38 @@ CLICON_RESTCONF_PATH
 CLICON_RESTCONF_PRETTY
    RESTCONF return value is pretty-printed or not
 
-CLICON_RESTCONF_ADDRESS
-   RESTCONF default address to bind to, default is ipv4:0.0.0.0. (only evhtp)
+CLICON_RESTCONF_CONFIG
+   For evhtp, get restconf-specific configuration from backend on startup instead of config-file.
 
+Evhtp local options
+^^^^^^^^^^^^^^^^^^^
+
+The following options apply only for evhtp and local config (ie ``CLICON_RESTCONF_CONFIG=false``). If the config is loaded from the backend, settings in the datastore is used instead, see `Native http`_.
+
+CLICON_RESTCONF_IPV4_ADDR
+   RESTCONF IPv4 socket address to bind
+
+CLICON_RESTCONF_IPV4_ADDR
+   RESTCONF IPv6 socket address to bind
+
+CLICON_RESTCONF_HTTP_PORT
+   RESTCONF non-ssl socket binding port
+
+CLICON_RESTCONF_HTTPS_PORT
+   RESTCONF SSL socket binding port
+   
 CLICON_SSL_SERVER_CERT
-  SSL server cert for restconf https (only evhtp)
-  
-CLICON_SSL_SERVER_CERT
-  SSL server cert for restconf https (only evhtp)
+  SSL server cert for restconf https
 
 CLICON_SSL_SERVER_KEY
-  SSL server private key for restconf https (only evhtp)
+  SSL server private key for restconf https
 
 CLICON_SSL_CA_CERT
-  SSL CA cert for client authentication (only evhtp)
+  SSL CA cert for client authentication
+
+Fcgi stream options
+^^^^^^^^^^^^^^^^^^^
+The following options apply only for fcgi and streams:
 
 CLICON_STREAM_DISCOVERY_RFC8040
   Enable monitoring information for the RESTCONF protocol from RFC 804 (only fcgi)
@@ -114,6 +132,33 @@ where ``fastcgi_pass`` setting must match ``CLICON_RESTCONF_PATH``.
 Native http
 -----------
 You need to have ``libevhtp`` installed. See :ref:`clixon_install`.
+
+Configuration of native http has more options than reverse proxy, since it contains web-fronting parts, including socket(address, ports) and certificates, where these part of Nginx.
+
+There are two ways to configure the socket and certificates of native http:
+
+  1. Local configure (see `Evhtp local options`_) 
+  2. Load configure options from clixon backend using clixon-restconf.yang (after loading initial config from config file).
+     
+In the case of (2), fields from clixon-restconf.yang is used by setting fields in the regular datastore, for example ::
+
+   <restconf xmlns="https://clicon.org/restconf">
+      <socket>
+         <namespace>default</namespace>
+         <address>0.0.0.0</address>
+         <port>443</port>
+         <ssl>true</ssl>
+      </socket>
+      <auth-type>client-certificate</auth-type>
+      <server-cert-path>/etc/ssl/certs/clixon-server-crt.pem</server-cert-path>
+      <server-key-path>/etc/ssl/private/clixon-server-key.pem</server-key-path>
+      <server-ca-cert-path>/etc/ssl/certs/clixon-ca_crt.pem</server-ca-cert-path>
+   </restconf>
+
+These settings must be present in the running datastore `before` the
+restconf daemon is started. This can be done via the startup datastore or
+by editing the running config before restconf daemon.
+
 
 SSL Certificates
 ----------------
