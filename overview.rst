@@ -73,6 +73,7 @@ CLI plugins.  You will have to write CLI rules, but Clixon can
 generate the configuration part of the CLI, including set, delete, show
 commands for a specific syntax.
    
+Notifications are supported both for CLI, netconf and restconf clients, sometimes referred to as "streams".
 
 Platforms
 ---------
