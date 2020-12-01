@@ -53,7 +53,7 @@ In the CLI, these will generate CLI commands such as::
    show config
    example 23
 
-The effect of typing the commands above will be of calling the callbacks: `cli_show_config` and `mycallback`. Both these functions must exist as C-functions. In fact, `cli_show_config` is a library function avaliable in the Clixon libs, while `mycallback` is defined in the main example CLI plugin.
+The effect of typing the commands above will be of calling the callbacks: `cli_show_config` and `mycallback`. Both these functions must exist as C-functions. In fact, `cli_show_config` is a library function available in the Clixon libs, while `mycallback` is defined in the main example CLI plugin.
 
 In this way, a designer writes cli command specifications which
 invokes C-callbacks. If there are no appropriate callbacks the
@@ -85,6 +85,33 @@ CLICON_CLISPEC_DIR
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
 
+CLI callbacks
+-------------
+CLI callback functions are "library" functions that an application may call from a clispec. A
+user is expected to create new application-specific callbacks.
+
+As an example, consider the following clispec::
+
+   example("Callback example") <var:int32>("any number"), mycallback("myarg");
+ 
+containing a keyword (`example`) and a variable (`var`) and `mycallback` is a cli callback with argument: (`myarg`).
+
+In C, the callback has the following signature::
+
+  int mycallback(clicon_handle h, cvec *cvv, cvec *argv);
+
+Suppose a user enters the following command in the CLI::
+
+  cli> example 23
+
+The callback will be called with the following parameters::
+  cvv: 
+     0: example 23
+     1: 23
+  argv:
+     0: "myarg"
+
+which means that `cvv` contains dynamic values set by the user, and `argv` contains static values set by the clispec designer.
   
 Modes
 -----
@@ -131,7 +158,7 @@ CLICON_CLI_LINESCROLLING
   Set to 1 if you want CLI to scroll sideways when approaching right margin (default).
 
 CLICON_CLI_LINES_DEFAULT
-   Set to number of CLI terminal rows for pageing/scrolling. 0 means unlimited.  The number is set statically UNLESS:
+   Set to number of CLI terminal rows for pagination/scrolling. 0 means unlimited.  The number is set statically UNLESS:
 
    * there is no terminal, such as file input, in which case nr lines is 0
    * there is a terminal sufficiently powerful to read the number of lines from ioctl calls.
@@ -248,7 +275,7 @@ This cli-spec forms the basis of the auto-cli and contains the following:
   - ``overwrite_me`` is a callback template which is overwritten by an actual callback in the clispec (eg ``cli_set()``)
 
 
-The auto-cli syntax can be copied and loaded seperately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
+The auto-cli syntax can be copied and loaded separately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
 
   CLICON_PROMPT="%U@%H %W> ";
   edit @datamodel, cli_auto_edit("datamodel", "candidate");

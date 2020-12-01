@@ -3,7 +3,7 @@
 Configuration
 =============
 
-Clixon configuration files are XML files modelled by YANG. By
+Clixon configuration files are XML files modeled by YANG. By
 default, the main config file is installed in ``/usr/local/etc/clixon.xml``, but can be changed by the ``-f <file>`` command-line option.
 
 The YANG specification for Clixon configuration is `clixon-config.yang
@@ -67,8 +67,6 @@ The following options control the Clixon configuration:
 
    * leaf values are overwritten
    * leaf-list values are appended
-
-
    
 
 Runtime modification
@@ -153,4 +151,3 @@ Default values
 ``CLICON_YANG_REGEXP`` which is not present in the ``hello world`` is an example of a configuration option with a default value of ``posix``::
 
    <CLICON_YANG_REGEXP>posix</CLICON_YANG_REGEXP>
-

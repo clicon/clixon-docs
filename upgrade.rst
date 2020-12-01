@@ -67,7 +67,7 @@ Example:
       /* Get all xml nodes matching path */
       if (xpath_vec(xt, nsc, "/a:x/a:y", &xvec, &xlen) < 0) 
          err;
-      /* Iterate throughnodes and remove them */
+      /* Iterate through nodes and remove them */
       for (i=0; i<xlen; i++){
          if (xml_purge(xvec[i]) < 0)
 	    err;
@@ -134,7 +134,7 @@ where:
 * `from` is the revision date in the startup file of the module. It is zero if the operation is ``ADD``
 * `to` is the revision date of the YANG module in the system. It is zero if the operation is ``DEL``
   
-If no action is made by the upgrade calback, and thus the XML is not upgraded, the next step is XML/Yang validation.
+If no action is made by the upgrade callback, and thus the XML is not upgraded, the next step is XML/Yang validation.
 
 An out-dated XML may still pass validation and the system will go up in normal state.
 

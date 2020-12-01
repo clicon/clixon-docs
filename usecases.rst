@@ -3,7 +3,7 @@
 Usecases
 ========
 
-This section contains usescases which illustrate the flow of data from
+This section contains usecases which illustrate the flow of data from
 a user via Clixon frontends, backend to the underlying system and back.
 
 CLI read
@@ -78,7 +78,7 @@ CLI write
 The figure illustrates the way messages flow through the system. The
 numbers illustrate the enumeration below.
 
-When setting a config value, the candidate datastore is modified and the commited to running which triggers a plugin commit transaction:
+When setting a config value, the candidate datastore is modified and the committed to running which triggers a plugin commit transaction:
 
 1. CLI example command:
 ::
@@ -146,7 +146,7 @@ underlying system. Often, commits are made at once after every edit
      <commit/>
    </rpc>
 
-2. When the backend receives the commit message, it computes the differences between candidate and running datastores, creates a transaction datastructure and initites a transaction.
+2. When the backend receives the commit message, it computes the differences between candidate and running datastores, creates a transaction data structure and initiates a transaction.
 
 3. Each plugin in turn gets callbacks to validate the transaction. The plugins verifies that the proposed changes to the system is sound. If not, the commit fails.
 

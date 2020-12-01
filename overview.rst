@@ -102,7 +102,7 @@ Report bugs via `Github issues <https://github.com/clicon/clixon/issues>`_
 Reference docs
 --------------
 The user-manual is this document.
-For reference documentation of the C-code, Doxygen is used. To build the reference doumentation you need to check out the source code, and type ``make doc``, eg::
+For reference documentation of the C-code, Doxygen is used. To build the reference documentation you need to check out the source code, and type ``make doc``, eg::
 
   git clone git@github.com:clicon/clixon.git
   cd clixon

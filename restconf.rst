@@ -95,7 +95,7 @@ In the case of (1) example HTTP on port 80 (note multiple sockets can be configu
            <namespace>default</namespace>
            <address>0.0.0.0</address>
            <port>80</port>
-           <ssl>flase</ssl>
+           <ssl>false</ssl>
         </socket>
      </restconf>
   </clixon-config>
@@ -115,9 +115,10 @@ In the case of (2) example with ssl ::
       </socket>
    </restconf>
 
-In the latter case, these settings must be present in the running datastore `before` the
-restconf daemon is started. This can be done via the startup datastore or
-by editing the running config before restconf daemon.
+In the latter case, ``clixon_restconf.yang`` should be imported, and these settings must be
+present in the running datastore `before` the restconf daemon is
+started. This can be done via the startup datastore or by editing the
+running config before restconf daemon.
 
 
 Plugin callbacks
@@ -183,7 +184,7 @@ Example: set the Clixon configuration options::
 
 In this example, the stream ``example`` is accessed with ``https://example.com/streams/example``.
 
-Clixon defines an internal in-memory (not persistent) replay function controlled by the configure option above.  In this example, the retention is configured to 1 hour, i.e., the stream replay function will only save timeseries one hour, but if the restconf daemon is restarted, the hisstory will be lost.
+Clixon defines an internal in-memory (not persistent) replay function controlled by the configure option above.  In this example, the retention is configured to 1 hour, i.e., the stream replay function will only save timeseries one hour, but if the restconf daemon is restarted, the history will be lost.
 
 In the Nginx configuration, add the following to extend the nginx configuration file with the following statements (for example)::
 

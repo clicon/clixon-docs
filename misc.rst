@@ -156,7 +156,7 @@ You enable the automatic upgrading by registering the changelog upgrade method i
 
    upgrade_callback_register(h, xml_changelog_upgrade, NULL, 0, 0, NULL);
 
-The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a nnew. Example from `auto upgrade test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_auto.sh>`_::  
+The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a new. Example from `auto upgrade test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_auto.sh>`_::  
 
   <changelogs xmlns="http://clicon.org/xml-changelog">
     <changelog>
@@ -167,7 +167,7 @@ The transformation is defined by a list of changelogs. Each changelog defined ho
     <changelog>
   </changelogs>
 
-Each changelog consists of set of (orderered) steps::
+Each changelog consists of set of (ordered) steps::
 
     <step>
       <name>1</name>
@@ -219,7 +219,7 @@ protocol have a couple of extensions to the Netconf protocol as follows:
 
     <rpc><get content="nonconfig"/></rpc>
     
-* *depth* - for ``get`` and ``get-config`` how deep a tree is requested. ALso from RESTCONF. Example::
+* *depth* - for ``get`` and ``get-config`` how deep a tree is requested. Also from RESTCONF. Example::
 
     <rpc><get depth="2"/></rpc>
     

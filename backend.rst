@@ -51,7 +51,7 @@ The backend have the following command-line options:
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
   -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
   -P <file>       PID filename (default: /usr/local/var/hello.pidfile)
-  -1              Run once and then quit (dont wait for events)
+  -1              Run once and then quit (do not wait for events)
   -s <mode>       Specify backend startup mode: none|startup|running|init)
   -c <file>       Load extra xml configuration, but don't commit.
   -g <group>      Client membership required to this group (default: clicon)
@@ -212,7 +212,7 @@ Using the CLI or another frontend, you edit the `candidate` configuration, which
 `validated` for consistency and then `committed` to the `running`
 configuration.
 
-A clixon developer writes commit functions to incrementaly upgrade a
+A clixon developer writes commit functions to incrementally upgrade a
 system state based on configuration changes. Writing commit callbacks
 is the core functionality of a clixon system.
 

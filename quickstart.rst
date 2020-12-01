@@ -5,7 +5,7 @@ Quick start
 
 .. This is a comment
    
-This section describes how to run the Hello world example available in soure code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_.
+This section describes how to run the Hello world example available in source code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_.
 
 Clixon is not a system in itself, it is a support system for an
 application. In this case, the "application" is hello world. The hello

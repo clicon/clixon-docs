@@ -78,7 +78,7 @@ The following XPath axes are supported:
 * self
 * parent
 
-The following xpath axes are *not* supported: preceeding, preceeding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
+The following xpath axes are *not* supported: preceding, preceding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
 
 The following XPath functions as defined in Section 4 of the XPath 1.0 standard are supported:
 
@@ -127,17 +127,17 @@ Clixon does *not* support the following NETCONF features:
 Further, in `get-config` filter expressions, the RFC6241 XPath
 Capability is preferred over default subtrees. This has two reasons:
 
-1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retreived.
+1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retrieved.
 2. Subtree filtering does not support namespaces yet.
 
-Further, the capability negotiation (hello protocol) as defined in RFC6241 Sec 8.1 and RFC7950 Sec 5.6.4 is only partly implemeted.
+Further, the capability negotiation (hello protocol) as defined in RFC6241 Sec 8.1 and RFC7950 Sec 5.6.4 is only partly implemented.
    
 Default values
 ^^^^^^^^^^^^^^
 
-Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retreival. This means that get-config will report all default values, not only those explicitly set. 
+Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retrieval. This means that get-config will report all default values, not only those explicitly set. 
 
-`RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes descriibed in the RFC, Clixon implements "report-all" with-respect to GET and GET-CONFIG operations, but "explicit" with reespect to how configurations are saved in datastores.
+`RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes described in the RFC, Clixon implements "report-all" with-respect to GET and GET-CONFIG operations, but "explicit" with respect to how configurations are saved in datastores.
 
 RESTCONF
 --------

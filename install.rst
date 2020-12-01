@@ -32,7 +32,7 @@ Install and build CLIgen::
 Add a clicon user and group, using useradd and usermod::
    
   sudo useradd -M -U clicon
-  sudo usermod -a -G clicon <youruser>
+  sudo usermod -a -G clicon <your user>
   sudo usermod -a -G clicon www-data # Only if RESTCONF
   
 If you do not require RESTCONF, then continue with `Build from source`_.
@@ -123,7 +123,7 @@ Systemd
 -------
 
 Once installed, Clixon can be setup using systemd. The following shows an example with the backend and restconf daemons for the main example.
-Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_retsconf.service, for example.
+Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_restconf.service, for example.
 
 Systemd backend
 ^^^^^^^^^^^^^^^
@@ -225,3 +225,8 @@ These include (standard options are omitted)
   --with-libxml2          use gnome/libxml2 regex engine
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
   --with-opt-yang-installdir=DIR  Install optional yang files here (default: ${prefix}/share/clixon)
+
+There are also some variables that can be set, such as::
+
+  LINKAGE=static ./configure     # Build static libraries
+  CFLAGS="-O1 -Wall" ./configure # Use other CFLAGS (overridden by --enable-debug)
