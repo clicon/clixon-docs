@@ -158,7 +158,7 @@ Plugins
 
 Backend plugins are the "glue" that binds the Clixon system to the
 underlying system. The backend invokes *callbacks* in the plugins when
-events occur. 
+events.
 
 Plugins are written in C as dynamically loaded modules (`.so` files). At startup, the backend daemon looks in the directory pointed to by the config option `CLICON_BACKEND_DIR`, and loads all files with `.so` suffixes from that dir in alphabetical order.
 
@@ -172,19 +172,21 @@ You can filter which plugins to load by specifying a regular expression. For exa
 
    <CLICON_BACKEND_REGEXP>^example*.so$</CLICON_BACKEND_REGEXP>
    
+Callbacks are registered in two ways:
+  - *clixon_plugin_init* : returning an API struct containing a fixed set of callbacks
+  - *register functions* : Some specific clixon features use registering functions instead. This allows for multiple callbacks.
+
+Clixon_plugin_init
+^^^^^^^^^^^^^^^^^^
 A plugin must have a init function called `clixon_plugin_init`. If
 this function does not exist, the backend will fail.
 
 The backend calls `clixon_plugin_init` and expects it to return an API
-struct defining all callbacks. The init function may return `NULL` in
-which case the backend logs this and continues.
+struct (`clixon_plugin_api`) defining all callbacks. The init function may return `NULL` in which case the backend logs this and continues.
 
 Once the plugin is loaded, it awaits callbacks from the backend.
 
-Callbacks
-^^^^^^^^^
-
-The following callbacks are defined for backend plugins:
+The following callbacks are defined for backend plugins in *clixon_plugin_api*:
 
 init
    Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called `clixon_plugin_init`. It returns a struct with the name of the plugin, and all other callback names.
@@ -204,6 +206,31 @@ upgrade
   General-purpose upgrade called once when loading the startup datastore
 trans_{begin,validate,complete,commit,commit_done,revert,end,abort}
   Transaction callbacks which are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
+
+Registered callbacks
+^^^^^^^^^^^^^^^^^^^^
+
+A second group of callbacks use register functions. This is a more detailed mechanism than the fixed callbacks described previously, but are only defined to a limted sets of functions:
+
+* ``rpc_callback_register()`` - for user-defined RPC callbacks.
+* ``upgrade_callback_register()`` - for upgrading, see :ref:`clixon_upgrade`.
+
+A user may register may register a callback for an incoming RPC, and
+that function will be called. 
+
+There may be several callbacks for the same RPC. The order the
+callbacks are registered.  The order is:
+
+1. plugin_init
+2. backend_rpc_init (where system callbacks are registered)
+3. plugin_start
+
+Which means if you register a copy-config callback in (1), it will be called *before* the system copy-config callback registered from (2) backend_rpc_init. If you register a copy-config in (3) plugin-start it will be called *after* the system copy-config.
+
+Second, if there are more than one reply (eg ``<rpc-reply/><rpc-reply/>``) only the first reply will be parsed and used by the cli/netconf/restconf clients.
+
+If you want to take the original and modify it, you should therefore register the callback in plugin_start so that your callback will be called second. Then you should modify the original reply (not add a new reply).
+
 
 Transactions
 ------------

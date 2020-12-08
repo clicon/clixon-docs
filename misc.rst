@@ -11,7 +11,6 @@ CLI
 
 Translators
 -----------
-
 CLIgen supports wrapper functions that can take the output of a
 callback and transform it to something else.
 
@@ -247,3 +246,85 @@ protocol have a couple of extensions to the Netconf protocol as follows:
 The reason for introducing the objectcreate/objectexisted attributes are as follows:
       * RFC 8040 4.5 PUT: if the PUT request creates a new resource, a "201 Created" status-line is returned.  If an existing resource is modified, a "204 No Content" status-line is returned.
       * RFC 8040 4.6 PATCH: If the target resource instance does not exist, the server MUST NOT create it.
+
+High availability
+=================
+Clixon is mainly a stand-alone app tightly coupled to the application/device with shared fate.
+
+That said, the primary state is the *backend* holding the *configuration database* that can be shared in different ways:
+  * *Active/standby*: With a standard failure/liveness detection of a master backend, a standby could be started when the master fails using "-s running" (just picking up the state from the failed master). The default cache write-through can be used (``CLICON_DATASTORE_CACHE = cache``). Would suffer from outage during standby boot.
+  * *Active/active*: The config-db cache is turned off (``CLICON_DATASTORE_CACHE = nocache``) and two backend process started with a load-balancing in front. Turning the cache off would suffer from performance degradation (and its not currently tested in regression tests). Would also need a failure/liveness detection.
+
+In both cases the *config-db* would be a single-point-of-failure but could be mitigated by a replicated file system, for example.
+
+Regarding clients:
+  * the *CLI* and *NETCONF* clients are stateless and spun up on demand.
+  * the *RESTCONF* daemon is stateless and can run as multiple instances (with an LB)
+
+Extensions
+==========
+
+Clixon implements YANG extensions.  There are several uses, but one is
+to "annotate" a YANG specification with application-specific data that can be used
+in plugin code for some reason.
+
+An extension with an argument is introduced in YANG as follows::
+
+   module example-lib {
+      namespace "urn:example:lib";
+      extension mymode {
+         argument annotation;
+      }
+
+Such an extension can then be used in YANG declarations in two ways, either
+*inline* or *augmented*.
+
+An inlined extension is useful in a YANG module that the designer has
+control over and can add extension reference directly in the YANG
+specification.
+
+Assume for example that an interface declaration is extended with the extension declared above, as follow::
+
+   module my-interface {
+     import example-lib{
+       prefix exl;
+     }
+     container "interfaces" {
+       list "interface" {
+         exl:mymode "my-interface";
+         ...
+
+If you instead use an external YANG, where you cannot edit the YANG
+itself, you can use augmentation instead, as follows::
+
+  module my-augments {
+   import example-lib{
+      prefix exl;
+   }
+   import ietf-interfaces{
+      prefix if;
+   }
+   augment "/if:interfaces/if:interface"{
+      exl:mymode "my-interface";
+   }
+   ...
+
+When this is done, it is possible to access the extension value in
+plugin code and use that value to perform application-specific
+actions. For example, assume an XML interface object ``x`` retrieve
+the annotation argument::
+
+     char      *value = NULL;
+     yang_stmt *y = xml_spec(x);
+
+     if (yang_extension_value(y, "mymode", "urn:example:lib", &value) < 0)
+        err;
+     if (value != NULL){
+        // use extension value
+        if (strcmp(value, "my-interface") == 0)
+	   ...
+	 
+A more advanced usage is possible via an extension callback
+(``ca_callback``) which is defined for backend, cli, netconf and
+restconf plugins. This allows for advanced YANG transformations. Please
+consult the main example to see how this could be done.
