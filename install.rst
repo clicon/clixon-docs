@@ -160,6 +160,7 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    [Install]
    WantedBy=multi-user.target
 
+The restconf daemon can also be started using the clixon-lib process-control RPC. FOr more info, see :ref:`clixon_restconf`.
 
 Docker
 ------

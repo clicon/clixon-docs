@@ -210,7 +210,7 @@ trans_{begin,validate,complete,commit,commit_done,revert,end,abort}
 Registered callbacks
 ^^^^^^^^^^^^^^^^^^^^
 
-A second group of callbacks use register functions. This is a more detailed mechanism than the fixed callbacks described previously, but are only defined to a limted sets of functions:
+A second group of callbacks use register functions. This is a more detailed mechanism than the fixed callbacks described previously, but are only defined to a limited sets of functions:
 
 * ``rpc_callback_register()`` - for user-defined RPC callbacks.
 * ``upgrade_callback_register()`` - for upgrading, see :ref:`clixon_upgrade`.
@@ -219,7 +219,7 @@ A user may register may register a callback for an incoming RPC, and
 that function will be called. 
 
 There may be several callbacks for the same RPC. The order the
-callbacks are registered.  The order is:
+callbacks are registered are as follows:
 
 1. plugin_init
 2. backend_rpc_init (where system callbacks are registered)
@@ -229,7 +229,7 @@ Which means if you register a copy-config callback in (1), it will be called *be
 
 Second, if there are more than one reply (eg ``<rpc-reply/><rpc-reply/>``) only the first reply will be parsed and used by the cli/netconf/restconf clients.
 
-If you want to take the original and modify it, you should therefore register the callback in plugin_start so that your callback will be called second. Then you should modify the original reply (not add a new reply).
+If you want to take the original and modify it, you should therefore register the callback in plugin_start (3) so that your callback will be called after the system RPC. Then you should modify the original reply (not add a new reply).
 
 
 Transactions
@@ -324,7 +324,7 @@ resources initially before the drop. For a plugin designer, this means
 that you need to access privileges system resources in the
 `plugin_init` or `plugin_start` callbacks. The transaction callbacks, for example, will be run in unprivileged mode.
 
-An alternative is to drop privileges temporary and the be able to raise privileges when needed:
+An alternative is to drop privileges temporary and then be able to raise privileges when needed:
 ::
 
     <CLICON_BACKEND_USER>clicon</CLICON_BACKEND_USER>
