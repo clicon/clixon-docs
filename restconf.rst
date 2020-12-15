@@ -60,15 +60,15 @@ CLICON_RESTCONF_PRETTY
 
 Starting
 --------
-The restconf daemon can be started as root, but in that case drops privileges to wwwuser, unless the ``-r`` command-line option is used. n
+The restconf daemon (``clixon_restconf``) can be started as root, but in that case drops privileges to wwwuser, unless the ``-r`` command-line option is used.
 
-You can start ``clixon_restconf`` in several ways:
+You can start it in several ways:
 
   1. systemd as described in :ref:`clixon_install`
   2. docker stand-alone or within the same pod as the backend
   3. internally using the ``process-control`` RPC.
 
-For starting restconf `internally`, you first need to register the daemon in a backend plugin as the following example::
+For starting restconf `internally`, you first need to register the daemon in a backend plugin as shown in the following example::
 
     argv = calloc(4, sizeof(char *));
     argv[0] = "/www-data/clixon_restconf";
@@ -78,20 +78,22 @@ For starting restconf `internally`, you first need to register the daemon in a b
     if (clixon_process_register(h, "restconf", NULL, argv, 4) < 0)
       err;
 
-Thereafter, you can call the clixon-lib.yang RPC to start/stop/restart the daemon or query status. In netconf for example::
+You need to assign a name (``restconf``) a namespace (NULL in this
+example) and an argument list with the path to the file as its first argument.
+
+Thereafter, you can call the clixon-lib.yang RPC to start/stop/restart the daemon or query status. Using netconf to query the status looks as follows::
 
   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
      <process-control xmlns="http://clicon.org/lib">
         <name>restconf</name>
-	<operation>start</operation>
+	<operation>status</operation>
      </process-control>
   </rpc>
   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
-     <ok/>
+     <status xmlns="http://clicon.org/lib">true</status>
   </rpc-reply>
 
-Note that the backend daemon cannot use lowering of privileges to use this feature.
-
+Note that the backend daemon must run as root (no lowering of privileges) to use this feature.
       
 FCGI mode
 ---------
