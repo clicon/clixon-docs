@@ -333,13 +333,20 @@ You can implement the "hidden command" cligen feature by using the
 annotating a YANG specification with that extension. In the auto-cli,
 that command will not active but not visible in the CLI.
 
-Example::
+Example YANG with hide extension of "val" leaf::
   
    import clixon-lib{
       prefix cl;
    }
-   cl:autocli-op hide; /* Add in the yang where commands should be hidden */
-
+   container x{
+      list y{
+         ...
+         leaf val{
+            type string;
+            cl:autocli-op hide;
+         }
+      }
+   }
 
 
 Options

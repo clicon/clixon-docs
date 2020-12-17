@@ -68,18 +68,7 @@ You can start it in several ways:
   2. docker stand-alone or within the same pod as the backend
   3. internally using the ``process-control`` RPC.
 
-For starting restconf `internally`, you first need to register the daemon in a backend plugin as shown in the following example::
-
-    argv = calloc(4, sizeof(char *));
-    argv[0] = "/www-data/clixon_restconf";
-    argv[1] = "-f"
-    argv[2] = "/usr/local/etc/clixon.xml"
-    argv[3] = NULL;
-    if (clixon_process_register(h, "restconf", NULL, argv, 4) < 0)
-      err;
-
-You need to assign a name (``restconf``) a namespace (NULL in this
-example) and an argument list with the path to the file as its first argument.
+For starting restconf `internally`, you need to enable ``CLICON_BACKEND_RESTCONF_PROCESS`` option
 
 Thereafter, you can call the clixon-lib.yang RPC to start/stop/restart the daemon or query status. Using netconf to query the status looks as follows::
 
