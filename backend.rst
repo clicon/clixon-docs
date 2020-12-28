@@ -42,6 +42,7 @@ The backend have the following command-line options:
   -h              Help
   -D <level>      Debug level
   -f <file>       CLICON config file
+  -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
   -d <dir>        Specify backend plugin directory (default: none)
   -p <dir>        Yang directory path (see CLICON_YANG_DIR)
@@ -112,7 +113,12 @@ When loading the startup/tmp configuration, the following actions are performed 
 * Upgrade callbacks.
 * Validation of the XML against the current Yang models
 * If errors are detected, enter `failsafe` mode.
-   
+
+The following config option is related to startup:
+
+CLICON_BACKEND_RESTCONF_PROCESS
+   Enable process-control of restconf daemon, ie start/stop restconf daemon internally using fork/exec. Disable if you start the restconf daemon by other means.
+  
 Socket
 ------
 ::

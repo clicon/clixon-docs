@@ -9,36 +9,6 @@ These are sections that do not fit into the rest of the document.
 CLI
 ===
 
-Translators
------------
-CLIgen supports wrapper functions that can take the output of a
-callback and transform it to something else.
-
-The CLI can perform variable translation. This is useful if you want to
-process the input, such as hashing, encrypting or in other way
-translate the input.
-
-Yang example::
-
-  list translate{
-     leaf value{
-        type string;
-     }
-  }
-
-CLI specification::
-
-  translate value (<value:string translate:incstr()>),cli_set("/translate/value");
-
-If you run this example using the `incstr()` function which increments the characters in the input, you get this result::
-
-  cli> translate value HAL
-  cli> show configuration
-  translate {
-      value IBM;
-  }
-
-You can perform translation on any type, not only strings.
 
 
 Differences to CLIgen

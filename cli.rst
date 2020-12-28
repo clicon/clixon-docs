@@ -370,3 +370,28 @@ CLICON_CLI_GENMODEL_TYPE, How to generate and show CLI syntax.
   - ``ALL``  Keywords on all variables: ``x y k <k>``
   - ``HIDE`` Keywords on non-key variables and hide container around lists: ``y <k>``
 
+Translators
+-----------
+CLIgen supports wrapper functions that can take the output of a
+callback and transform it to something else.
+
+The CLI can perform variable translation. This is useful if you want to
+process the input, such as hashing, encrypting or in other way
+translate the input.
+
+The following example is based on the main Clixon example and is included in the regression tests. In the following CLI specification, a "translate" command sets a modifed value to the "table/parameter=translate/value"::
+
+  translate <value:string translate:cli_incstr()>, cli_set("/clixon-example:table/parameter=translate/value");
+
+If you run this example using the `cli_incstr()` function which increments the characters in the input, you get this result::
+
+  cli> translate HAL
+  cli> show configuration
+  table {
+     parameter {
+        name translate;
+        value IBM;
+     }
+  }
+
+The example is very simple and based on strings, but can be used also for other types and more advanced functions.

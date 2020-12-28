@@ -45,6 +45,23 @@ The RESTCONF daemon can be configured (by autotools) as follows:
   --with-restconf=evhtp   RESTCONF using native http with libevhtp
   --with-wwwuser=<user>   Set www user different from ``www-data``
 
+Command-line options
+--------------------
+
+The restconf daemon have the following command-line options:
+  -h              Help
+  -D <level>      Debug level
+  -f <file>       CLICON config file
+  -E <dir>        Extra configuration directory
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
+  -d <dir>        Specify backend plugin directory (default: none)
+  -p <dir>        Yang directory path (see CLICON_YANG_DIR)
+  -b <dir>        Specify XMLDB database directory
+  -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
+  -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
+  -r              Do not drop privileges if run as root\n"
+  -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
+
 Options
 ^^^^^^^
 The configuration file options related to RESTCONF common to both fcgi and evhtp are the following:
