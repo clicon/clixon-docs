@@ -79,24 +79,58 @@ Starting
 --------
 The restconf daemon (``clixon_restconf``) can be started as root, but in that case drops privileges to wwwuser, unless the ``-r`` command-line option is used.
 
-You can start it in several ways:
+You can start the restconf daemon in several ways:
 
-  1. systemd as described in :ref:`clixon_install`
-  2. docker stand-alone or within the same pod as the backend
-  3. internally using the ``process-control`` RPC.
+  1. `systemd` as described in :ref:`clixon_install`
+  2. `internally` using the `process-control` RPC (see below)
+  3. `docker` mechanisms, see the docker container docs
 
-For starting restconf `internally`, you need to enable ``CLICON_BACKEND_RESTCONF_PROCESS`` option
+Internal start
+^^^^^^^^^^^^^^
+For starting restconf internally, you need to enable ``CLICON_BACKEND_RESTCONF_PROCESS`` option
 
-Thereafter, you can call the clixon-lib.yang RPC to start/stop/restart the daemon or query status. Using netconf to query the status looks as follows::
+Thereafter, you can either use the ``clixon-restconf.yang`` configuration or use the ``clixon-lib.yang`` process control RPC:s to start/stop/restart the daemon or query status.
+
+The algorithm for starting and stopping the clixon-restconf internally is as follows:
+
+  1. on RPC start, if enable is true, start the service, if false, error or ignore it
+  2. on RPC stop, stop the service 
+  3. on backend start make the state as configured
+  4. on enable change, make the state as configured  
+
+Example 1, using netconf `edit-config` to start the process::
+
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
+     <edit-config>
+        <default-operation>merge</default-operation>
+	<target><candidate/></target>
+        <config>
+	   <restconf xmlns="http://clicon.org/restconf">
+	      <enable>true</enable>
+	   </restconf>
+	</config>
+     </edit-config
+  </rpc>
+  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
+     <ok/>
+  </rpc-reply>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="11">
+     <commit/>
+    </rpc>
+  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
+     <ok/>
+  </rpc-reply>
+  
+Example 2, using netconf RPC to restart the process::
 
   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
      <process-control xmlns="http://clicon.org/lib">
         <name>restconf</name>
-	<operation>status</operation>
+	<operation>restart</operation>
      </process-control>
   </rpc>
   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
-     <status xmlns="http://clicon.org/lib">true</status>
+     <pid xmlns="http://clicon.org/lib">1029</pid>
   </rpc-reply>
 
 Note that the backend daemon must run as root (no lowering of privileges) to use this feature.

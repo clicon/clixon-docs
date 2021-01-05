@@ -208,6 +208,18 @@ For RESTCONF using fcgi build fcgi from source as follows::
   sudo make install
 
 
+SSH subsystem
+-------------
+
+You can expose ``clixon_netconf`` as an SSH subsystem according to `RFC 6242`. Register the subsystem in ``/etc/sshd_config``::
+
+	Subsystem netconf /usr/local/bin/clixon_netconf
+
+and then invoke it from a client using::
+
+	ssh -s <host> netconf
+
+
 Configure options
 -----------------
 
