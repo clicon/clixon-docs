@@ -114,6 +114,7 @@ The following RFC6241 capabilities/features are hardcoded in Clixon:
 The following features are optional and can be enabled by setting CLICON_FEATURE:
 
 * :startup (RFC6241 8.7)
+* :writable-running (RFC6241 8.2) - just write to running, no commit semantics
 
 Clixon does *not* support the following NETCONF features:
 

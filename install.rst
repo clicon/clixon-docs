@@ -51,10 +51,16 @@ Note that the libfcgi-dev package may not exist in Ubuntu 18 bionic or later, yo
 
 RESTCONF native http
 ^^^^^^^^^^^^^^^^^^^^
-For RESTCONF using the native http solution you may need to `build libevhtp from source`_ since few platforms have it as package (freebsd is one exception). It also requires openssl 1.1 API (not 1.0) and libevent-2::
+For RESTCONF using the native http solution you may need to `build libevhtp from source`_ since few platforms have it as package (freebsd is one exception). It also requires openssl 1.1 API (not 1.0)
+
+.. note::
+        The openssl 1.1 API is NOT default in some older OS:s such as Ubuntu 16.0.4, CentOS 7
+
+Native http also requires libevent-2::
 
   sudo apt-get install libevent-dev
 
+  
 Build from source
 ^^^^^^^^^^^^^^^^^
 Download clixon source code::
@@ -194,7 +200,7 @@ For RESTCONF using native http build evhtp from source as follows::
 
 You may also need to install cmake and libevent2/libevent-dev.
 
-Evhtp requires openssl 1.1 API.
+Evhtp requires openssl 1.1 API which is NOT default in Ubuntu 16.0.4, CentOS 7 for example.
 
 Build fcgi from source
 ----------------------

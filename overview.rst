@@ -31,6 +31,14 @@ General Public License Version 2.
 System Architecture
 -------------------
 
+Clixon provides YANG functionality with Netconf, Restconf and CLI that
+can be integrated with a "base system" in several ways. Two primary integrations are outlined here:
+
+  * `Tight` integration where clixon handles all user interaction with the interaction with the base system with backend plugins. This is the primary Clixon usage model.
+  * `Loose` integration where the base system uses clixon primarily for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
+
+Tight integration
+^^^^^^^^^^^^^^^^^
 ::
    
                   +------------------------------------------+
@@ -38,10 +46,10 @@ System Architecture
                   |  +----------+        | configfile |      |
                   |  |   cli    |--+     +------------+      |
                   |  +----------+   \ +----------+---------+ |
-                  |  +----------+    \| backend  | plugins | |
-      User  <-->  |  | restconf |---- | daemon   |         | |  <--> Underlying
-                  |  +----------+    /+----------+---------+ |       System
-                  |  +----------+   /    +------------+      |
+                  |  +----------+    \| backend  | plugins | |       +--------+
+      User  <-->  |  | restconf |---- | daemon   |         | |  <--> |  Base  |
+                  |  +----------+    /+----------+---------+ |       | system |
+                  |  +----------+   /    +------------+      |       +--------+
 	          |  | netconf  |--+     | datastores |      |
 		  |  +----------+        +------------+      |
                   +------------------------------------------+
@@ -62,7 +70,7 @@ startup configurations.
 
 When you adapt Clixon to your system, you typically start with a set
 of YANG specifications that you want implemented. You then write
-backend plugins that interact with the underlying system. The plugins
+backend plugins that interact with the base system. The plugins
 are written in C using the Clixon API and a set of plugin
 callbacks. The main callback is a transaction callback, where you
 specify how configuration changes are made to your system.
@@ -75,6 +83,32 @@ commands for a specific syntax.
    
 Notifications are supported both for CLI, netconf and restconf clients, sometimes referred to as "streams".
 
+Loose integration
+^^^^^^^^^^^^^^^^^
+::
+
+                                  +------------------------------------------+
+                                  |  +----------+        +------------+      |
+                 User    <------> +  | cli/netcf|        | configfile |      |
+                  |               |  | restconf |--+     +------------+      |
+                  |               |  +----------+   \ +----------+---------+ |
+            +-------------+       |                  \| backend  | plugins | |
+            | Base system |       |                   | daemon   |         | |
+            |  +--------+ |       |                  /+----------+---------+ |
+            |  | clixon | |       |                 /   +------------+      | 
+            |  | client | + <---> + -- "internal"--+     | datastores |      |
+	    |  +--------+ |       |                     +------------+      |
+            +-------------+       +------------------------------------------+
+
+In a loose architecture, the base system keeps existing APIs and
+only YANG-based configurations are exposed via Clixon. The base system
+acts as a clixon client and uses the clixon client module to subscribe
+to configuration events.
+
+.. note::
+        Loose integration is currently not well supported in Clixon
+
+	    
 Platforms
 ---------
 
