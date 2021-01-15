@@ -43,7 +43,7 @@ Tight integration
    
                   +------------------------------------------+
                   |  Frontends:          +------------+      |
-                  |  +----------+        | configfile |      |
+                  |  +----------+ IPC   | configfile |      |
                   |  |   cli    |--+     +------------+      |
                   |  +----------+   \ +----------+---------+ |
                   |  +----------+    \| backend  | plugins | |       +--------+
@@ -96,17 +96,19 @@ Loose integration
             | Base system |       |                   | daemon   |         | |
             |  +--------+ |       |                  /+----------+---------+ |
             |  | clixon | |       |                 /   +------------+      | 
-            |  | client | + <---> + -- "internal"--+     | datastores |      |
+            |  | client | + <---> + ----  IPC ---- +     | datastores |      |
 	    |  +--------+ |       |                     +------------+      |
             +-------------+       +------------------------------------------+
 
 In a loose architecture, the base system keeps existing APIs and
 only YANG-based configurations are exposed via Clixon. The base system
 acts as a clixon client and uses the clixon client module to subscribe
-to configuration events.
+to configuration events using message passing.
+
+In comparison, the tightly coupled architecture uses plugins, callbacks and a shared datastore.
 
 .. note::
-        Loose integration is currently not well supported in Clixon
+        Loose integration is currently not fully supported in Clixon
 
 	    
 Platforms
