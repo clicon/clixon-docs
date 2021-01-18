@@ -10,7 +10,7 @@ Backend
                            +----------------+
                                    |- XML
                                    v
-   Frontends:   Netconf +----------+--------+
+   Frontends:    IPC    +----------+--------+
    CLI,           |     | backend  | plugin |   <-->  Underlying
    netconf      <--->   | daemon   |--------+         System
    restconf             |          | plugin |   <-->   

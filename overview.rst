@@ -34,42 +34,46 @@ System Architecture
 Clixon provides YANG functionality with Netconf, Restconf and CLI that
 can be integrated with a "base system" in several ways. Two primary integrations are outlined here:
 
-  * `Tight` integration where clixon handles all user interaction with the interaction with the base system with backend plugins. This is the primary Clixon usage model.
-  * `Loose` integration where the base system uses clixon primarily for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
+  * `Plugin` integration where clixon handles all user interaction with the interaction with the base system with backend plugins. This is the primary Clixon usage model.
+  * `Client` integration where the base system uses clixon primarily for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
 
-Tight integration
-^^^^^^^^^^^^^^^^^
+Plugin integration
+^^^^^^^^^^^^^^^^^^
 ::
    
                   +------------------------------------------+
                   |  Frontends:          +------------+      |
-                  |  +----------+ IPC   | configfile |      |
+                  |  +----------+ IPC    | configfile |      |
                   |  |   cli    |--+     +------------+      |
                   |  +----------+   \ +----------+---------+ |
-                  |  +----------+    \| backend  | plugins | |       +--------+
-      User  <-->  |  | restconf |---- | daemon   |         | |  <--> |  Base  |
-                  |  +----------+    /+----------+---------+ |       | system |
+                  |  +----------+    \| backend  | backend | |       +--------+
+      User/ <-->  |  | restconf |---- | daemon   | plugins | |  <--> |  Base  |
+      NMS         |  +----------+    /+----------+---------+ |       | system |
                   |  +----------+   /    +------------+      |       +--------+
 	          |  | netconf  |--+     | datastores |      |
 		  |  +----------+        +------------+      |
                   +------------------------------------------+
 		 
+This describes how to inytegrate a base system with clixon using plugins.
+
 The core of the Clixon architecture is a backend daemon with
 configuration datastores and a set of internal clients: cli, restconf
 and netconf.
 
-The clients provide frontend interfaces to users, including an
-interactive CLI, RESTCONF over HTTP, and XML NETCONF over SSH.
-Internally, the clients and backend communicate via NETCONF over a
-UNIX socket.
+The clients provide frontend interfaces to users of the system, such
+as a Network Management System (NMS) or just a live user. The
+external interfaces includes interactive CLI, RESTCONF over HTTP/HTTPS, and XML
+NETCONF over TCP or SSH.  Internally, the clients and backend
+communicate over Inter-Process Communication (IPC) bus via NETCONF
+over a UNIX socket. It is possible to run over an INET socket as well.
 
 The backend manages a configuration datastore and implements a
 transaction mechanism for configuration operations (eg, create, read,
 update, delete) . The datastore supports candidate, running and
 startup configurations.
 
-When you adapt Clixon to your system, you typically start with a set
-of YANG specifications that you want implemented. You then write
+A system integrating Clixon using plugins, typically starts with a set
+of YANG specifications that should be implemented. You then write
 backend plugins that interact with the base system. The plugins
 are written in C using the Clixon API and a set of plugin
 callbacks. The main callback is a transaction callback, where you
@@ -83,33 +87,32 @@ commands for a specific syntax.
    
 Notifications are supported both for CLI, netconf and restconf clients, sometimes referred to as "streams".
 
-Loose integration
-^^^^^^^^^^^^^^^^^
+Client integration
+^^^^^^^^^^^^^^^^^^
 ::
 
                                   +------------------------------------------+
-                                  |  +----------+        +------------+      |
-                 User    <------> +  | cli/netcf|        | configfile |      |
-                  |               |  | restconf |--+     +------------+      |
-                  |               |  +----------+   \ +----------+---------+ |
-            +-------------+       |                  \| backend  | plugins | |
-            | Base system |       |                   | daemon   |         | |
-            |  +--------+ |       |                  /+----------+---------+ |
-            |  | clixon | |       |                 /   +------------+      | 
-            |  | client | + <---> + ----  IPC ---- +     | datastores |      |
-	    |  +--------+ |       |                     +------------+      |
+                 User/            |  Frontends:          +------------+      |
+                 NMS     <------> |  +----------+ IPC    | configfile |      |
+                  |               |  |   cli    |--+     +------------+      |
+                  |               |  +----------+   \    +------------+      |
+            +-------------+       |  +----------+    \   | backend    |      |
+            | Base system |       |  | restconf |-----+--| daemon     |      |
+            |  +--------+ |       |  +----------+    /   +------------+      |
+            |  | clixon | |       |  +----------+   /    +------------+      | 
+            |  | client | + <---> + -| netconf  |--+     | datastores |      |
+	    |  +--------+ |       |  +----------+        +------------+      |
             +-------------+       +------------------------------------------+
 
-In a loose architecture, the base system keeps existing APIs and
+In a client architecture, the base system keeps existing APIs and
 only YANG-based configurations are exposed via Clixon. The base system
 acts as a clixon client and uses the clixon client module to subscribe
-to configuration events using message passing.
+to configuration events using Netconf message passing.
 
-In comparison, the tightly coupled architecture uses plugins, callbacks and a shared datastore.
+In comparison, the tighter plugin architecture uses plugins, callbacks and a shared datastore.
 
 .. note::
-        Loose integration is currently not fully supported in Clixon
-
+        Client integration is currently not fully supported in Clixon
 	    
 Platforms
 ---------

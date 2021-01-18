@@ -23,6 +23,7 @@ mechanism.
    datastore
    usecases
    cli
+   netconf
    restconf
    xml
    nacm

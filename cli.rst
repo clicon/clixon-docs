@@ -3,6 +3,17 @@
 CLI
 ===
 
+::
+
+                   +---------------------------------------+
+                   |  +------------+  IPC  +------------+  |
+                   |  |    cli     | ----- |  backend   |  |
+      User <-----> |  |------------|       |------------|  |
+                   |  |cli plugins |       | be plugins |  |
+                   |  +------------+       +------------+  |
+                   +---------------------------------------+
+
+		  
 The CLI uses `<https://github.com/clicon/cligen>`_ is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_.
 
 Once the backend is started, the easiest way to use Clixon is via
