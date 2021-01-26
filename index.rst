@@ -30,4 +30,4 @@ mechanism.
    nacm
    upgrade
    misc
-
+   examples
