@@ -3,35 +3,30 @@
 Client API
 ==========
 
-
 Clixons client API offers a simple way to communicate with the
 built-in XML datastore. This can be used to fetch or manipulate
-configuration which is handled by Clixon from any other application
-running on the host system.
+configurations handled by Clixon from any other application
+running on a host system. For example, a deamon running on a host system may need
+to read a configured value from the Clixon datastore.
 
+Clixon integration normally uses dynamic plugins, but the client API
+shown here is an alternative.
 
-For example, there can be a deamon running on the host system and we
-want that deamon to read a certain configured value from the
-datastore. Normally we would use the plugin API, but there is also the
-option to use the client API to achieve that in a fast and simple way.
-
-Below we will use examples from both Clixon and Cisco ConfD and see
-how we can achieve the same thing using the two of them, and also show
-how Clixon can be a replacement for ConfD with minimal effort.
-
+Below, simple examples for both Clixon and Cisco ConfD are shown and compared
+with the aim of replacing one with the other.
 
 
 Comparison between Clixon and ConfD
 -----------------------------------
 
-Cisco ConfD is another well known configuration manager which also
-maintains the configuration in its buil-in datastore. Just like
+Cisco ConfD is a well known configuration manager which also
+maintains the configuration in its built-in datastore. Just like
 Clixon, ConfD offers an API for configuration access and manipulation.
 
-Applications that are integrated using ConfDs CDB API can easly be
-converted to use Clixon instead. Below we have a minimal example
-application which will connect to ConfD and get a value which is
-stored under "/table/parameter" in the XML store.
+Applications that are integrated using ConfDs CDB API can be converted
+to use Clixon instead. Below is a minimal example application
+which connects to ConfD to get a value stored under
+"/table/parameter" in the XML store.
 
 ConfD example:
 ::
@@ -82,9 +77,8 @@ ConfD example:
    }
 
 
-To use Clixon instead, there are very few things we have to change and
-most of the functions are nearly identical, if we want to convert the
-above application to use Clixon instead, we will change very few things:
+To use Clixon instead, the following needs to change but
+most of the functions are similar:
 
 - confd_init        -> clixon_client_init
 - cdb_connect       -> clixon_client_connect
@@ -94,7 +88,7 @@ above application to use Clixon instead, we will change very few things:
 - cdb_close         -> clixon_client_terminate
 
 
-And the above example re-written for Clixon would look like this:
+The above example re-written for Clixon looks as follows:
 
 ::
 
@@ -102,7 +96,6 @@ And the above example re-written for Clixon would look like this:
    #include <stdio.h>
    #include <stdint.h>
 
-   #include <clixon/clixon_log.h>
    #include <clixon/clixon_client.h>
 
    int main(int argc, char **argv)
@@ -129,13 +122,9 @@ And the above example re-written for Clixon would look like this:
        return 0;
    }
 
-One difference between Clixon and ConfD is that when we handle data
-Clixon will use an XPATH:
+Tne difference between Clixon and ConfD is that Clixon data paths use full XPATHs::
 
-::
+   /table/parameter[name='a']/value
 
-   "/table/parameter[name='a']/value"
-
-This means that we don't have to know where in a list to find a
-specific item, the XPATH can look that up for us and we can avoid
-writing code for iterating the list of possible parameter values.
+One can make the same index access as in ConfD paths as well (eg
+`[0]`). This means that one can make direct indexed accesses as an alternative to looping.

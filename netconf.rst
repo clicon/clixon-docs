@@ -22,42 +22,65 @@ others). Netconf is also used in the internal IPC.
 External Netconf
 ----------------
 
-Clixon implements the following NETCONF RFC:s:
-Clixon implements the following NETCONF RFC:s:
+Netconf is defined in RFC 6241 (see :ref:`clixon_standards`) and
+implemented by the `clixon_netconf` client.
 
-* `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
-* `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
-* `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
-* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
+Command-line options
+^^^^^^^^^^^^^^^^^^^^
 
-The following RFC6241 capabilities/features are hardcoded in Clixon:
+The `clixon_netconf` client has the following command-line options:
+  -h              Help
+  -D <level>      Debug level
+  -f <file>       Clixon config file
+  -E <dir>        Extra configuration directory
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
+  -q              Quiet mode, do not run hello protocol
+  -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
+  -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
+  -d <dir>        Specify netconf plugin directory
+  -p <dir>        Yang directory path (see CLICON_YANG_DIR)
+  -y <file>       Load yang spec file (override yang main module)
+  -U <user>       Over-ride unix user with a pseudo user for NACM.
+  -t <sec>        Timeout in seconds. Quit after this time.
+  -e              Dont ignore errors on packet input.
+  -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
-* :candidate (RFC6241 8.3)
-* :validate (RFC6241 8.6)
-* :xpath (RFC6241 8.9)
-* :notification (RFC5277)
+Options
+^^^^^^^
+The configuration file options related to RESTCONF common to both fcgi and evhtp are the following:
 
-The following features are optional and can be enabled by setting CLICON_FEATURE:
+CLICON_RESTCONF_DIR
+   Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
 
-* :startup (RFC6241 8.7)
-* :writable-running (RFC6241 8.2) - just write to running, no commit semantics
+CLICON_RESTCONF_PATH
+   FCGI unix socket. Should be specified in webserver (only fcgi)
 
-Clixon does *not* support the following NETCONF features:
+CLICON_RESTCONF_PRETTY
+   RESTCONF return value is pretty-printed or not
 
-* :url capability
-* copy-config source config
-* edit-config testopts 
-* edit-config erropts
-* edit-config config-text
-* edit-config operation
 
-Further, in `get-config` filter expressions, the RFC6241 XPath
-Capability is preferred over default subtrees. This has two reasons:
+Starting
+--------
+The netconf client (``clixon_netconf``) can be started on the command line using stdin/stdout::
 
-1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retrieved.
-2. Subtree filtering does not support namespaces yet.
+  > clixon_netconf -qf /usr/local/etc/clixon.conf < my.xml
 
-Further, the capability negotiation (hello protocol) as defined in RFC6241 Sec 8.1 and RFC7950 Sec 5.6.4 is only partly implemented.
+It then reads and parses netconf commands on stdin, eventually invokes
+netconf plugin callbacks, then establishes a connection to the backend
+and usually sends the netconf message over IPC to the backend. Some
+commands (eg hello) are terminated in the client. The reply from the
+backend is then displayed on stdout.
+
+SSH subsystem
+^^^^^^^^^^^^^
+
+You can expose ``clixon_netconf`` as an SSH subsystem according to `RFC 6242`. Register the subsystem in ``/etc/sshd_config``::
+
+	Subsystem netconf /usr/local/bin/clixon_netconf
+
+and then invoke it from a client using::
+
+	ssh -s <host> netconf
 
 IPC
 ---

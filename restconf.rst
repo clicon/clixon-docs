@@ -51,7 +51,7 @@ Command-line options
 The restconf daemon have the following command-line options:
   -h              Help
   -D <level>      Debug level
-  -f <file>       CLICON config file
+  -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
   -d <dir>        Specify backend plugin directory (default: none)

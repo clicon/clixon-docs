@@ -64,7 +64,7 @@ In the CLI, these will generate CLI commands such as::
    show config
    example 23
 
-The effect of typing the commands above will be of calling the callbacks: `cli_show_config` and `mycallback`. Both these functions must exist as C-functions. In fact, `cli_show_config` is a library function available in the Clixon libs, while `mycallback` is defined in the main example CLI plugin.
+The effect of typing the commands above is calling the callbacks: `cli_show_config` and `mycallback`. Both these functions must exist as C-functions. In fact, `cli_show_config` is a library function available in the Clixon libs, while `mycallback` is defined in the main example CLI plugin.
 
 In this way, a designer writes cli command specifications which
 invokes C-callbacks. If there are no appropriate callbacks the
@@ -115,7 +115,8 @@ Suppose a user enters the following command in the CLI::
 
   cli> example 23
 
-The callback will be called with the following parameters::
+The callback is called with the following parameters::
+
   cvv: 
      0: example 23
      1: 23
@@ -148,7 +149,7 @@ Finally, add a command to all modes::
   CLICON_MODE="*";
   show("Show") all("Show all");
    
-Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes will be three commands in total for the *configure* mode::
+Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes are the three commands in total for the *configure* mode::
 
   > clixon_cli -m configure
   cli> show <TAB>
@@ -191,7 +192,7 @@ The design is similar to bash history but is simpler in some respects:
    - The size (number of lines) of the file is the same as the history in memory
    - Only the latest session dumping its history will survive (bash merges multiple session history).
 
-Further, tilde-expansion is supported and if history files are not found or lack appropriate access will not cause an exit but will be logged at debug level
+Further, tilde-expansion is supported and if history files are not found or lack appropriate access will not cause an exit but are logged at debug level
 
 Sub-trees
 ^^^^^^^^^
@@ -209,7 +210,7 @@ then access that subtree from other modes::
   main @subtree;
   other @subtree,c();
 
-The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks will be overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` will be invoked.
+The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks are overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` is invoked.
 
 Help strings
 ------------
@@ -281,7 +282,7 @@ This cli-spec forms the basis of the auto-cli and contains the following:
   - Keywords for the YANG symbol (eg ``x`` and ``y``).
   - Variable syntax for leafs (eg ``<k:string>``)
   - Non-terminal nodes can be entered as automatic modes with prompt showing the current path
-  - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content will be shown as alternatives.
+  - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content is shown as alternatives.
   - Output syntax as cli, xml, json, as netconf commands
   - ``overwrite_me`` is a callback template which is overwritten by an actual callback in the clispec (eg ``cli_set()``)
 

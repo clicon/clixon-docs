@@ -22,6 +22,7 @@ mechanism.
    backend
    datastore
    usecases
+   client
    cli
    netconf
    restconf
@@ -29,4 +30,4 @@ mechanism.
    nacm
    upgrade
    misc
-   client
+

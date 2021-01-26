@@ -109,10 +109,8 @@ only YANG-based configurations are exposed via Clixon. The base system
 acts as a clixon client and uses the clixon client module to subscribe
 to configuration events using Netconf message passing.
 
-In comparison, the tighter plugin architecture uses plugins, callbacks and a shared datastore.
+In comparison, the tighter plugin architecture uses dynamically loaded plugins, callbacks and a shared datastore. See :ref:`clixon client api<client_api>` for more details.
 
-.. note::
-        Client integration is currently not fully supported in Clixon
 	    
 Platforms
 ---------
