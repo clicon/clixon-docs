@@ -29,3 +29,4 @@ mechanism.
    nacm
    upgrade
    misc
+   client
