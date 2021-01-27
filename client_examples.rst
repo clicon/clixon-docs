@@ -1,7 +1,5 @@
-.. _examples:
-
-Examples
-========
+Clixon and ConfD Examples
+-------------------------
 
 This section will describe how to create a minimal YANG specification
 and use it together with both Clixon and ConfD. We will start with
@@ -14,7 +12,7 @@ running and we refer to their respective documentation for guideance
 about installation and initial configuration.
 
 YANG model
-----------
+^^^^^^^^^^
 
 We will start off with a minimal YANG model. The model consist of a
 table with a list of parameters where each parameter have a name and a
@@ -48,7 +46,7 @@ value.
 We will save the YANG model as example.yang
 
 Installating the YANG model
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Clixon and ConfD have different ways of adding new models.
 
@@ -118,7 +116,7 @@ And finally after restarting ConfD the new model should be installed.
 
 
 Testing with NETCONF
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 To test all this we can use NETCONF. We will try to set a new
 parameter with the name "test" and value 1234.
