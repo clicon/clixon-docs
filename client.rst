@@ -128,3 +128,5 @@ Tne difference between Clixon and ConfD is that Clixon data paths use full XPATH
 
 One can make the same index access as in ConfD paths as well (eg
 `[0]`). This means that one can make direct indexed accesses as an alternative to looping.
+
+.. include:: ./client_examples.rst
