@@ -198,7 +198,7 @@ An inlined extension is useful in a YANG module that the designer has
 control over and can add extension reference directly in the YANG
 specification.
 
-Assume for example that an interface declaration is extended with the extension declared above, as follow::
+Assume for example that an interface declaration is extended with the extension declared above, as follows::
 
    module my-interface {
      import example-lib{

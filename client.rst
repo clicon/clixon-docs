@@ -3,7 +3,7 @@
 Client API
 ==========
 
-Clixons client API offers a simple way to communicate with the
+Clixon's client API provides a simple way to communicate with the
 built-in XML datastore. This can be used to fetch or manipulate
 configurations handled by Clixon from any other application
 running on a host system. For example, a deamon running on a host system may need

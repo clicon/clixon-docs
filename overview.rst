@@ -39,20 +39,9 @@ can be integrated with a "base system" in several ways. Two primary integrations
 
 Plugin integration
 ^^^^^^^^^^^^^^^^^^
-::
-   
-                  +------------------------------------------+
-                  |  Frontends:          +------------+      |
-                  |  +----------+ IPC    | configfile |      |
-                  |  |   cli    |--+     +------------+      |
-                  |  +----------+   \ +----------+---------+ |
-                  |  +----------+    \| backend  | backend | |       +--------+
-      User/ <-->  |  | restconf |---- | daemon   | plugins | |  <--> |  Base  |
-      NMS         |  +----------+    /+----------+---------+ |       | system |
-                  |  +----------+   /    +------------+      |       +--------+
-	          |  | netconf  |--+     | datastores |      |
-		  |  +----------+        +------------+      |
-                  +------------------------------------------+
+
+.. image:: overview1.jpg
+   :width: 100%
 		 
 This describes how to inytegrate a base system with clixon using plugins.
 
@@ -89,20 +78,8 @@ Notifications are supported both for CLI, netconf and restconf clients, sometime
 
 Client integration
 ^^^^^^^^^^^^^^^^^^
-::
-
-                                  +------------------------------------------+
-                 User/            |  Frontends:          +------------+      |
-                 NMS     <------> |  +----------+ IPC    | configfile |      |
-                  |               |  |   cli    |--+     +------------+      |
-                  |               |  +----------+   \    +------------+      |
-            +-------------+       |  +----------+    \   | backend    |      |
-            | Base system |       |  | restconf |-----+--| daemon     |      |
-            |  +--------+ |       |  +----------+    /   +------------+      |
-            |  | clixon | |       |  +----------+   /    +------------+      | 
-            |  | client | + <---> + -| netconf  |--+     | datastores |      |
-	    |  +--------+ |       |  +----------+        +------------+      |
-            +-------------+       +------------------------------------------+
+.. image:: overview2.jpg
+   :width: 100%
 
 In a client architecture, the base system keeps existing APIs and
 only YANG-based configurations are exposed via Clixon. The base system

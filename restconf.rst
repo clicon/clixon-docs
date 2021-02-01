@@ -207,6 +207,12 @@ In the case of (2) example with ssl ::
          <port>443</port>
          <ssl>true</ssl>
       </socket>
+      <socket>
+         <namespace>myns</namespace>
+         <address>0.0.0.0</address>
+         <port>443</port>
+         <ssl>true</ssl>
+      </socket>
    </restconf>
 
 In the latter case, ``clixon_restconf.yang`` should be imported, and these settings must be
@@ -214,6 +220,7 @@ present in the running datastore `before` the restconf daemon is
 started. This can be done via the startup datastore or by editing the
 running config before restconf daemon.
 
+The example also includes a socket that listen to another network namespace ``myns``, which must exist and have networking setup so that a socket can be bound.
 
 Plugin callbacks
 ----------------
