@@ -60,48 +60,16 @@ You then need to set the following configure option:
 
   <CLICON_YANG_REGEXP>libxml2</CLICON_YANG_REGEXP>
 
-XML and XPath
--------------
-Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
-
-The XML-related standards include:
-
-* `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_. (DOCTYPE/ DTD not supported)
-* `Namespaces in XML 1.0 <https://www.w3.org/TR/2009/REC-xml-names-20091208>`_
-* `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_
-       
-The following XPath axes are supported:
-
-* child,
-* descendant,
-* descendant_or_self,
-* self
-* parent
-
-The following xpath axes are *not* supported: preceding, preceding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
-
-The following XPath functions as defined in Section 4 of the XPath 1.0 standard are supported:
-
-* count
-* name
-* contains
-* not
-
-The remaining XPath functions are not supported. 
-
-The following nodetype nodetests are not supported: processing-instruction, comment.
-
-Unicode
--------
-Unicode is not supported in YANG and XML
 
 NETCONF
 -------
 Clixon implements the following NETCONF RFC:s:
 
+* `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
-* `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
+* `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. RESTCONF call home not implemented
+* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
@@ -163,6 +131,41 @@ RESTCONF event notification as described in RFC7950 section 6 is supported as fo
 
 _NMDA_ is partly supported according to `RFC 8324 <https://tools.ietf.org/html/rfc8342>`_ and `RFC 8527 <https://tools.ietf.org/html/rfc8527>`_. With-defaults and with-origin are not implemented.
   
+XML and XPath
+-------------
+Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
+
+The XML-related standards include:
+
+* `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_. (DOCTYPE/ DTD not supported)
+* `Namespaces in XML 1.0 <https://www.w3.org/TR/2009/REC-xml-names-20091208>`_
+* `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_
+       
+The following XPath axes are supported:
+
+* child,
+* descendant,
+* descendant_or_self,
+* self
+* parent
+
+The following xpath axes are *not* supported: preceding, preceding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
+
+The following XPath functions as defined in Section 4 of the XPath 1.0 standard are supported:
+
+* count
+* name
+* contains
+* not
+
+The remaining XPath functions are not supported. 
+
+The following nodetype nodetests are not supported: processing-instruction, comment.
+
+Unicode
+-------
+Unicode is not supported in YANG and XML.
+
 JSON
 ----
 

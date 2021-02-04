@@ -43,9 +43,9 @@ Plugin integration
 .. image:: overview1.jpg
    :width: 100%
 		 
-This describes how to inytegrate a base system with clixon using plugins.
+This describes how to integrate a base system with clixon using plugins.
 
-The core of the Clixon architecture is a backend daemon with
+The Clixon architecture consists of a backend daemon with
 configuration datastores and a set of internal clients: cli, restconf
 and netconf.
 

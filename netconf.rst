@@ -7,7 +7,7 @@ Overview
 --------
 
 Netconf is an external client interface (cli and restconf are
-others). Netconf is also used in the internal IPC.
+other external interfaces). Netconf is also used in the internal IPC.
 
 ::
 
@@ -19,8 +19,8 @@ others). Netconf is also used in the internal IPC.
                    |  +------------+       +------------+  |
                    +---------------------------------------+
 
-External Netconf
-----------------
+Netconf
+-------
 
 Netconf is defined in RFC 6241 (see :ref:`clixon_standards`) and
 implemented by the `clixon_netconf` client.
@@ -82,6 +82,50 @@ and then invoke it from a client using::
 
 	ssh -s <host> netconf
 
+SSH Callhome
+------------
+Clixon implements `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ as a utility using openssh. This means that Clixon itself is not affected, the solution is built "around" core Clixon.
+
+The netconf callhome solution is an example. Other solutions are
+possible, and a full system integration requires a callhome framework
+to determine when and how callhomes are made as well as addressing the security implications addressed by RFC 8071.
+
+Overview of a callhome architecture::
+
+     device/server                             client
+  +-----------------+   2) tcp connect   +-----------------+
+  |    callhome     | ---------------->  | callhome-client |
+  +-----------------+                    +-----------------+
+          | 3) c                                  ^
+          v                                    1) | 4)
+  +-----------------+        ssh         +-----------------+   5) stdio
+  |     sshd -i     | <----------------> |       ssh       |  <------  <rpc>...</rpc>]]>]]>"
+  +-----------------+                    |-----------------+   
+          | stdio                      
+  +-----------------+
+  | clixon_netconf  |
+  +-----------------+
+          | 
+  +-----------------+
+  | clixon_backend  |
+  +-----------------+
+
+
+The steps followed to make a netconf callhome is as follows are:
+
+1) Start ssh client using ``-o ProxyUseFdpass=yes -o ProxyCommand="callhome-client"``. Callhome-client listens on port 4334 for incoming TCP connections.
+2) Start callhome on server making tcp connect to client on port 4334 establishing a tcp stream
+3) Callhome starts ``sshd -i`` using the established stream socket (stdio)
+4) Callhome-client returns with an open stream socket to the ssh client establishing an SSH stream to server
+5) Client request sent on stdin to ssh client on established SSH stream using netconf subsystem to clixon_netconf client
+
+The callhome and callhome-client referred to above are implemented by the utility functions: ``util/clixon_netconf_ssh_callhome`` and ``util/clixon_netconf_ssh_callhome_client``.
+
+The example is implemented as a regression test in ``test/test_netconf_ssh_callhome.sh``
+
+.. note::
+        Warning: there are security implications of using this example as noted in `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_
+
 IPC
 ---
 
@@ -109,7 +153,7 @@ A fixed header using session id and message length before the netconf message::
 Extensions
 ^^^^^^^^^^
 
-The protocol have a couple of extensions to the Netconf protocol as follows:
+The internal IPC protocol have a couple of extensions to the Netconf protocol as follows:
 
 * *content* - for ``get`` command with values "config", "nonconfig" or "all", to indicate which parts of state and config are requested. This option is taken from RESTCONF. Example::
 

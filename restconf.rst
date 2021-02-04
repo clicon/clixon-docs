@@ -169,6 +169,8 @@ This only applies if you have chosen ``--with-restconf=evhtp``.
 
 You need to have ``libevhtp`` installed. See :ref:`clixon_install`.
 
+Native http uses openssl version 1.1.1.
+
 Configuration of native http has more options than reverse proxy, since it contains web-fronting parts, including socket(address, ports) and certificates, where these part of Nginx. These options are defined in in ``clixon-restconf.yang``.
 
 There are two ways to configure the socket and certificates of native http:
