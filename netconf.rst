@@ -82,22 +82,24 @@ and then invoke it from a client using::
 
 	ssh -s <host> netconf
 
-SSH Callhome
-------------
-Clixon implements `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ as a utility using openssh. This means that Clixon itself is not affected, the solution is built "around" core Clixon.
+Callhome
+--------
+Clixon implements `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ over SSH as a utility using openssh.  
 
-The netconf callhome solution is an example. Other solutions are
-possible, and a full system integration requires a callhome framework
-to determine when and how callhomes are made as well as addressing the security implications addressed by RFC 8071.
+The solution is built "around" Clixon meaning that Clixon itself is
+not affected, Other solutions are possible, and a full system
+integration requires a callhome framework to determine when and how
+callhomes are made as well as addressing the security implications
+addressed by RFC 8071.
 
-Overview of a callhome architecture::
+Overview of a callhome architecture with a device (where clixon resides) and a client::
 
      device/server                             client
   +-----------------+   2) tcp connect   +-----------------+
   |    callhome     | ---------------->  | callhome-client |
   +-----------------+                    +-----------------+
-          | 3) c                                  ^
-          v                                    1) | 4)
+          | 3) c                               1) ^
+          v                                       | 4)
   +-----------------+        ssh         +-----------------+   5) stdio
   |     sshd -i     | <----------------> |       ssh       |  <------  <rpc>...</rpc>]]>]]>"
   +-----------------+                    |-----------------+   
@@ -113,14 +115,26 @@ Overview of a callhome architecture::
 
 The steps followed to make a netconf callhome is as follows are:
 
-1) Start ssh client using ``-o ProxyUseFdpass=yes -o ProxyCommand="callhome-client"``. Callhome-client listens on port 4334 for incoming TCP connections.
-2) Start callhome on server making tcp connect to client on port 4334 establishing a tcp stream
-3) Callhome starts ``sshd -i`` using the established stream socket (stdio)
-4) Callhome-client returns with an open stream socket to the ssh client establishing an SSH stream to server
-5) Client request sent on stdin to ssh client on established SSH stream using netconf subsystem to clixon_netconf client
+1) Start the ssh client using ``-o ProxyUseFdpass=yes -o ProxyCommand="callhome-client"``. Callhome-client listens on port 4334 for incoming TCP connections.
+2) Start the callhome program on the server making tcp connect to client on port 4334 establishing a tcp stream
+3) The Callhome program starts ``sshd -i`` using the established stream socket (stdio)
+4) The callhome-client returns with an open stream socket to the ssh client establishing an SSH stream to the server
+5) Netconf messages are sent on stdin to the ssh client in turen using the established SSH stream and the netconf subsystem to clixon, which returns a reply.
 
 The callhome and callhome-client referred to above are implemented by the utility functions: ``util/clixon_netconf_ssh_callhome`` and ``util/clixon_netconf_ssh_callhome_client``.
 
+Example::
+
+  # Start ssh on client: bind to 1.2.3.4:4334 sending an rpc on stdin
+  client> echo '<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><candidate/></source></get-config></rpc>]]>]]>' > msg
+  client> ssh -s -v -o ProxyUseFdpass=yes -o ProxyCommand="clixon_netconf_ssh_callhome_client -a 1.2.3.4" . netconf < msg
+
+  # Start callhome on server: connect to 1.2.3.4:4334
+  server> sudo clixon_netconf_ssh_callhome -a 1.2.3.4
+
+  # Reply on client stdout: (skipping hello):
+  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><data/></rpc-reply>]]>]]>
+  
 The example is implemented as a regression test in ``test/test_netconf_ssh_callhome.sh``
 
 .. note::
