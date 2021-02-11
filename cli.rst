@@ -382,6 +382,18 @@ CLICON_CLI_GENMODEL_TYPE, How to generate and show CLI syntax.
   - ``ALL``  Keywords on all variables: ``x y k <k>``
   - ``HIDE`` Keywords on non-key variables and hide container around lists: ``y <k>``
 
+Bits
+----
+The Yang bits built-in type as defined in RFC 7950 Sec 9.7 provides a set of bit names. In the CLI, the names should be given in a white-spaced delimited list, such as ``"fin syn rst"``.
+
+The RFC defines a "canonical form"where the bits appear ordered by their position in YANG, but Clixon validation accepts them in any order.
+
+Given them in XML and JSON follows thus, eg XML::
+
+   <flags>fin rst syn</flags>
+
+Clixon CLI does not treat individual bits as "first-level objects". Instead it only validates the whole string of bit names. Operations (add/remove) are made atomically on the whole string.
+
 Translators
 -----------
 CLIgen supports wrapper functions that can take the output of a

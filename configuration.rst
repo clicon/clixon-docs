@@ -34,12 +34,16 @@ The following is the configuration file of an example:
      <CLICON_XMLDB_DIR>/usr/local/var/hello</CLICON_XMLDB_DIR>
      <CLICON_STARTUP_MODE>init</CLICON_STARTUP_MODE>
      <CLICON_MODULE_LIBRARY_RFC7895>false</CLICON_MODULE_LIBRARY_RFC7895>
+     <restconf>
+        <enable>true</enable>
+     </restconf>
    </clixon-config>
 
 The option ``CLICON_CONFIGFILE`` is special, it must be available before
 the configuration file is found (see `Loading the configuration`_),
 which means that the value in the file is a no-op.
 
+The ``restconf`` clause defines RESTCONF configuration options as described in the :ref:`clixon_restconf` section.
 
 Loading the configuration
 -------------------------

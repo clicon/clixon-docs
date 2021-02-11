@@ -113,13 +113,13 @@ Overview of a callhome architecture with a device (where clixon resides) and a c
   +-----------------+
 
 
-The steps followed to make a netconf callhome is as follows are:
+The steps to make a netconf callhome is as follows:
 
 1) Start the ssh client using ``-o ProxyUseFdpass=yes -o ProxyCommand="callhome-client"``. Callhome-client listens on port 4334 for incoming TCP connections.
 2) Start the callhome program on the server making tcp connect to client on port 4334 establishing a tcp stream with the client
 3) The callhome program starts ``sshd -i`` using the established stream socket 
 4) The callhome-client returns with an open stream socket to the ssh client establishing an SSH stream to the server
-5) Netconf messages are sent on stdin to the ssh client in turen using the established SSH stream and the netconf subsystem to clixon, which returns a reply.
+5) Netconf messages are sent on stdin to the ssh client in turn using the established SSH stream and the netconf subsystem to clixon, which returns a reply.
 
 The callhome and callhome-client referred to above are implemented by the utility functions: ``util/clixon_netconf_ssh_callhome`` and ``util/clixon_netconf_ssh_callhome_client``.
 

@@ -36,15 +36,19 @@ The restconf daemon reads its initial config options from the configuration file
 You can add plugins to the restconf daemon, where the primary usecase is authentication, using the ``ca_auth`` callback.
 
 
-Configuration
--------------
+Installation
+------------
 
-The RESTCONF daemon can be configured (by autotools) as follows:
+The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
   --with-restconf=evhtp   RESTCONF using native http with libevhtp
   --with-wwwuser=<user>   Set www user different from ``www-data``
 
+After that perform system-wide compilation::
+
+    make && sudo make install
+  
 Command-line options
 --------------------
 
@@ -54,36 +58,157 @@ The restconf daemon have the following command-line options:
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
-  -d <dir>        Specify backend plugin directory (default: none)
   -p <dir>        Yang directory path (see CLICON_YANG_DIR)
   -b <dir>        Specify XMLDB database directory
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
   -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
-  -r              Do not drop privileges if run as root\n"
+  -r              Do not drop privileges if run as root
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
-Options
-^^^^^^^
-The configuration file options related to RESTCONF common to both fcgi and evhtp are the following:
+Note that the restconf daemon can be started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used.
+
+Configuration
+-------------
+The following RESTCONF configuration options can be defined in the clixon configuration file:
 
 CLICON_RESTCONF_DIR
    Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
+CLICON_BACKEND_RESTCONF_PROCESS
+  Start restconf daemon internally from backend daemon.
 
-CLICON_RESTCONF_PATH
-   FCGI unix socket. Should be specified in webserver (only fcgi)
+The remaining options are defined in `clixon-restconf.yang` where they can be defined locally within the clixon config file::
 
-CLICON_RESTCONF_PRETTY
-   RESTCONF return value is pretty-printed or not
+  <clixon-config xmlns="http://clicon.org/config">
+     <restconf>
+        <enable>true</enable>
+        ...  <!-- Add restconf options here -->
+     </restconf>
+   </clixon-config>
+
+Alternatively, the restconf configuration can be defined in the regular datastore by adding, as follows::
+
+   <restconf xmlns="http://clicon.org/restconf">
+      <enable>true</enable>
+      ...   <!--  Add restconf options here -->
+   </restconf>
+   
+In the latter case, the restconf daemon reads its config from the running datastore on startup.
+
+Those restconf options are as follows:
+
+enable
+   Enable the RESTCONF daemon. If disabled, the restconf daemon will not start
+auth-type
+   Authentication method (see `auth types`_)
+debug
+   Enable to debug on syslog
+pretty
+   Restconf vallues are pretty printed by default. Disable to turn this off
+
+Auth types
+^^^^^^^^^^
+The RESTCONF daemon uses the following authentication types:
+
+none
+   Message are not authenticated. No callback is called, authenticated user is set to special user "none". Typically assumes NACM is not enabled.
+client-cert
+   Set to authenticated and extract the username from the SSL_CN parameter. A callback can revise this behavior.
+user
+   User-defined behaviour as implemented by the `auth callback`_. Typically done by basic auth, eg HTTP_AUTHORIZATION header, and verify password
+
+NGINX
+^^^^^
+Nginx specific config options are:
+
+fcgi-socket
+   Path to FCGI unix socket. This path should be the same as specific in fcgi reverse proxy
+
+Evhtp
+^^^^^
+Evhtp specific config options are:
+
+server-cert-path
+   Path to server certificate file
+server-key-path
+   Path to server key file
+server-ca-cert-path
+   Path to server CA cert file
+socket
+   List of server sockets that the restconf daemon listens to with the following fields:
+socket namespace
+   Network namespace
+socket address
+   IP address to bind to
+socket port
+   TCP port to bind to
+socket ssl
+   If true: HTTPS; if false: HTTP protocol
+
+Examples
+^^^^^^^^
+Configure a single HTTP on port 80 in the default config file::
+
+  <clixon-config xmlns="http://clicon.org/config">
+     <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
+     ...
+     <restconf>
+        <enable>true</enable>
+        <auth-type>password</auth-type>
+        <socket>
+           <namespace>default</namespace>
+           <address>0.0.0.0</address>
+           <port>80</port>
+           <ssl>false</ssl>
+        </socket>
+     </restconf>
+  </clixon-config>
+
+Configure two HTTPS listeners in two different namespaces::
+
+   <restconf xmlns="https://clicon.org/restconf">
+      <enable>true</enable>
+      <auth-type>client-certificate</auth-type>
+      <server-cert-path>/etc/ssl/certs/clixon-server-crt.pem</server-cert-path>
+      <server-key-path>/etc/ssl/private/clixon-server-key.pem</server-key-path>
+      <server-ca-cert-path>/etc/ssl/certs/clixon-ca_crt.pem</server-ca-cert-path>
+      <socket>
+         <namespace>default</namespace>
+         <address>0.0.0.0</address>
+         <port>443</port>
+         <ssl>true</ssl>
+      </socket>
+      <socket>
+         <namespace>myns</namespace>
+         <address>0.0.0.0</address>
+         <port>443</port>
+         <ssl>true</ssl>
+      </socket>
+   </restconf>
+
+SSL Certificates
+^^^^^^^^^^^^^^^^
+If you use native RESTCONF you may want to have server/client
+certs. If you use FCGI, certs are configured according to the reverse
+proxy documentation, such as NGINX. The rest of this section applies to native restconf only.
+
+If you already have certified server certs, ensure ``CLICON_SSL_SERVER_CERT`` and ``CLICON_SSL_SERVER_KEY`` points to them.
+
+If you do not have them, you can generate self-signed certs, for example as follows::
+
+   openssl req -x509 -nodes -newkey rsa:4096 -keyout /etc/ssl/private/clixon-server-key.pem -out /etc/ssl/certs/clixon-server-crt.pem -days 365
+
+You can also generate client certs (not shown here) using ``CLICON_SSL_CA_CERT``. Example using client certs and curl for client `andy`::
+  
+   curl -Ssik --key andy.key --cert andy.crt -X GET https://localhost/restconf/data/example:x
 
 Starting
 --------
-The restconf daemon (``clixon_restconf``) can be started as root, but in that case drops privileges to wwwuser, unless the ``-r`` command-line option is used.
-
-You can start the restconf daemon in several ways:
+You can start the RESTCONF daemon in several ways:
 
   1. `systemd` as described in :ref:`clixon_install`
   2. `internally` using the `process-control` RPC (see below)
   3. `docker` mechanisms, see the docker container docs
+
 
 Internal start
 ^^^^^^^^^^^^^^
@@ -135,12 +260,68 @@ Example 2, using netconf RPC to restart the process::
 
 Note that the backend daemon must run as root (no lowering of privileges) to use this feature.
       
-FCGI mode
----------
-This section describes the RESTCONF FCGI mode using NGINX.
+
+Plugin callbacks
+----------------
+Restconf plugins implement callbacks, some are same as for :ref:`backend plugins <clixon_backend>`.
+
+init
+   Clixon plugin init function, called immediately after plugin is loaded into the restconf daemon.
+start
+   Called when application is started and initialization is complete, and after drop privileges.
+exit
+   Called just before plugin is unloaded 
+extension
+  Called at parsing of yang modules containing an extension statement.
+auth
+  See `auth callback`_
+
+
+Auth callback
+^^^^^^^^^^^^^
+
+The role of the authentication callback is, given a message (its headers) and authentication type, determine if the message passes authentication and return an associated user.
+
+The auth callback is invoked after incoming processing, including cert validation, if any, but before relaying the message to the backend for NACM checks and datastore processing.
+
+If the message is not authenticated, an error message is returned with
+tag: `access denied` and HTTP error code `401 Unauthorized`.
+   
+There are default handlers for TLS client certs and for "no" authentication. But other variants, such as http basic authentication, oauth2 or the remapping of client certs to NACM usernames, can be implemented by this callback
+
+If the message is authenticated, a user is associated with the message. This user can be derived from the headers or mapped in an application-dependent way. This user is used internally in Clixon and sent via the IPC protocol to the backend where it may be used for NACM authorization.
+
+The signature of the auth callback is as follows::
+
+  int ca_auth(clicon_handle h, void *req, clixon_auth_type_t auth_type, int *authp, char **userp);
+
+where:  
+
+h
+   Clixon handle
+req
+   Per-message request www handle to use with restconf_api.h
+auth-type
+   Specifies how the authentication is made and what default value 
+authp
+   Boolean result value: 0 for not authenticated, 1: authenticated
+userp
+   The associated user, malloced by plugin. Only if retval is 1/OK and authp=1,
+
+The return value is one of:
+
+- -1: Fatal error
+- 0: Ignore, undecided, not handled, same as no callback
+- 1: OK see authp and userp parameter for result.
+ 
+If there are multiple callbacks, the first result which is not "ignore" is returned. This is to allow for different callbacks registering different classes, or grouping of authentication.
+  
+The main example contains example code.
 
 NGINX
-^^^^^
+-----
+This section describes the RESTCONF FCGI mode using NGINX.
+
 If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical configuration is as follows::
 
   server {
@@ -152,109 +333,6 @@ If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical
   }
 
 where ``fastcgi_pass`` setting must match ``CLICON_RESTCONF_PATH``.
-
-Fcgi stream options
-^^^^^^^^^^^^^^^^^^^
-The following options apply only for fcgi mode and notification streams:
-
-CLICON_STREAM_DISCOVERY_RFC8040
-  Enable monitoring information for the RESTCONF protocol from RFC 804 (only fcgi)
-
-CLICON_STREAM_PATH  
-  Stream path appended to CLICON_STREAM_URL to form stream subscription URL (only fcgi)
-
-Native http mode
-----------------
-This only applies if you have chosen ``--with-restconf=evhtp``.
-
-You need to have ``libevhtp`` installed. See :ref:`clixon_install`.
-
-Native http uses openssl version 1.1.1.
-
-Configuration of native http has more options than reverse proxy, since it contains web-fronting parts, including socket(address, ports) and certificates, where these part of Nginx. These options are defined in in ``clixon-restconf.yang``.
-
-There are two ways to configure the socket and certificates of native http:
-
-  1. Local configure (clixon-config), where clixon-restconf.yang options can be included.
-  2. From clixon backend as a second step after loading initial config from clixon-config.
-     
-In the case of (1) example HTTP on port 80 (note multiple sockets can be configured)::
-
-  <clixon-config xmlns="http://clicon.org/config">
-     <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
-     ...
-     <restconf>
-        <enable>true</enable>
-        <auth-type>password</auth-type>
-        <socket>
-           <namespace>default</namespace>
-           <address>0.0.0.0</address>
-           <port>80</port>
-           <ssl>false</ssl>
-        </socket>
-     </restconf>
-  </clixon-config>
-
-In the case of (2) example with ssl ::
-
-   <restconf xmlns="https://clicon.org/restconf">
-      <enable>true</enable>
-      <auth-type>client-certificate</auth-type>
-      <server-cert-path>/etc/ssl/certs/clixon-server-crt.pem</server-cert-path>
-      <server-key-path>/etc/ssl/private/clixon-server-key.pem</server-key-path>
-      <server-ca-cert-path>/etc/ssl/certs/clixon-ca_crt.pem</server-ca-cert-path>
-      <socket>
-         <namespace>default</namespace>
-         <address>0.0.0.0</address>
-         <port>443</port>
-         <ssl>true</ssl>
-      </socket>
-      <socket>
-         <namespace>myns</namespace>
-         <address>0.0.0.0</address>
-         <port>443</port>
-         <ssl>true</ssl>
-      </socket>
-   </restconf>
-
-In the latter case, ``clixon_restconf.yang`` should be imported, and these settings must be
-present in the running datastore `before` the restconf daemon is
-started. This can be done via the startup datastore or by editing the
-running config before restconf daemon.
-
-The example also includes a socket that listen to another network namespace ``myns``, which must exist and have networking setup so that a socket can be bound.
-
-Plugin callbacks
-----------------
-Restconf plugins implement callbacks, some are same as for :ref:`backend plugins <clixon_backend>`. Most important is the ``auth`` callback where user authentication can be implemented.
-
-init
-   Clixon plugin init function, called immediately after plugin is loaded into the restconf daemon.
-start
-   Called when application is started and initialization is complete, and after drop privileges.
-exit
-   Called just before plugin is unloaded 
-extension
-  Called at parsing of yang modules containing an extension statement.
-auth
-  Called by restconf on each incoming request to check credentials and return username. This is done after cert validation, if any. For example, http basic authentication, oauth2 or just matching client certs with username can be implemented here.
-
-
-SSL Certificates
-----------------
-If you use native RESTCONF you may want to have server/client
-certs. If you use FCGI, certs are configured according to the reverse
-proxy documentation, such as NGINX. The rest of this section applies to native restconf only.
-
-If you already have certified server certs, ensure ``CLICON_SSL_SERVER_CERT`` and ``CLICON_SSL_SERVER_KEY`` points to them.
-
-If you do not have them, you can generate self-signed certs, for example as follows::
-
-   openssl req -x509 -nodes -newkey rsa:4096 -keyout /etc/ssl/private/clixon-server-key.pem -out /etc/ssl/certs/clixon-server-crt.pem -days 365
-
-You can also generate client certs (not shown here) using ``CLICON_SSL_CA_CERT``. Example using client certs and curl for client `andy`::
-  
-   curl -Ssik --key andy.key --cert andy.crt -X GET https://localhost/restconf/data/example:x
 
 RESTCONF streams
 ----------------
@@ -294,3 +372,12 @@ You can also specify start and stop time. Start-time enables replay of existing 
 
    curl -H "Accept: text/event-stream" -s -X GET http://localhost/streams/EXAMPLE?start-time=2014-10-25T10:02:00&stop-time=2014-10-25T12:31:00
 
+Fcgi stream options
+^^^^^^^^^^^^^^^^^^^
+The following options apply only for fcgi mode and notification streams:
+
+CLICON_STREAM_DISCOVERY_RFC8040
+  Enable monitoring information for the RESTCONF protocol from RFC 804 (only fcgi)
+
+CLICON_STREAM_PATH  
+  Stream path appended to CLICON_STREAM_URL to form stream subscription URL (only fcgi)
