@@ -137,6 +137,8 @@ Example::
   
 The example is implemented as a regression test in ``test/test_netconf_ssh_callhome.sh``
 
+The RFC lists several security issues that need to be addressed in a solution, including "pinning" of host keys etc.
+
 .. note::
         Warning: there are security implications of using this example as noted in `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_
 
