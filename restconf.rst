@@ -9,24 +9,15 @@ Clixon supports two RESTCONF compile-time variants: *FCGI* and *Native*.
    
 Architecture
 ------------
-::
 
-                                      +---------------------------------+
-                                      |        clixon options           |
-                                      +---------------------------------+
-                                          |- XML                   |- XML
-                        FCGI              v                        v
-        (1)  +-------+    |    +----------+--------+   IPC    +----------+
- User  <-->  | nginx |  <--->  | restconf | plugin |    |     | backend  |
-             +-------+         | daemon   |--------+  <--->   | daemon   |
- User  <-------------------->  |          | plugin |          |          |
-        (2)     "native"       +----------+--------+          +----------+
+ .. image:: restconf1.jpg
+   :width: 100%
 
 The restconf deamon provides a http/https RESTCONF interface to the
 Clixon backend.  It comes in two variants, as shown by (1) and (2) in the figure above:
 
-  1. A reverse proxy (such as NGINX) and fastCGI where web and restconf function is separated
-  2. Native http using libevhtp, which combines a web server and restconf handler.
+  1. Native http using libevhtp, which combines a web server and restconf handler.
+  2. A reverse proxy (such as NGINX) and fastCGI where web and restconf function is separated
 
 The restconf daemon communicates with the backend using
 internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
