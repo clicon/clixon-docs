@@ -75,6 +75,8 @@ CLICON_RESTCONF_DIR
    Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
 CLICON_BACKEND_RESTCONF_PROCESS
   Start restconf daemon internally from backend daemon.
+CLICON_ANONYMOUS_USER
+  If RESTCONF authentication auth-type=none then use this user
 
 The remaining options are defined in `clixon-restconf.yang` where they can be defined locally within the clixon config file::
 
@@ -110,7 +112,7 @@ Auth types
 The RESTCONF daemon uses the following authentication types:
 
 none
-   Message are not authenticated. No callback is called, authenticated user is set to special user "none". Typically assumes NACM is not enabled.
+   Messages are not authenticated and set to the value of `CLICON_ANONYMOUS_USER`. A callback can revise this behavior.
 client-cert
    Set to authenticated and extract the username from the SSL_CN parameter. A callback can revise this behavior.
 user
@@ -153,7 +155,7 @@ Configure a single HTTP on port 80 in the default config file::
      ...
      <restconf>
         <enable>true</enable>
-        <auth-type>password</auth-type>
+        <auth-type>user</auth-type>
         <socket>
            <namespace>default</namespace>
            <address>0.0.0.0</address>
@@ -287,7 +289,7 @@ The auth callback is invoked after incoming processing, including cert validatio
 If the message is not authenticated, an error message is returned with
 tag: `access denied` and HTTP error code `401 Unauthorized`.
    
-There are default handlers for TLS client certs and for "no" authentication. But other variants, such as http basic authentication, oauth2 or the remapping of client certs to NACM usernames, can be implemented by this callback
+There are default handlers for TLS client certs and for "none" authentication. But other variants, such as http basic authentication, oauth2 or the remapping of client certs to NACM usernames, can be implemented by this callback
 
 If the message is authenticated, a user is associated with the message. This user can be derived from the headers or mapped in an application-dependent way. This user is used internally in Clixon and sent via the IPC protocol to the backend where it may be used for NACM authorization.
 
