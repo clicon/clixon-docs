@@ -157,6 +157,8 @@ The following XPath functions as defined in Section 4 of the XPath 1.0 standard 
 * name
 * contains
 * not
+* true
+* false
 
 The remaining XPath functions are not supported. 
 

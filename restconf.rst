@@ -286,7 +286,7 @@ If the message is authenticated, a user is associated with the message. This use
 
 The signature of the auth callback is as follows::
 
-  int ca_auth(clicon_handle h, void *req, clixon_auth_type_t auth_type, int *authp, char **userp);
+  int ca_auth(clicon_handle h, void *req, clixon_auth_type_t auth_type, char **authp);
 
 where:  
 
@@ -297,15 +297,12 @@ req
 auth-type
    Specifies how the authentication is made and what default value 
 authp
-   Boolean result value: 0 for not authenticated, 1: authenticated
-userp
-   The associated user, malloced by plugin. Only if retval is 1/OK and authp=1,
 
 The return value is one of:
 
-- -1: Fatal error
-- 0: Ignore, undecided, not handled, same as no callback
-- 1: OK see authp and userp parameter for result.
+- -1: Fatal error, close socket.
+- 0: Ignore, undecided, not handled, same as no callback. Fallback to default handler.
+- 1: OK see authp parameter whether the result is authenticated or not, and the associated user.
  
 If there are multiple callbacks, the first result which is not "ignore" is returned. This is to allow for different callbacks registering different classes, or grouping of authentication.
   
