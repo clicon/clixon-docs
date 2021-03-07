@@ -297,10 +297,11 @@ req
 auth-type
    Specifies how the authentication is made and what default value 
 authp
+   NULL if credentials failed, otherwise malloced string of authentoicated user
 
 The return value is one of:
 
-- -1: Fatal error, close socket.
+- -1: Fatal error, close socket
 - 0: Ignore, undecided, not handled, same as no callback. Fallback to default handler.
 - 1: OK see authp parameter whether the result is authenticated or not, and the associated user.
  
