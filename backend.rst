@@ -43,7 +43,7 @@ The backend have the following command-line options:
   -D <level>      Debug level
   -f <file>       CLICON config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
   -d <dir>        Specify backend plugin directory (default: none)
   -p <dir>        Yang directory path (see CLICON_YANG_DIR)
   -b <dir>        Specify XMLDB database directory

@@ -109,6 +109,69 @@ You can also add the C preprocessor as a first step. You can then define macros,
         $(CPP) -P -x assembler-with-cpp $(INCLUDES) -o $@ $<
 
 
+Error and logs
+==============
+
+Initialization
+--------------
+
+Clixon core applications typically have a command-line option controlling the logs as follows:
+
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
+
+An example of a clixon error as it may appear in a syslog::
+
+  Mar 24 10:30:48 Alarik clixon_restconf[3993]: clixon_restconf openssl: 3993 Started
+
+In C-code, clixon error and logging is initialized by ``clicon_log_init``::
+
+  clicon_log_init(prefix, upto, flags); 
+
+where:
+
+* `prefix`: appears first in the error string
+* `upto`: log priority as defined by syslog(3), eg: LOG_DEBUG, LOG_INFO,..
+* `flags`: a bitmask of where logs appear, values are: ``CLICON_LOG_STDERR``, ``_STDOUT``, ``_SYSLOG``, ``_FILE``.
+
+
+  
+Error call
+----------
+An error is typically called by ``clicon_err()`` and a return value of ``-1`` as follows::
+
+  clicon_err(category, errno, format, ...)
+  return -1;
+
+where:
+
+* `category` is an error "category" including for example "yang", "xml" See `enum clicon_err` for more examples.
+* `errno`  if given, usually errors as given by ``errno.h``
+* `format` A variable arg string describing the error.
+
+Specialized error handling
+--------------------------
+An application can specialize error handling for a specific category by using `clixon_err_cat_reg()` and a log callback. Example::
+
+
+   /* Clixon error category log callback 
+    * @param[in]    handle  Application-specific handle
+    * @param[out]   cb      Read log/error string into this buffer
+    */
+   static int
+   my_log_cb(void  *handle,
+             cbuf  *cb)
+   {
+       cprintf(cb, "Myerror");
+       return 0;
+   }
+
+   main(){
+     ...
+     /* Register error callback for category */
+     clixon_err_cat_reg(OE_SSL, h, openssl_cat_log_cb);
+
+In this example, "Myerror" will appear in the log string.
+  
 Automatic upgrades
 ==================
 There is an EXPERIMENTAL xml changelog feature based on

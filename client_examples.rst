@@ -139,7 +139,7 @@ NETCONF it should work in the same way regardless of using Clixon or ConfD:
   <?xml version="1.0" encoding="UTF-8"?>
   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <capabilities>
-      <capability>urn:ietf:params:netconf:base:1.0</capability>
+      <capability>urn:ietf:params:netconf:base:1.1</capability>
     </capabilities>
   </hello>
   ]]>]]>

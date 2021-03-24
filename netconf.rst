@@ -33,7 +33,7 @@ The `clixon_netconf` client has the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
   -q              Quiet mode, do not run hello protocol
   -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
   -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
@@ -126,7 +126,7 @@ The callhome and callhome-client referred to above are implemented by the utilit
 Example::
 
   # Start ssh on client: bind to 1.2.3.4:4334 sending an rpc on stdin
-  client> echo '<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><candidate/></source></get-config></rpc>]]>]]>' > msg
+  client> echo '<?xml version="1.0" encoding="UTF-8"?><hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities></hello>]]>]]><rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><candidate/></source></get-config></rpc>]]>]]>' > msg
   client> ssh -s -v -o ProxyUseFdpass=yes -o ProxyCommand="clixon_netconf_ssh_callhome_client -a 1.2.3.4" . netconf < msg
 
   # Start callhome on server: connect to 1.2.3.4:4334

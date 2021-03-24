@@ -34,6 +34,10 @@ The first usecase illustrates how a retrieval of a configured value from the sys
 2. The CLI string `show configuration text hello` is translated to internal NETCONF and sent to the backend:
 ::
 
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities>
+   </hello>]]>]]>
    <rpc username="myuser" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
      <get-config>
        <source><candidate/></source>
@@ -89,6 +93,10 @@ When setting a config value, the candidate datastore is modified and the committ
 2. Internal netconf containing a "replace" operation:
 ::
 
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities>
+   </hello>]]>]]>
    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" username="clicon">
      <edit-config>
        <target><candidate/></target>

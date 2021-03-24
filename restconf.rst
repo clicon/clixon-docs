@@ -48,7 +48,7 @@ The restconf daemon have the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f: -lf<file>.
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
   -p <dir>        Yang directory path (see CLICON_YANG_DIR)
   -b <dir>        Specify XMLDB database directory
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
@@ -85,9 +85,12 @@ Alternatively, the restconf configuration can be defined in the regular datastor
       ...   <!--  Add restconf options here -->
    </restconf>
    
-In the latter case, the restconf daemon reads its config from the running datastore on startup.
+In the latter case, the restconf daemon reads its config from the running datastore on startup. 
 
-Those restconf options are as follows:
+.. note::
+      If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config should be in the regular datastore.
+   
+The restconf options are as follows:
 
 enable
    Enable the RESTCONF daemon. If disabled, the restconf daemon will not start
@@ -218,6 +221,10 @@ The algorithm for starting and stopping the clixon-restconf internally is as fol
 
 Example 1, using netconf `edit-config` to start the process::
 
+  <?xml version="1.0" encoding="UTF-8"?>
+  <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities>
+  </hello>]]>]]>
   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
      <edit-config>
         <default-operation>merge</default-operation>
@@ -241,6 +248,10 @@ Example 1, using netconf `edit-config` to start the process::
   
 Example 2, using netconf RPC to restart the process::
 
+  <?xml version="1.0" encoding="UTF-8"?>
+  <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities>
+  </hello>]]>]]>
   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
      <process-control xmlns="http://clicon.org/lib">
         <name>restconf</name>

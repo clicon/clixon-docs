@@ -99,8 +99,6 @@ Capability is preferred over default subtrees. This has two reasons:
 1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retrieved.
 2. Subtree filtering does not support namespaces yet.
 
-Further, the capability negotiation (hello protocol) as defined in RFC6241 Sec 8.1 and RFC7950 Sec 5.6.4 is only partly implemented.
-   
 Default values
 ^^^^^^^^^^^^^^
 
@@ -141,6 +139,8 @@ The XML-related standards include:
 * `Namespaces in XML 1.0 <https://www.w3.org/TR/2009/REC-xml-names-20091208>`_
 * `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_
        
+Clixon XML supports version and UTF-8 only.
+
 The following XPath axes are supported:
 
 * child,
