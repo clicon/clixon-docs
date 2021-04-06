@@ -47,7 +47,7 @@ The `clixon_netconf` client has the following command-line options:
 
 Options
 ^^^^^^^
-The configuration file options related to RESTCONF common to both fcgi and evhtp are the following:
+The configuration file options related to RESTCONF common to both fcgi and native mode are the following:
 
 CLICON_RESTCONF_DIR
    Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.

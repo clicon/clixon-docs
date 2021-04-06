@@ -16,7 +16,7 @@ Architecture
 The restconf deamon provides a http/https RESTCONF interface to the
 Clixon backend.  It comes in two variants, as shown by (1) and (2) in the figure above:
 
-  1. Native http using libevhtp, which combines a web server and restconf handler.
+  1. Native http, which combines a web and restconf server.
   2. A reverse proxy (such as NGINX) and fastCGI where web and restconf function is separated
 
 The restconf daemon communicates with the backend using
@@ -33,7 +33,7 @@ Installation
 The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
-  --with-restconf=evhtp   RESTCONF using native http with libevhtp
+  --with-restconf=native  RESTCONF using native http with libevhtp
   --with-wwwuser=<user>   Set www user different from ``www-data``
 
 After that perform system-wide compilation::
@@ -119,9 +119,9 @@ Nginx specific config options are:
 fcgi-socket
    Path to FCGI unix socket. This path should be the same as specific in fcgi reverse proxy
 
-Evhtp
-^^^^^
-Evhtp specific config options are:
+Native
+^^^^^^
+Native specific config options are:
 
 server-cert-path
    Path to server certificate file
@@ -340,7 +340,7 @@ RESTCONF streams
 ----------------
 
 Clixon has an experimental RESTCONF event stream implementations following
-RFC8040 Section 6 using Server-Sent Events (SSE).  Currently this is implemented in FCGI/Nginx only (not evhtp).
+RFC8040 Section 6 using Server-Sent Events (SSE).  Currently this is implemented in FCGI/Nginx only (not native).
 
 .. note::
         RESTCONF streams are experimental and only implemented for FCGI.

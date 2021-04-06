@@ -70,8 +70,8 @@ Download clixon source code::
 Configure Clixon using one of the following RESTCONF variants::
 
      configure --without-restconf
-     configure --with-restconf=fcgi  # Reverse proxy This is default
-     configure --with-restconf=evhtp # Native http / libevhtp
+     configure --with-restconf=fcgi   # Reverse proxy This is default
+     configure --with-restconf=native # Native http using libevhtp/libevent
 
 For more configure options see: `Configure options`_.
 
@@ -192,15 +192,13 @@ Build libevhtp from source
 --------------------------
 For RESTCONF using native http build evhtp from source as follows::
 
-  sudo git clone https://github.com/criticalstack/libevhtp.git
-  cd libevhtp/build
-  cmake -DEVHTP_DISABLE_REGEX=ON -DEVHTP_DISABLE_EVTHR=ON -DBUILD_SHARED_LIBS=ON ..
+  sudo git clone https://github.com/clicon/clixon-libevhtp.git
+  cd libevhtp
+  ./configure --libdir=/usr/lib
   make
   sudo make install
 
-You may also need to install cmake and libevent2/libevent-dev.
-
-Evhtp requires openssl 1.1 API which is NOT default in Ubuntu 16.0.4, CentOS 7 for example.
+Note: Clixon native mode requires openssl 1.1 API which is NOT default in Ubuntu 16.0.4, CentOS 7 for example.
 
 Build fcgi from source
 ----------------------
@@ -238,7 +236,7 @@ These include (standard options are omitted)
   --with-cligen=dir       Use CLIGEN here
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
-  --with-restconf=evhtp   RESTCONF using native http with libevhtp
+  --with-restconf=native  RESTCONF using native http with libevhtp
   --with-wwwuser=<user>   Set www user different from www-data
   --with-configfile=FILE  set default path to config file
   --with-libxml2          use gnome/libxml2 regex engine
