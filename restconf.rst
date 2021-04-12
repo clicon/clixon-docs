@@ -14,7 +14,7 @@ Architecture
    :width: 100%
 
 The restconf deamon provides a http/https RESTCONF interface to the
-Clixon backend.  It comes in two variants, as shown by (1) and (2) in the figure above:
+Clixon backend.  It comes in two variants, as shown in the figure above:
 
   1. Native http, which combines a web and restconf server.
   2. A reverse proxy (such as NGINX) and fastCGI where web and restconf function is separated
@@ -32,7 +32,7 @@ Installation
 
 The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
   --without-restconf      No RESTCONF
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default. Note fcgi feature must be set
   --with-restconf=native  RESTCONF using native http with libevhtp
   --with-wwwuser=<user>   Set www user different from ``www-data``
 
@@ -65,11 +65,11 @@ The following RESTCONF configuration options can be defined in the clixon config
 CLICON_RESTCONF_DIR
    Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
 CLICON_BACKEND_RESTCONF_PROCESS
-  Start restconf daemon internally from backend daemon.
+   Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore. 
 CLICON_ANONYMOUS_USER
-  If RESTCONF authentication auth-type=none then use this user
+   If RESTCONF authentication auth-type=none then use this user
 
-The remaining options are defined in `clixon-restconf.yang` where they can be defined locally within the clixon config file::
+The remaining options are defined in `clixon-restconf.yang` where they are defined locally within the clixon config file::
 
   <clixon-config xmlns="http://clicon.org/config">
      <restconf>
@@ -78,7 +78,7 @@ The remaining options are defined in `clixon-restconf.yang` where they can be de
      </restconf>
    </clixon-config>
 
-Alternatively, the restconf configuration can be defined in the regular datastore by adding, as follows::
+Alternatively if ``CLICON_BACKEND_RESTCONF_PROCESS`` is set, the restconf configuration is defined in the regular datastore by adding the following::
 
    <restconf xmlns="http://clicon.org/restconf">
       <enable>true</enable>
@@ -88,7 +88,7 @@ Alternatively, the restconf configuration can be defined in the regular datastor
 In the latter case, the restconf daemon reads its config from the running datastore on startup. 
 
 .. note::
-      If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config should be in the regular datastore.
+      If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config must be in the regular datastore.
    
 The restconf options are as follows:
 
@@ -101,26 +101,42 @@ debug
 pretty
    Restconf vallues are pretty printed by default. Disable to turn this off
 
+Features
+^^^^^^^^
+The Restconf config has two features:
+
+fcgi
+   The restconf server supports the fast-cgi reverse proxy mode. Set this if fcgi/nginx is used.
+allow-auth-none
+   Authentication supports a `none` mode.
+
+Example, add this in the config file to enable fcgi::
+
+   <clixon-config xmlns="http://clicon.org/config">
+      ...
+      <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
+   
 Auth types
 ^^^^^^^^^^
 The RESTCONF daemon uses the following authentication types:
 
 none
-   Messages are not authenticated and set to the value of `CLICON_ANONYMOUS_USER`. A callback can revise this behavior.
+   Messages are not authenticated and set to the value of ``CLICON_ANONYMOUS_USER``. A callback can revise this behavior. Note, must set `allow-auth-none` feature.
 client-cert
    Set to authenticated and extract the username from the SSL_CN parameter. A callback can revise this behavior.
 user
    User-defined behaviour as implemented by the `auth callback`_. Typically done by basic auth, eg HTTP_AUTHORIZATION header, and verify password
 
-NGINX
-^^^^^
-Nginx specific config options are:
+FCGI mode
+^^^^^^^^^
+Applies if clixon is configured with ``--with-restconf=fcgi``. Fcgi-specific config options are:
 
 fcgi-socket
    Path to FCGI unix socket. This path should be the same as specific in fcgi reverse proxy
 
-Native
-^^^^^^
+Native mode
+^^^^^^^^^^^
+Applies if clixon is configured with ``--with-restconf=native``. 
 Native specific config options are:
 
 server-cert-path
@@ -263,7 +279,6 @@ Example 2, using netconf RPC to restart the process::
   </rpc-reply>
 
 Note that the backend daemon must run as root (no lowering of privileges) to use this feature.
-      
 
 Plugin callbacks
 ----------------
@@ -320,8 +335,8 @@ If there are multiple callbacks, the first result which is not "ignore" is retur
   
 The main example contains example code.
 
-NGINX
------
+FCGI
+----
 This section describes the RESTCONF FCGI mode using NGINX.
 
 If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical configuration is as follows::

@@ -323,3 +323,64 @@ In both cases the *config-db* would be a single-point-of-failure but could be mi
 Regarding clients:
   * the *CLI* and *NETCONF* clients are stateless and spun up on demand.
   * the *RESTCONF* daemon is stateless and can run as multiple instances (with a load-balancer)
+
+Process handling
+================
+
+Clixon has a simple internal process handling currently used for :ref:`internal restconf <clixon_restconf>` but can also be used for user applications.
+
+The process data structure has a unique name with pids created for "active" processes. There are three states:
+
+STOPPED
+   pid=0,   No process running
+RUNNING
+   pid is set, Process started and assumed running
+EXITING
+   pid set, Process is killed by parent but not waited for (eg not 
+   
+There are three operations that a client can perform on processes:
+
+start
+   Start a process
+restart
+   Restart a process
+stop
+   Stop a process
+
+State machine
+-------------
+
+The state machine for a process is as follows::   
+
+   --> STOPPED --(re)start-->    RUNNING(pid)
+          ^   <--1.wait(kill)---   |  ^
+	  |                   stop/|  | 
+          |                 restart|  | restart
+          |                        v  |
+          wait(stop) ------- EXITING(dying pid)
+	  
+The Process struct is created by calling clixon_process_register() with static info such as name, description, namespace, start arguments, etc. Starts in STOPPED state::
+
+       --> STOPPED
+
+On operation "start" or "restart" it gets a pid and goes into RUNNING state::
+
+           STOPPED -- (re)start --> RUNNING(pid)
+
+When running, several things may happen:
+
+     1. It is killed externally: the process gets a SIGCHLD triggers a wait and it goes to STOPPED::
+	  
+           RUNNING  --sigchld/wait-->  STOPPED
+
+     2. It is stopped due to a rpc or configuration remove: The parent kills the process and enters EXITING waiting for a SIGCHLD that triggers a wait,	therafter it goes to STOPPED::
+
+           RUNNING --stop--> EXITING  --sigchld/wait--> STOPPED
+     
+     3. It is restarted due to rpc or config change (eg a server is added, a key modified, etc). The parent kills the process and enters EXITING waiting for a SIGCHLD that triggers a wait, therafter a new process is started and it goes to RUNNING with a new pid::
+
+           RUNNING --restart--> EXITING  --sigchld/wait + restart --> RUNNING(pid)
+
+
+
+
