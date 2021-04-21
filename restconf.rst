@@ -69,20 +69,33 @@ CLICON_BACKEND_RESTCONF_PROCESS
 CLICON_ANONYMOUS_USER
    If RESTCONF authentication auth-type=none then use this user
 
+Config file
+^^^^^^^^^^^
+
 The remaining options are defined in `clixon-restconf.yang` where they are defined locally within the clixon config file::
 
+  <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
+  <CLICON_BACKEND_RESTCONF_PROCESS>false/CLICON_BACKEND_RESTCONF_PROCESS>
   <clixon-config xmlns="http://clicon.org/config">
      <restconf>
         <enable>true</enable>
-        ...  <!-- Add restconf options here -->
+	<fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
      </restconf>
    </clixon-config>
 
-Alternatively if ``CLICON_BACKEND_RESTCONF_PROCESS`` is set, the restconf configuration is defined in the regular datastore by adding the following::
+Datastore
+^^^^^^^^^
+
+Alternatively if ``CLICON_BACKEND_RESTCONF_PROCESS`` is set, the restconf configuration is::
+
+  <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
+  <CLICON_BACKEND_RESTCONF_PROCESS>false/CLICON_BACKEND_RESTCONF_PROCESS>
+
+And the detailed restconf is defined in the regular running datastore by adding something like::
 
    <restconf xmlns="http://clicon.org/restconf">
       <enable>true</enable>
-      ...   <!--  Add restconf options here -->
+      <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
    </restconf>
    
 In the latter case, the restconf daemon reads its config from the running datastore on startup. 

@@ -127,8 +127,10 @@ RESTCONF event notification as described in RFC7950 section 6 is supported as fo
 * is supported by *FCGI* 
 * is *not* supported by *native* 
 
-_NMDA_ is partly supported according to `RFC 8324 <https://tools.ietf.org/html/rfc8342>`_ and `RFC 8527 <https://tools.ietf.org/html/rfc8527>`_. With-defaults and with-origin are not implemented.
-  
+`NMDA` is partly supported according to `RFC 8324 <https://tools.ietf.org/html/rfc8342>`_ and `RFC 8527 <https://tools.ietf.org/html/rfc8527>`_. With-defaults and with-origin are not implemented.
+
+`RFC 8072: YANG Patch Media Type <https://www.rfc-editor.org/rfc/rfc8072.txt>`_ is not implemented.
+
 XML and XPath
 -------------
 Clixon has its own implementation of XML and XPath. See more in the detailed API reference.

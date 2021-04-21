@@ -56,7 +56,7 @@ For RESTCONF using the native http solution you may need to `build libevhtp from
 .. note::
         The openssl 1.1 API is NOT default in some older OS:s such as Ubuntu 16.0.4, CentOS 7
 
-Native http also requires libevent-2::
+Native http also requires libevent-2.1::
 
   sudo apt-get install libevent-dev
 
@@ -71,7 +71,7 @@ Configure Clixon using one of the following RESTCONF variants::
 
      configure --without-restconf
      configure --with-restconf=fcgi   # Reverse proxy This is default
-     configure --with-restconf=native # Native http using libevhtp/libevent
+     configure --with-restconf=native # Native http using libevhtp/libevent-2.1
 
 For more configure options see: `Configure options`_.
 
@@ -166,7 +166,7 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    [Install]
    WantedBy=multi-user.target
 
-The restconf daemon can also be started using the clixon-lib process-control RPC. FOr more info, see :ref:`clixon_restconf`.
+The restconf daemon can also be started using the clixon-lib process-control RPC. For more info, see :ref:`clixon_restconf`.
 
 Docker
 ------
