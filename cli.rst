@@ -75,7 +75,7 @@ Cli spec variables
 A CLI specification file typically starts with the following variables:
 
 CLICON_MODE
-  A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to _all_ modes specified in the list. You can also use wildcards `*` and `?`.
+  A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to *all* modes specified in the list. You can also use wildcards `*` and `?`.
 
 CLICON_PROMPT
   A string describing the CLI prompt using a very simple format with: ``%H`` (host) , ``%U`` (user) , ``%T`` (tty),  ``%W`` (working path).

@@ -17,11 +17,10 @@ The YANG standards that Clixon follows include:
 * `YANG 1.1 RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_
 * `YANG module library RFC 7895 <http://www.rfc-editor.org/rfc/rfc7895.txt>`_
 
-However, Clixon deviates from the YANG standard as follows (reference to RFC7950 in parenthesis):
+However, Clixon deviates from the YANG standard as follows (reference to RFC7950 sections in parenthesis):
 
 Not implemented:
 
-* deviation (7.20.3)
 * action (7.15)
 * augment in a uses sub-clause (7.17) (module-level augment is implemented)
 * require-instance
@@ -33,13 +32,20 @@ Not implemented:
 
 Further:
 
-* Clixon supports the following extended XPath functions (10)
-  * current()
-  * deref()
-  * derived-from(),
-  * derived-from-or-self() 
-* The following extended XPath functions are not supported: re-match(), enum-value(), bit-is-set() (10)
-* if-feature-expr is restricted to single layer expressions with and/or: "x and y" and "x or y" is allowed but "x or (not y and z)" is not. (7.20.2)
+* Clixon supports the following extended XPath functions (10):
+   - current()
+   - deref()
+   - derived-from(),
+   - derived-from-or-self()
+  
+* But the following extended XPath functions are *not* supported (10):
+   - re-match()
+   - enum-value()
+   - bit-is-set()
+     
+* if-feature-expr() is restricted to single layer expressions with and/or (7.20.2):
+   - ``x and y`` and ``x or y`` is supported
+   - ``x or (not y and z)`` is *not* supported 
 
 Regular expressions
 ^^^^^^^^^^^^^^^^^^^
