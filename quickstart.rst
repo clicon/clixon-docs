@@ -76,12 +76,14 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 ::
 
    olof@vandal> clixon_netconf -q
-   <rpc><edit-config><target><candidate/></target><config><hello xmlns="urn:example:hello"><world/></hello></config></edit-config></rpc>]]>]]>
-   <rpc-reply><ok/></rpc-reply>]]>]]>
-   <rpc><commit/></rpc>]]>]]>
-   <rpc-reply><ok/></rpc-reply>]]>]]>
-   <rpc><get-config><source><running/></source></get-config></rpc>]]>]]>
-   <rpc-reply><data><hello xmlns="urn:example:hello"><world/></hello></data></rpc-reply>]]>]]>
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities></hello>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><edit-config><target><candidate/></target><config><hello xmlns="urn:example:hello"><world/></hello></config></edit-config></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><ok/></rpc-reply>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><commit/></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><ok/></rpc-reply>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><running/></source></get-config></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><data><hello xmlns="urn:example:hello"><world/></hello></data></rpc-reply>]]>]]>
    olof@vandal> 
 
 Restconf
@@ -165,8 +167,10 @@ Or Netconf:
 ::
 
    $ sudo docker exec -it clixon/clixon clixon_netconf
-   <rpc><get-config><source><candidate/></source></get-config></rpc>]]>]]>
-   <rpc-reply><data/></rpc-reply>]]>]]>
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities></hello>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><candidate/></source></get-config></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><data/></rpc-reply>]]>]]>
 
 Or using restconf using curl on exposed port 8080:
 ::

@@ -222,7 +222,7 @@ However, on-line repair *cannot* be made in the following circumstances:
 First, copy the (broken) startup config to candidate. This is necessary since you cannot make `edit-config` calls to the startup db:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <copy-config>
       <source><startup/></source>
       <target><candidate/></target>
@@ -233,7 +233,7 @@ You can now edit the XML in candidate. However, there are some restrictions on t
 For example, assume `x` is obsolete syntax, then this is *not* accepted:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <edit-config>
       <target><candidate/></target>
       <config>
@@ -245,7 +245,7 @@ For example, assume `x` is obsolete syntax, then this is *not* accepted:
 Instead, assuming `y` is a valid syntax, the following operation is allowed since `x` is not explicitly accessed:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <edit-config>
       <target><candidate/></target>
       <config operation='replace'>
@@ -257,7 +257,7 @@ Instead, assuming `y` is a valid syntax, the following operation is allowed sinc
 Finally, the candidate is validate and committed:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <commit/>
   </rpc>
 

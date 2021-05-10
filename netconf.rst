@@ -173,11 +173,11 @@ The internal IPC protocol have a couple of extensions to the Netconf protocol as
 
 * *content* - for ``get`` command with values "config", "nonconfig" or "all", to indicate which parts of state and config are requested. This option is taken from RESTCONF. Example::
 
-    <rpc><get content="nonconfig"/></rpc>
+    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get content="nonconfig"/></rpc>
     
 * *depth* - for ``get`` and ``get-config`` how deep a tree is requested. Also from RESTCONF. Example::
 
-    <rpc><get depth="2"/></rpc>
+    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get depth="2"/></rpc>
     
 * *username* - for top-level ``rpc`` command. Indicates which user the client represents ("pseudo-user"). This is either the actual user logged in as the client (eg "peer-user") or can represent another user. The credentials mode determines the trust-level of the pseudo-username. Example::
 
@@ -185,20 +185,24 @@ The internal IPC protocol have a couple of extensions to the Netconf protocol as
     
 * *autocommit* - for ``edit-config``. If true, perform a ``commit`` operation immediately after an edit. If this fails, make a ``discard`` operation. Example::
 
-    <rpc><edit-config autocommit="true"><target><candidate/></target><config>...</config></edit-config></rpc>
+    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><edit-config autocommit="true"><target><candidate/></target><config>...</config></edit-config></rpc>
     
 * *copystartup* - for ``edit-config`` combined with autocommit. If true, copy the running db to the startup db after a commit. The combination with autocommit is the default for RESTCONF operations. Example::
 
-     <rpc><edit-config autocommit="true" copystartup="true"><target><candidate/></target><config>...</config></edit-config></rpc>
+     <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><edit-config autocommit="true" copystartup="true"><target><candidate/></target><config>...</config></edit-config></rpc>
 
 * *objectcreate* and *objectexisted* - in the data field of ``edit-config`` XML data tree. In the request set objectcreate to false/true whether an object should be created if it does not exist or not. If such a request exists, then the ok reply should contain "objectexists" to indicate whether the object existed or not (eg prior to the operation). The reason for this protocol is to implement some RESTCONF PATCH and PUT functionalities. Example::
 
-      <rpc><edit-config objectcreate="false"><target><candidate/></target>
-         <config>
-            <protocol objectcreate="true">tcp</protocol>
-         </config>
-      </edit-config></rpc>]]>]]>
-      <rpc-reply><ok objectexisted="true"/></rpc-reply>]]>]]>
+      <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+         <edit-config objectcreate="false"><target><candidate/></target>
+            <config>
+               <protocol objectcreate="true">tcp</protocol>
+             </config>
+         </edit-config>
+      </rpc>]]>]]>
+      <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+         <ok objectexisted="true"/>
+      </rpc-reply>]]>]]>
 
 The reason for introducing the objectcreate/objectexisted attributes are as follows:
       * RFC 8040 4.5 PUT: if the PUT request creates a new resource, a "201 Created" status-line is returned.  If an existing resource is modified, a "204 No Content" status-line is returned.

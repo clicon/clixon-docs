@@ -121,7 +121,7 @@ When setting a config value, the candidate datastore is modified and the committ
 4. The backend will reply with an OK:
 ::
 
-   <rpc-reply>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
      <ok/>
    </rpc-reply
 
@@ -166,7 +166,7 @@ underlying system. Often, commits are made at once after every edit
 6. An OK is returned to the user.
 ::
 
-   <rpc-reply>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
      <ok/>
    </rpc-reply
 
@@ -209,7 +209,7 @@ A plugin can register an application-dependent RPC, and a client can then access
 6. The plugin returns a reply which is returned to the restonf client (for example):
 ::
 
-   <rpc-reply>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
      <x xmlns="urn:example:clixon">0</x>
      <y xmlns="urn:example:clixon">42</y>
    </rpc-reply>
