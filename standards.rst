@@ -42,6 +42,8 @@ Further:
    - re-match()
    - enum-value()
    - bit-is-set()
+
+See also support of standard XPath functions `XML and XPath`_
      
 * if-feature-expr() is restricted to single layer expressions with and/or (7.20.2):
    - ``x and y`` and ``x or y`` is supported
@@ -159,18 +161,43 @@ The following XPath axes are supported:
 
 The following xpath axes are *not* supported: preceding, preceding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
 
-The following XPath functions as defined in Section 4 of the XPath 1.0 standard are supported:
+The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 standard are supported:
 
-* count
-* name
-* contains
-* not
-* true
-* false
+* contains()
+* count()
+* false()
+* name()
+* node()
+* not()
+* position()
+* text()
+* true()
 
-The remaining XPath functions are not supported. 
+The following standard XPath functions are *not* supported:
 
-The following nodetype nodetests are not supported: processing-instruction, comment.
+* bit-is-set
+* boolean
+* ceiling
+* comment
+* concat
+* floor
+* id
+* lang
+* last
+* local-name
+* namespace-uri
+* normalize-space
+* number
+* processing-instructions
+* round
+* starts-with
+* string
+* substring
+* substring-after
+* substring-before
+* sum
+* translate
+
 
 Unicode
 -------
