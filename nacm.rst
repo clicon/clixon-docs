@@ -98,7 +98,7 @@ you can control who can act as the recovery user.
 
 For example, by setting ``CLICON_NACM_CREDENTIALS`` to `except` the
 RESTCONF daemon can make backend calls posing as the recovery user,
-even though it runs as `www-data`.
+even though it runs as `wwwuser`.
 
 Alternatively, ``CLICON_NACM_CREDENTIALS`` can be set to `exact` and
 the recovery user as `root`, in which case only a netconf or cli

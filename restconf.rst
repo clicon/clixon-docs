@@ -34,7 +34,6 @@ The RESTCONF daemon can be configured for compile-time (by autotools) as follows
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default. Note fcgi feature must be set
   --with-restconf=native  RESTCONF using native http with libevhtp
-  --with-wwwuser=<user>   Set www user different from ``www-data``
 
 After that perform system-wide compilation::
 
@@ -54,6 +53,7 @@ The restconf daemon have the following command-line options:
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
   -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
   -r              Do not drop privileges if run as root
+  -W <user>       Run restconf daemon as this user, drop according to CLICON_RESTCONF_PRIVILEGES
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
 Note that the restconf daemon can be started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used.

@@ -29,11 +29,11 @@ Install and build CLIgen::
   make;
   make install
 
-Add a clicon user and group, using useradd and usermod::
+Add a clixon user and group, using useradd and usermod::
    
-  sudo useradd -M -U clicon
-  sudo usermod -a -G clicon <your user>
-  sudo usermod -a -G clicon www-data # Only if RESTCONF
+  sudo useradd -M -U clixon
+  sudo usermod -a -G clixon <your user>
+  sudo usermod -a -G clixon www-data # Only if RESTCONF
   
 If you do not require RESTCONF, then continue with `Build from source`_.
 
@@ -159,10 +159,9 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    After=example.service
    [Service]
    Type=simple
-   User=www-data
-   WorkingDirectory=/www-data
+   User=root
    Restart=on-failure
-   ExecStart=/www-data/clixon_restconf -f /usr/local/etc/example.xml
+   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/example.xml
    [Install]
    WantedBy=multi-user.target
 
@@ -237,7 +236,6 @@ These include (standard options are omitted)
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
   --with-restconf=native  RESTCONF using native http with libevhtp
-  --with-wwwuser=<user>   Set www user different from www-data
   --with-configfile=FILE  set default path to config file
   --with-libxml2          use gnome/libxml2 regex engine
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)

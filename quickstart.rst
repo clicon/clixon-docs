@@ -128,7 +128,7 @@ Start and run
 Regardless of which RESTCONF variant is used, next step is to start the restconf daemon:
 ::
 
-   sudo /www-data/clixon_restconf
+   sudo clixon_restconf
 
 Start sending restconf commands (using Curl):
 ::
