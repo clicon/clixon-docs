@@ -172,72 +172,6 @@ An application can specialize error handling for a specific category by using `c
 
 In this example, "Myerror" will appear in the log string.
   
-Automatic upgrades
-==================
-There is an EXPERIMENTAL xml changelog feature based on
-"draft-wang-netmod-module-revision-management-01" (Zitao Wang et al)
-where changes to the Yang model are documented and loaded into
-Clixon. The implementation is not complete.
-
-When upgrading, the system parses the changelog and tries to upgrade
-the datastore automatically. This feature is experimental and has
-several limitations.
-
-You enable the automatic upgrading by registering the changelog upgrade method in ``clixon_plugin_init()`` using wildcards::
-
-   upgrade_callback_register(h, xml_changelog_upgrade, NULL, 0, 0, NULL);
-
-The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a new. Example from `auto upgrade test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_auto.sh>`_::  
-
-  <changelogs xmlns="http://clicon.org/xml-changelog">
-    <changelog>
-      <namespace>urn:example:b</namespace>
-      <revfrom>2017-12-01</revfrom>
-      <revision>2017-12-20</revision>
-      ...
-    <changelog>
-  </changelogs>
-
-Each changelog consists of set of (ordered) steps::
-
-    <step>
-      <name>1</name>
-      <op>insert</op>
-      <where>/a:system</where>
-      <new><y>created</y></new>
-    </step>
-    <step>
-      <name>2</name>
-      <op>delete</op>
-      <where>/a:system/a:x</where>
-    </step>
-
-Each step has an (atomic) operation:
-
-* rename - Rename an XML tag
-* replace - Replace the content of an XML node
-* insert - Insert a new XML node
-* delete - Delete and existing node
-* move - Move a node to a new place
-
-A *step* has the following arguments:
-
-* where - An XPath node-vector pointing at a set of target nodes. In most operations, the vector denotes the target node themselves, but for some operations (such as insert) the vector points to parent nodes.
-* when - A boolean XPath determining if the step should be evaluated for that (target) node.
-
-Extended arguments:
-
-* tag - XPath string argument (rename)
-* new - XML expression for a new or transformed node (replace, insert)
-* dst - XPath node expression (move)
-
-Step summary:
-
-* rename(where:targets, when:bool, tag:string)
-* replace(where:targets, when:bool, new:xml)
-* insert(where:parents, when:bool, new:xml)
-* delete(where:parents, when:bool)
-* move(where:parents, when:bool, dst:node)
 
 Extensions
 ==========
@@ -382,5 +316,38 @@ When running, several things may happen:
            RUNNING --restart--> EXITING  --sigchld/wait + restart --> RUNNING(pid)
 
 
+Event notifications
+===================
 
+Clixon implements RFC 5277 NETCONF Event Notifications
 
+The main example illustrates an EXAMPLE stream notification that triggers every 5s. First, declare a notification in YANG::
+
+    notification event {
+         description "Example notification event.";
+         leaf event-class {
+           type string;
+           description "Event class identifier.";
+         }
+	 ...
+
+To start a notification stream via netconf::
+
+   <rpc><create-subscription xmlns="urn:ietf:params:xml:ns:netmod:notification"><stream>EXAMPLE</stream></create-subscription></rpc>]]>]]>
+   <rpc-reply><ok/></rpc-reply>]]>]]>
+   <notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2019-01-02T10:20:05.929272</eventTime><event><event-class>fault</event-class><reportingEntity><card>Ethernet0</card></reportingEntity><severity>major</severity></event></notification>]]>]]>
+
+This can also be triggered via the CLI::
+
+  clixon_cli -f /usr/local/etc/example.xml
+  cli> notify
+  cli> event-class fault;
+  reportingEntity {
+    card Ethernet0;
+  }
+  severity major;
+
+  cli> no notify
+  cli>
+
+Restconf notifications (FCGI only) is also supported, 

@@ -54,12 +54,14 @@ The restconf daemon have the following command-line options:
   -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
   -r              Do not drop privileges if run as root
   -W <user>       Run restconf daemon as this user, drop according to CLICON_RESTCONF_PRIVILEGES
+  -R <xml>        Restconf configuration in-line overriding config file
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
-Note that the restconf daemon can be started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used.
+Note that the restconf daemon can be started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used, or ``CLICON_RESTCONF_PRIVILEGES`` is defined.
 
-Configuration
--------------
+
+Configuration options
+---------------------
 The following RESTCONF configuration options can be defined in the clixon configuration file:
 
 CLICON_RESTCONF_DIR
@@ -68,11 +70,52 @@ CLICON_BACKEND_RESTCONF_PROCESS
    Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore. 
 CLICON_ANONYMOUS_USER
    If RESTCONF authentication auth-type=none then use this user
+CLICON_RESTCONF_USER
+   Run clixon_restconf daemon as this user
+CLICON_RESTCONF_USER
+   Run clixon_restconf daemon as this user
+CLICON_RESTCONF_PRIVILEGES
+   Restconf daemon drop privileges mode, one of: none, drop_perm, drop_temp
+CLICON_RESTCONF_INSTALLDIR
+   Path to dir of clixon-restconf daemon binary as used by backend if started internally
+CLICON_RESTCONF_STARTUP_DONTUPDATE
+   Disable automatic update of startup on restconf edit operations
+
+Advanced config
+---------------
+
+Apart from options, there is also structured restconf data primarily for native mode encapsulated with ``<restconf>...</restconf>`` as defined in ``clixon-restconf.yang``. 
+
+The first-level fields of the advanced restconf structure are the following:
+
+enable
+   Enable the RESTCONF daemon. If disabled, the restconf daemon will not start
+auth-type
+   Authentication method (see `auth types`_)
+debug
+   Enable debug
+log-destination
+   Either syslog or file (/var/log/clixon_restconf.log)
+pretty
+   Restconf vallues are pretty printed by default. Disable to turn this off
+
+The advanced config can be given using three different methods
+
+  1. inline - as command-line option using ``-R``
+  2. config-file - as part of the regular config file
+  3. datastore - committed in the regular running datastore
+
+Inline
+^^^^^^
+
+When starting the restconf daemon, structured data can be directly given as a command-line option::
+
+  -R <restconf><enable>true</enable></restconf>
 
 Config file
 ^^^^^^^^^^^
 
-The remaining options are defined in `clixon-restconf.yang` where they are defined locally within the clixon config file::
+The restconf config can also be defined locally within the clixon config file, such as::
 
   <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
   <CLICON_BACKEND_RESTCONF_PROCESS>false/CLICON_BACKEND_RESTCONF_PROCESS>
@@ -82,6 +125,7 @@ The remaining options are defined in `clixon-restconf.yang` where they are defin
 	<fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
      </restconf>
    </clixon-config>
+
 
 Datastore
 ^^^^^^^^^
@@ -102,18 +146,8 @@ In the latter case, the restconf daemon reads its config from the running datast
 
 .. note::
       If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config must be in the regular datastore.
-   
-The restconf options are as follows:
 
-enable
-   Enable the RESTCONF daemon. If disabled, the restconf daemon will not start
-auth-type
-   Authentication method (see `auth types`_)
-debug
-   Enable to debug on syslog
-pretty
-   Restconf vallues are pretty printed by default. Disable to turn this off
-
+     
 Features
 ^^^^^^^^
 The Restconf config has two features:
@@ -168,6 +202,8 @@ socket port
    TCP port to bind to
 socket ssl
    If true: HTTPS; if false: HTTP protocol
+
+
 
 Examples
 ^^^^^^^^
@@ -233,7 +269,6 @@ You can start the RESTCONF daemon in several ways:
   1. `systemd` as described in :ref:`clixon_install`
   2. `internally` using the `process-control` RPC (see below)
   3. `docker` mechanisms, see the docker container docs
-
 
 Internal start
 ^^^^^^^^^^^^^^
