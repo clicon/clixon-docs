@@ -16,8 +16,8 @@ Architecture
 The restconf deamon provides a http/https RESTCONF interface to the
 Clixon backend.  It comes in two variants, as shown in the figure above:
 
-  1. Native http, which combines a web and restconf server.
-  2. A reverse proxy (such as NGINX) and fastCGI where web and restconf function is separated
+  1. Native http, which combines a HTTP and Restconf server.
+  2. A reverse proxy (such as NGINX) and FastCGI where web and restconf function is separated
 
 The restconf daemon communicates with the backend using
 internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
@@ -34,6 +34,8 @@ The RESTCONF daemon can be configured for compile-time (by autotools) as follows
   --without-restconf      No RESTCONF
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default. Note fcgi feature must be set
   --with-restconf=native  RESTCONF using native http with libevhtp
+  --enable-nghttp2        Enable native http/2 using libnghttp2
+  --disable-evhtp         Disable native http/1.1 using libevhtp
 
 After that perform system-wide compilation::
 
@@ -57,7 +59,7 @@ The restconf daemon have the following command-line options:
   -R <xml>        Restconf configuration in-line overriding config file
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
-Note that the restconf daemon can be started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used, or ``CLICON_RESTCONF_PRIVILEGES`` is defined.
+Note that the restconf daemon started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used, or ``CLICON_RESTCONF_PRIVILEGES`` is defined.
 
 
 Configuration options

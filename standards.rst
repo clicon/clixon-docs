@@ -139,6 +139,12 @@ RESTCONF event notification as described in RFC7950 section 6 is supported as fo
 
 `RFC 8072: YANG Patch Media Type <https://www.rfc-editor.org/rfc/rfc8072.txt>`_ is not implemented.
 
+In the native mode, clixon also supports:
+* HTTP/1 as a transport implemented by libevhtp
+* HTTP/2 (RFC7540) as a transport implemented by libnghttp2.
+* Transport Layer Security (TLS) implemented by libopenssl,
+* ALPN as defined in RFC 7301 for http/1, http/2 protocol selection
+
 XML and XPath
 -------------
 Clixon has its own implementation of XML and XPath. See more in the detailed API reference.

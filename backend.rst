@@ -3,25 +3,9 @@
 Backend
 =======
 
-::
-
-                           +----------------+
-                           | clixon options |
-                           +----------------+
-                                   |- XML
-                                   v
-   Frontends:    IPC    +----------+--------+
-   CLI,           |     | backend  | plugin |   <-->  Underlying
-   netconf      <--->   | daemon   |--------+         System
-   restconf             |          | plugin |   <-->   
-                        +----------+--------+
-                                   ^
-                                   |- XML
-               Datastores:         v	                
-               +-----------+  +-----------+  +-----------+
-               | candidate |  |  running  |  |  startup  |
-               +-----------+  +-----------+  +-----------+
-
+ .. image:: backend1.jpg
+   :width: 100%
+	       
 The backend daemon is the central Clixon component. It consists of a main module and a number of dynamically loaded plugins. The backend has four APIs:
 
 *configuration*
@@ -159,8 +143,8 @@ CLICON_BACKEND_REGEXP
 CLICON_BACKEND_PIDFILE
   Process-id file of backend daemon
 
-Plugins
--------
+Backend plugins
+---------------
 
 Backend plugins are the "glue" that binds the Clixon system to the
 underlying system. The backend invokes *callbacks* in the plugins when
@@ -236,6 +220,62 @@ Which means if you register a copy-config callback in (1), it will be called *be
 Second, if there are more than one reply (eg ``<rpc-reply/><rpc-reply/>``) only the first reply will be parsed and used by the cli/netconf/restconf clients.
 
 If you want to take the original and modify it, you should therefore register the callback in plugin_start (3) so that your callback will be called after the system RPC. Then you should modify the original reply (not add a new reply).
+
+Example: RPC callback
+^^^^^^^^^^^^^^^^^^^^^
+
+This example shows how to define a new RPC in YANG, register a callback function in C, read and write a parameter.
+It is revised slightly from the main example.
+
+YANG::
+
+    module clixon-example {
+      namespace "urn:example:clixon";
+      ...
+      rpc example {
+          input {
+	      leaf x {
+		type string;
+		...
+ 	  output {
+	      leaf y {
+		type string;
+                ...
+		
+Register RPC in clixon_plugin_init()::		
+
+    clixon_plugin_api *clixon_plugin_init(clicon_handle h)
+    {
+       ...
+       rpc_callback_register(h, example_rpc, NULL, "urn:example:clixon", "example");
+
+Callback function reading value input x, modifying value and writing it as output value y::
+
+   static int 
+   example_rpc(clicon_handle h,            /* Clicon handle */
+               cxobj        *xe,           /* Request: <rpc><xn></rpc> */
+	       cbuf         *cbret,        /* Reply eg <rpc-reply>... */
+	       void         *arg,          /* client_entry */
+	       void         *regarg)       /* Argument given at register */
+   {
+       char *val;
+       val = xml_find_body(xe, "x");       /* Read x value of incoming rpc */
+       cprintf(cbret, "<rpc-reply xmlns=\"%s\">", NETCONF_BASE_NAMESPACE);
+       val[0]++;                           /* Increment first char */
+       /* Construct reply */
+       cprintf(cbret, "<y xmlns=\"urn:example:clixon\">%s</y>", val);
+       cprintf(cbret, "</rpc-reply>");
+
+Result netconf session::
+
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="42">
+     <example xmlns="urn:example:clixon">
+        <x>42</x>
+     </example>
+  </rpc>]]>]]>
+  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="42">
+     <y xmlns="urn:example:clixon">52</y>
+  </rpc-reply>]]>]]>
 
 
 Transactions
