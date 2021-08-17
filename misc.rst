@@ -262,7 +262,6 @@ Process handling
 ================
 
 Clixon has a simple internal process handling currently used for :ref:`internal restconf <clixon_restconf>` but can also be used for user applications.
-
 The process data structure has a unique name with pids created for "active" processes. There are three states:
 
 STOPPED
@@ -351,3 +350,60 @@ This can also be triggered via the CLI::
   cli>
 
 Restconf notifications (FCGI only) is also supported, 
+
+Leafrefs
+========
+
+Some notes on `YANG leafref <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ implementation in Clixon, especially as used in `openconfig modules <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01>`_,  which rely heavily on leafrefs.
+
+Typically, a YANG leafref declaration looks something like this::
+
+  container c {  
+    leaf x {
+      type leafref {
+        path "../config/name";   /* "deferring node" */
+        require-instance <bool>; /* determines existing deferred node */
+      }
+    }
+    container config {
+      leaf name {
+        type unit32;             /* "deferred node" */
+      }
+    }
+  }
+
+Types
+-----
+
+Consider the YANG example above, the type of ``x`` is the deferred node:s, in this example ``uint32``.
+The validation/commit process, as well as the autocli type system and completion handles accordingly.
+
+For example, if the deferred node is a more complex type such as identityref with options "a, b", the completion of "x" will show the options "a,b".
+
+Require-instance
+----------------
+Assume the yang above have the following two XML trees::
+
+  <c>
+    <x>foo</x>
+  </c>
+
+and::
+
+  <c>
+    <x>foo</x>
+    <config>
+      <name>foo</name>
+    </config>
+  </c>
+  
+The validity of the trees is controlled by the `require-instance property <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ . According to this semantics:
+
+ - if require-instance is false (or not present) both trees above are valid,
+ - if require-instance is true, theupper tree is invalid and the lower is valid
+
+Openconfig lists
+----------------
+
+Openconfig has a construct for lists that provides some challenges for clixon. The way many lists are defined is described in the `openconfig draft <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01#section-8.1.2>`_.
+where a leaf key is deferring node to a deferred node not yet defined. Since require-instance is false in these constructs, the defer can be unresolved and still valid.

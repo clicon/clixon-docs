@@ -56,9 +56,13 @@ For RESTCONF using the native http solution you may need to `build libevhtp from
 .. note::
         The openssl 1.1 API is NOT default in some older OS:s such as Ubuntu 16.0.4, CentOS 7
 
-Native http also requires libevent-2.1::
+Native http/1 requires libevent-2.1::
 
   sudo apt-get install libevent-dev
+
+Native http/2 requires libnghttp2::
+
+  sudo apt-get install libnghttp2
 
   
 Build from source
@@ -70,8 +74,8 @@ Download clixon source code::
 Configure Clixon using one of the following RESTCONF variants::
 
      configure --without-restconf
-     configure --with-restconf=fcgi   # Reverse proxy This is default
-     configure --with-restconf=native # Native http using libevhtp/libevent-2.1
+     configure --with-restconf=native # Native http using libevhtp/libevent-2.1 (default)
+     configure --with-restconf=fcgi   # Reverse proxy
 
 For more configure options see: `Configure options`_.
 
@@ -177,6 +181,11 @@ Clixon can run in a docker container.  As an example the `docker` directory has 
 
 The docker tests are run in the `Travis CI <https://travis-ci.org/github/clicon/clixon>`_
    
+OpenWRT
+-------
+
+See [Clixon cross-compiler for openwrt](https://github.com/clicon/clixon-openwrt)
+
 Vagrant
 -------
 
@@ -234,8 +243,10 @@ These include (standard options are omitted)
   --enable-publish        Enable publish of notification streams using SSE and curl
   --with-cligen=dir       Use CLIGEN here
   --without-restconf      No RESTCONF
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
-  --with-restconf=native  RESTCONF using native http with libevhtp
+  --with-restconf=native  RESTCONF using native http with libevhtp. This is default
+  --disable-nghttp2       Disable native http/2 using libnghttp2 (http/1 only)
+  --disable-evhtp         Disable native http/1.1 using libevhtp (http/2 only)
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
   --with-configfile=FILE  set default path to config file
   --with-libxml2          use gnome/libxml2 regex engine
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)

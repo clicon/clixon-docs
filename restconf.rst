@@ -32,10 +32,10 @@ Installation
 
 The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
   --without-restconf      No RESTCONF
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default. Note fcgi feature must be set
-  --with-restconf=native  RESTCONF using native http with libevhtp
-  --enable-nghttp2        Enable native http/2 using libnghttp2
+  --with-restconf=native  RESTCONF using native http with libevhtp. This is default
+  --disable-nghttp2       Disable native http/2 using libnghttp2
   --disable-evhtp         Disable native http/1.1 using libevhtp
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. Note fcgi feature must be set
 
 After that perform system-wide compilation::
 
@@ -112,7 +112,7 @@ Inline
 
 When starting the restconf daemon, structured data can be directly given as a command-line option::
 
-  -R <restconf><enable>true</enable></restconf>
+  -R <restconf xmlns="http://clicon.org/restconf"><enable>true</enable></restconf>
 
 Config file
 ^^^^^^^^^^^

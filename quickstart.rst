@@ -92,7 +92,7 @@ Restconf
 Clixon can use two RESTCONF compile-time variants:
   
 *  `FCGI` : Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication.  A reverse proxy needs to be configured.
-*  `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_. The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
+*  `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
 
 FCGI
 ^^^^
