@@ -372,6 +372,10 @@ Typically, a YANG leafref declaration looks something like this::
     }
   }
 
+This YANG example is typical of Openconfig lists defined in the `openconfig modeling <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01#section-8.1.2>`_, where a key leaf references a "config" node further down in the tree.
+
+Other typical uses is where the path is an absolute path, such as eg ``path "/network-instances/network-instance/config/name";``
+  
 Types
 -----
 
@@ -402,8 +406,6 @@ The validity of the trees is controlled by the `require-instance property <https
  - if require-instance is false (or not present) both trees above are valid,
  - if require-instance is true, theupper tree is invalid and the lower is valid
 
-Openconfig lists
-----------------
+In most models defined by openconfig and ietf, require-instance is typically false.
 
-Openconfig has a construct for lists that provides some challenges for clixon. The way many lists are defined is described in the `openconfig draft <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01#section-8.1.2>`_.
-where a leaf key is deferring node to a deferred node not yet defined. Since require-instance is false in these constructs, the defer can be unresolved and still valid.
+
