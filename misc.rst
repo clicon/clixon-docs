@@ -409,3 +409,128 @@ The validity of the trees is controlled by the `require-instance property <https
 In most models defined by openconfig and ietf, require-instance is typically false.
 
 
+Paging
+======
+
+Paging and scrolling in clixon encompasses several aspects:
+
+1. Netconf/Restconf paging protocol
+2. CLI scrolling
+3. Plugin state API
+
+.. note::
+        Paging will appear as a new feature in Clixon 5.3
+   
+Paging protocol
+---------------
+
+The paging protocol is loosely based on `<https://tools.ietf.org/id/draft-wwlh-netconf-list-pagination-nc-01.html>`_ and others for lists and leaf-lists.
+
+Netconf and restconf paging is implemented using the `offset` and `limit` attributes. For example a restconf list request::
+
+      GET /localhost/restconf/data/example-social:members/uint8-numbers?offset=20&limit=10 HTTP/1.1
+      Host: example.com
+      Accept: application/yang-collection+json
+
+In netconf a similar request is::
+
+      <rpc>
+        <get>
+	  <filter type="xpath" select="/es:members/es:uint8-numbers" xmlns:es="http://example.com/ns/example-social"/>
+	  <list-pagination xmlns="http://clicon.org/clixon-netconf-list-pagination">true</list-pagination>
+   	   <offset xmlns="http://clicon.org/clixon-netconf-list-pagination">20</offset>
+	   <limit xmlns="http://clicon.org/clixon-netconf-list-pagination">10</limit>
+         </get>
+       </rpc>
+
+For Netconf paging, once can lock the datastore during a paging session to ensure that the data
+is unchanged, such as (in pseudo-code)::
+
+  lock-db
+  get offset=0 limit=20
+  get offset=20 limit=20
+  ---
+  unlock-db
+
+CLI scrolling
+-------------
+
+CLIgen has a scrolling mechanism as implemented by the `cligen_output`
+function mimicing `printf` in syntax. By using cligen_output for all
+output, CLIgen ensures a scrolling mechanism.
+
+Clixon includes an example CLI callback function that combines
+the scrolling mechanism of the CLI with Netconf paging called
+`cli_pagination` with the following arguments:
+
+- `xpath` : XPath of a leaflist or list (can also be given by an "xpath" cli argument)
+- `prefix` : Prefix used in XPath (only one can be specified)
+- `namespace` : Namespace associated with prefix
+- `format` : one of xml, text, json, or cli
+- `limit` : Number of lines of the paging window
+
+In the main example, cli_pagination is called as follows::
+  
+   show pagination xpath <xpath:string> xml, cli_pagination("use xpath var", "es", "http://example.com/ns/example-social", "xml", "10");
+
+which when called in a clixon_cli session could yield the following result::
+
+   clixon_cli -1 -f /var/tmp/./test_paging_state.sh/conf.xml -l o show pagination xpath /es:audit-logs/es:audit-log cli
+   <audit-log>
+      <timestamp>2021-09-05T018:48:11Z</timestamp>
+      <member-id>bob0</member-id>
+      <source-ip>192.168.1.32</source-ip>
+      <request>POST</request>
+      <outcome>true</outcome>
+   </audit-log>
+   <audit-log>
+      <timestamp>2021-09-05T018:48:11Z</timestamp>
+      <member-id>bob1</member-id>
+      <source-ip>192.168.1.32</source-ip>
+      <request>POST</request>
+      <outcome>true</outcome>
+   </audit-log>
+   <audit-log>
+   --More--
+
+In the example, two state entries are shown in the CLI scrolling
+mechanism. Note that the limit is `ten` which means there are eight
+outstanding elements to display locally before a new paging request is made.
+
+Plugin state API
+----------------
+
+While paging of config data is built-in, state data needs plugin callbacks. A new state callback API has been made which extends the previous state callback as follows::
+
+  char           *xpath,
+  paging_status_t pagination,
+  uint32_t        offset, 
+  uint32_t        limit
+  uint32_t       *remaining
+
+Essentially, the state callback requests state data forlist/leaf-list `xpath` in the interval `[offset...offset+limit]` and returns `remaining`.
+
+The paging mode is either:
+
+  - PAGING_NONE        No list paging: limit/offset are no-ops 
+  - PAGING_STATELESS   Stateless list paging, dont expect more paging calls
+  - PAGING_LOCK        Transactional list paging, can expect more paging until lock release
+
+In the `PAGING_LOCK` case, the plugin can cache the state data, return
+further requests from the same cache until the lock on the "runníng"
+database is released, thus forming an (implicit) transaction.  For
+this, the ca_lockdb callback can be used as an end to the transaction.
+Note that there is not explicit "start transaction", the first locked
+pagination request acts as one.
+
+Example NETCONF paging calls::
+
+  lock-db(running)
+  get (offset=0, limit=20)
+  get (offset=20, limit=20)
+  get (offset=40, limit=20)
+  ...
+  unlock-db(running)
+
+
+

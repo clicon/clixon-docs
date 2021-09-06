@@ -16,8 +16,8 @@ Architecture
 The restconf deamon provides a http/https RESTCONF interface to the
 Clixon backend.  It comes in two variants, as shown in the figure above:
 
-  1. Native http, which combines a HTTP and Restconf server.
-  2. A reverse proxy (such as NGINX) and FastCGI where web and restconf function is separated
+  1. Native http, which combines a HTTP and Restconf server. Further, HTTP configuration is made using Clixon.
+  2. A reverse proxy (such as NGINX) and FastCGI where web and restconf function is separated. NGINX is used to make all HTTP configuration.
 
 The restconf daemon communicates with the backend using
 internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
@@ -25,6 +25,11 @@ internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI
 The restconf daemon reads its initial config options from the configuration file on startup. The native http variant can read config options from the backend as an alternative to reading everything from clixon options.
 
 You can add plugins to the restconf daemon, where the primary usecase is authentication, using the ``ca_auth`` callback.
+
+Note that there is some complexity in the configuration of the
+different variants of native Clixon restconf involving HTTP/1 vs
+HTTP/2, TLS vs plain HTTP, client cert vs basic authentication and
+external vs internal daemon start.
 
 
 Installation
@@ -82,6 +87,8 @@ CLICON_RESTCONF_INSTALLDIR
    Path to dir of clixon-restconf daemon binary as used by backend if started internally
 CLICON_RESTCONF_STARTUP_DONTUPDATE
    Disable automatic update of startup on restconf edit operations
+CLICON_RESTCONF_HTTP2_PLAIN
+   Enable plain (non-tls) HTTP/2, default: true
 
 Advanced config
 ---------------
