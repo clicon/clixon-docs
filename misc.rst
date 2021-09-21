@@ -412,22 +412,44 @@ Pagination
 ==========
 
 Pagination and scrolling is the technique of showing large amount of data in smaller
-chunks.  In clixon this encompasses several aspects:
+chunks.  
+
+.. note::
+        Pagination is planned to appear in the Clixon 5.3 September release
+
+Overview
+--------
+
+The pagination protocol is loosely based on `<https://tools.ietf.org/id/draft-wwlh-netconf-list-pagination-nc-01.html>`_ and others for lists and leaf-lists.
+
+The pagination in Clixon is currently restricted to the `offset` and `limit` attributes. For example, the following requests a list of 120 items in chunks of 20::
+
+   get offset=0 limit=20
+   get offset=20 limit=20
+   ...
+   get offset=100 limit=20
+
+Using NETCONF, one can lock the datastore during a session to ensure that the data
+is unchanged, such as::
+
+   lock-db
+   get offset=0 limit=20
+   get offset=20 limit=20
+   ...
+   get offset=100 limit=20
+   unlock-db
+
+Clixon pagination encompasses several aspects:
 
 1. NETCONF/RESTCONF protocol extensions
 2. CLI scrolling
 3. Plugin state API
-
-.. note::
-        Pagination is planned to appear in the Clixon 5.3 September release
    
 Pagination protocol
 -------------------
 
-The pagination protocol is loosely based on `<https://tools.ietf.org/id/draft-wwlh-netconf-list-pagination-nc-01.html>`_ and others for lists and leaf-lists.
-
-NETCONF and RESTCONF pagination is restricted to the `offset` and `limit` attributes. For example a RESTCONF list request of ten entries starting from entry number 20::
-
+In a RESTCONF a pagination request looks as follows::
+   
    GET /localhost/restconf/data/example-social:members/uint8-numbers?offset=20&limit=10 HTTP/1.1
    Host: example.com
    Accept: application/yang-collection+json
@@ -464,19 +486,11 @@ In return, Clixon returns a reply with the requested number of entries (in NETCO
       </data>
    </rpc-reply>
 
-For NETCONF pagination, one can lock the datastore during a session to ensure that the data
-is unchanged, such as (in pseudo-code)::
-
-   lock-db
-   get offset=0 limit=20
-   get offset=20 limit=20
-   ---
-   unlock-db
 
 CLI scrolling
 -------------
 
-CLIgen has a scrolling mechanism that may be ntegrated with pagination. For example, showing the list from the example above::
+CLIgen has a scrolling mechanism that can be integrated with pagination. For example, showing the list from the example above::
 
    clixon_cli
    cli> show state /es:members/es:member[es:member-id=\'bob\']/es:favorites/es:uint64-numbers cli
@@ -523,9 +537,9 @@ Essentially, the state callback requests state data forlist/leaf-list `xpath` in
 
 The pagination mode is either:
 
-  - PAGINATION_NONE       No list pagination: limit/offset are no-ops 
-  - PAGINATION_STATELESS  Stateless list pagination, dont expect more pagination calls
-  - PAGINATION_LOCK       Transactional list pagination, can expect more pagination until lock release
+  - `PAGINATION_NONE`      No list pagination: limit/offset are no-ops 
+  - `PAGINATION_STATELESS` Stateless list pagination, do not expect more pagination calls
+  - `PAGINATION_LOCK`      Transactional list pagination, can expect more pagination until lock release
 
 In the `PAGINATION_LOCK` case, the plugin can cache the state data, return
 further requests from the same cache until the lock on the "runníng"

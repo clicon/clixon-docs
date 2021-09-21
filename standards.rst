@@ -29,6 +29,7 @@ Not implemented:
 * YIN (13)
 * Default values on leaf-lists (7.7.2)
 * Lists without keys (non-config lists may lack keys)
+* error-message is not implemented as sub-statement of "range", "length" and "pattern"
 
 Further:
 
