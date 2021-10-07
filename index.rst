@@ -28,5 +28,6 @@ mechanism.
    restconf
    xml
    nacm
+   pagination
    upgrade
    misc

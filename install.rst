@@ -251,8 +251,12 @@ These include (standard options are omitted)
   --with-libxml2          use gnome/libxml2 regex engine
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
   --with-opt-yang-installdir=DIR  Install optional yang files here (default: ${prefix}/share/clixon)
+  --without-sigaction     Disable sigaction logic (eg SA_RESTART mode)
+  --enable-yang-patch     Enable RFC 8072 YANG patch (plain patch is always enabled)
 
 There are also some variables that can be set, such as::
 
-  LINKAGE=static ./configure     # Build static libraries
-  CFLAGS="-O1 -Wall" ./configure # Use other CFLAGS (overridden by --enable-debug)
+  ./configure LINKAGE=static ./configure         # Build static libraries
+  ./configure CFLAGS="-O1 -Wall" INSTALLFLAGS="" # Use other CFLAGS
+
+Note, you need to reconfigure and recompile from scratch if you want to build static libs

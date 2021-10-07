@@ -291,10 +291,26 @@ is the core functionality of a clixon system.
 
 The netconf validation and commit operation is implemented in
 Clixon by a transaction mechanism, which ensures that user-written
-plugin callbacks are invoked atomically and revert on error.  If you
-have two plugins, for example, a transaction sequence looks like the
-following:
-::
+plugin callbacks are invoked atomically and revert on error. The transaction callbacks are the following:
+
+begin
+   Transaction start
+validate
+   Transaction validation
+complete
+   Transaction validation complete
+commit
+   Transaction commit
+commit_done
+   Transaction when commit done. After this, the source db is copied to target and default values removed.
+end
+   Transaction completed. 
+revert
+   Transaction revert
+abort
+   Transaction aborted
+
+In a system with two plugins, for example, a transaction sequence looks like the following::
    
   Backend   Plugin1    Plugin2
   |          |          |
@@ -302,7 +318,11 @@ following:
   |          |          |
   +--------->+--------->+ validate
   |          |          |
+  +--------->+--------->+ complete
+  |          |          |
   +--------->+--------->+ commit
+  |          |          |
+  +--------->+--------->+ commit_done
   |          |          |
   +--------->+--------->+ end
 
@@ -323,7 +343,81 @@ the transaction is aborted and the commit reverted:
   |          |          |
   +--------->+--------->+ abort
 
+Callbacks
+~~~~~~~~~
 
+There are two XML trees:
+
+src
+  This is the original XML tree, such as "running"
+target
+  This is the new XML tree, such as "candidate"
+  
+There are three vectors pointing into the XML trees:
+
+delete
+  The delete vector consists of XML nodes in "src" that are removed in "target"
+add
+  The add vector consists of nodes that exists in "target" and do not exist in "src"
+change
+  The change vector consists of nodes that exists in both "src" and "target" but are different
+  
+All transaction callbacks are called with a transaction-data argument
+(td). The transaction data describes a system transition from a src to
+target state.  The struct contains source and target XML tree
+(e.g. candidate/running) in the form of XML tree vectors (dvec, avec,
+cvec) and associated lengths. These contain the difference between src
+and target XML, ie "what has changed".  It is up to the validate
+callbacks to ensure that these changes are OK. It is up to the commit
+callbacks to enforce these changes in the configuration of the system.
+
+The "td" parameter can be accessed with the following functions:
+
+``uint64_t transaction_id(transaction_data td)``
+  Get the unique transaction-id
+``void   *transaction_arg(transaction_data td)``
+  Get plugin/application specific callback argument
+``int     transaction_arg_set(transaction_data td, void *arg)``
+  Set callback argument
+``cxobj  *transaction_src(transaction_data td)``
+  Get source database xml tree
+``cxobj  *transaction_target(transaction_data td)``
+  Get target database xml tree
+``cxobj **transaction_dvec(transaction_data td)``
+  Get vector of xml nodes that are deleted src->target
+``size_t  transaction_dlen(transaction_data td)``
+  Get length of delete xml vector
+``cxobj **transaction_avec(transaction_data td)``
+  Get vector of xml nodes that are added src->target
+``size_t  transaction_alen(transaction_data td)``
+  Get length of add xml vector
+``cxobj **transaction_scvec(transaction_data td)``
+  Get vector of xml nodes that changed
+``cxobj **transaction_tcvec(transaction_data td)``
+  Get vector of xml nodes that changed
+``size_t  transaction_clen(transaction_data td)``
+  Get length of changed xml vector
+
+A programmer can also use XML flags that are set in "src" and "target" XML trees to identify what has changed. The following flags are used to makr the trees:
+
+XML_FLAG_DEL
+  All deleted XML nodes in "src" and all its descendants
+XML_FLAG_ADD
+  All added XML nodes in "target" and all its descendants
+XML_FLAG_CHANGE
+  All changed XML nodes in both "src" and "target" and all its descendants.
+  Also all ancestors of all added, deleted and changed nodes.
+
+For example, assume the tree (A B) is replaced with (B C), then the two trees are marked with the following flags::
+
+             src            target
+              o CHANGE        o CHANGE
+              |               |
+              o CHANGE        o CHANGE
+             /|               |\
+   DELETE   A B               B C ADD
+
+  
 Privileges
 ----------
 
