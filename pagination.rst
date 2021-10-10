@@ -6,7 +6,7 @@ Pagination
 .. This is a comment
 
 Pagination and scrolling is the technique of showing large amount of data in smaller
-chunks. pagination was introduced in Clixon 5.3.
+chunks. Pagination was introduced in Clixon 5.3. Expect further development and changes.
 
 Overview
 --------
@@ -20,6 +20,21 @@ The pagination in Clixon is currently restricted to the `offset` and `limit` att
    ...
    get offset=100 limit=20
 
+This is referred to as `stateless` pagination, since the state may
+change between "get" calls. For paging of a consistent snapshot view,
+consider `locked` pagination.
+
+Clixon pagination encompasses several aspects:
+
+1. Locked pagination
+2. NETCONF/RESTCONF protocol extensions
+3. CLI scrolling
+4. Plugin state API
+
+   
+Locked pagination
+-----------------
+
 Using NETCONF, one can lock the datastore during a session to ensure that the data
 is unchanged, such as::
 
@@ -30,11 +45,11 @@ is unchanged, such as::
    get offset=100 limit=20
    unlock-db
 
-Clixon pagination encompasses several aspects:
+The use of locks guarantees a consistent view (snapshot) of the state
+data, but ultimately needs to be implemented by the pagination plugin
+code. Clixon provides a framework, but the semantics must be implemented
+by the plugin.
 
-1. NETCONF/RESTCONF protocol extensions
-2. CLI scrolling
-3. Plugin state API
    
 Pagination protocol
 -------------------
@@ -113,29 +128,45 @@ In the main example, cli_pagination is called as follows::
    show state <xpath:string> cli, cli_pagination("", "es", "http://example.com/ns/example-social", "cli", "10");
 
 
-Plugin state API
-----------------
+An application can use the `cli_pagination` callback, or create a
+tailor-made CLI callback based on the example callback.
 
-While pagination of config data is built-in, state data needs plugin callbacks. A new state callback API has been made which extends the previous state callback as follows::
 
-  char             *xpath,
-  pagination_mode_t pagmode,
-  uint32_t          offset, 
-  uint32_t          limit
-  uint32_t         *remaining
+Backend pagination API
+----------------------
 
-Essentially, the state callback requests state data forlist/leaf-list `xpath` in the interval `[offset...offset+limit]` and returns `remaining`.
+While pagination of config data is built-in, state data needs backend plugin
+callbacks. There is a special state pagination callback API where a
+callback is bound to an xpath, and is called when a pagination request is made on an xpath.
 
-The pagination mode is either:
+Such a callback is registered with an XPath and a callback as follows::
 
-  - `PAGINATION_NONE`      No list pagination: limit/offset are no-ops 
-  - `PAGINATION_STATELESS` Stateless list pagination, do not expect more pagination calls
-  - `PAGINATION_LOCK`      Transactional list pagination, can expect more pagination until lock release
+   clixon_pagination_cb_register(h, mycallback, "/myxpath", myarg);
 
-In the `PAGINATION_LOCK` case, the plugin can cache the state data, return
+where the callback has the following signature::
+
+   int 
+   mycallback(void            *h,
+              char            *xpath,
+	      pagination_data  pd,
+	      void            *arg)
+
+The ``pd`` parameter has the following accessor functions::
+
+   uint32_t pagination_offset(pagination_data pd)
+   uint32_t pagination_limit(pagination_data pd)
+   int      pagination_locked(pagination_data pd)
+   cxobj*   pagination_xstate(pagination_data pd)
+
+Essentially, the state callback requests state data for list/leaf-list `xpath` in the interval `[offset...offset+limit]`.
+
+If `locked` is true, the plugin can cache the state data, return
 further requests from the same cache until the lock on the "runníng"
 database is released, thus forming an (implicit) transaction.  For
 this, the ca_lockdb callback can be used as an end to the transaction.
 Note that there is not explicit "start transaction", the first locked
 pagination request acts as one.
 
+
+
+See a detailed example in the main example.
