@@ -190,6 +190,8 @@ exit
    Called just before plugin is unloaded 
 extension
   Called at parsing of yang modules containing an extension statement.  A plugin may identify the extension by its name, and perform actions on the yang statement, such as transforming the yang in-memory. A callback is made for every statement, which means that several calls per extension can be made.
+statedata
+  Provide state data XML from a plugin
 reset
   Reset system status
 upgrade
@@ -204,6 +206,7 @@ A second group of callbacks use register functions. This is a more detailed mech
 
 * ``rpc_callback_register()`` - for user-defined RPC callbacks.
 * ``upgrade_callback_register()`` - for upgrading, see :ref:`clixon_upgrade`.
+* ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`clixon_pagination`.
 
 A user may register may register a callback for an incoming RPC, and
 that function will be called. 
