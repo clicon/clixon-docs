@@ -381,6 +381,7 @@ CLICON_CLI_GENMODEL_TYPE, How to generate and show CLI syntax.
   - ``VARS`` Keywords on non-key variables: ``x y <k>``
   - ``ALL``  Keywords on all variables: ``x y k <k>``
   - ``HIDE`` Keywords on non-key variables and hide container around lists: ``y <k>``
+  - ``OC_COMPRESS`` Compress OpenConfig paths, see https://github.com/openconfig/ygot/blob/master/docs/design.md for more information
 
 CLICON_CLI_AUTOCLI_EXCLUDE,
   List of module names that are not generated autocli for.
