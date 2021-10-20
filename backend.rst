@@ -150,7 +150,11 @@ Backend plugins are the "glue" that binds the Clixon system to the
 underlying system. The backend invokes *callbacks* in the plugins when
 events.
 
-Plugins are written in C as dynamically loaded modules (`.so` files). At startup, the backend daemon looks in the directory pointed to by the config option `CLICON_BACKEND_DIR`, and loads all files with `.so` suffixes from that dir in alphabetical order.
+Plugins are added by the application developer and adds "semantics" to
+a Clixon system. The CLI, Restconf and Netconf applications also use
+callbacks.
+
+Plugins are written in C as dynamically loaded modules (``.so`` files). At startup, the backend daemon looks in the directory pointed to by the config option ``CLICON_BACKEND_DIR``, and loads all files with `.so` suffixes from that dir in alphabetical order.
 
 For example, to load all backend plugins from: `/usr/local/lib/example/backend`:
 ::
@@ -171,15 +175,15 @@ Clixon_plugin_init
 A plugin must have a init function called `clixon_plugin_init`. If
 this function does not exist, the backend will fail.
 
-The backend calls `clixon_plugin_init` and expects it to return an API
-struct (`clixon_plugin_api`) defining all callbacks. The init function may return `NULL` in which case the backend logs this and continues.
+The backend calls ``clixon_plugin_init`` and expects it to return an API
+struct (``clixon_plugin_api``) defining all callbacks. The init function may return ``NULL`` in which case the backend logs this and continues.
 
 Once the plugin is loaded, it awaits callbacks from the backend.
 
 The following callbacks are defined for backend plugins in *clixon_plugin_api*:
 
 init
-   Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called `clixon_plugin_init`. It returns a struct with the name of the plugin, and all other callback names.
+   Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called ``clixon_plugin_init``. It returns a struct with the name of the plugin, and all other callback names.
 start
    Called when application is started and initialization is complete, but before the application is placed in the background and drop privileges (see `dropping privileges`_), if those operations are requested.
 pre_daemon
@@ -280,7 +284,37 @@ Result netconf session::
      <y xmlns="urn:example:clixon">52</y>
   </rpc-reply>]]>]]>
 
+Callback guidelines
+^^^^^^^^^^^^^^^^^^^
 
+Since Clixon callbacks are loaded as dynamically loaded modules, the
+code running in a callback may affect the workings of the main
+program. They `share fate` in the sense that if the callback crashes,
+so does the backend main program.  The developer of callback code therefore has
+responsibility to ensure the succesful operation of the main program.
+
+This includes the use of global resources, such as signals, or privilege levels.
+
+.. note::
+        Callbacks may affect the main program and should not block, or modify global resources
+	
+Further, Clixon programs run as non-blocking `single-threaded`
+applications. This means that callback code must honor this
+programming model, i.e., not block, make asynchronous calls or introduce
+large latencies, since this will block the main program.
+
+It is possible to fork or create threads but only for activities that
+do not affect the clixon data structures or flow control.
+
+The following are some guidelines on how to avoid affecting the main program:
+
+  * Try to ensure the callback does not crash (such as a "SEGV") since it crashes the main program
+  * Do not change signal behaviour, such as blocking or assigning signal handlers
+  * Do not change process privileges
+  * Do not make asynchronous calls
+  * If you fork or create threads, ensure the main program continues uninterrupted
+
+  
 Transactions
 ------------
 Clixon follows NETCONF in its validate and commit semantics.
@@ -347,7 +381,7 @@ the transaction is aborted and the commit reverted:
   +--------->+--------->+ abort
 
 Callbacks
-~~~~~~~~~
+^^^^^^^^^
 
 There are two XML trees:
 
