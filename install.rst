@@ -2,21 +2,18 @@
 
 Installation
 ============
-
-.. This is a comment
-   
 Clixon runs on Linux, `FreeBSD port <https://www.freshports.org/devel/clixon>`_. CPU architectures include x86_64, i686, ARM32.
 
 You can also run Clixon in a docker container.
 
 Ubuntu Linux
 ------------
-
 This section can be used for many other Linux distributions.
 
 Prerequisites
 ^^^^^^^^^^^^^
-
+General prerequisites
+"""""""""""""""""""""
 Install packages::
 
   sudo apt-get install flex bison
@@ -27,62 +24,86 @@ Install and build CLIgen::
   cd cligen;
   configure
   make;
-  make install
+  sudo make install
 
 Add a clixon user and group, using useradd and usermod::
    
   sudo useradd -M -U clixon
-  sudo usermod -a -G clixon <your user>
+  sudo usermod -a -G clixon <youruser>  # Remember to re-log in for this to take effect
   sudo usermod -a -G clixon www-data # Only if RESTCONF
   
-If you do not require RESTCONF, then continue with `Build from source`_.
+If you do not require RESTCONF, then continue with `Build clixon from source`_.
 
-RESTCONF reverse proxy
-^^^^^^^^^^^^^^^^^^^^^^
+RESTCONF HTTP Support
+"""""""""""""""""""""
+Clixon's RESTCONF implementation currently supports two HTTP configurations:
 
-There are two RESTCONF variants. Either a reverse proxy solution using fcgi and (for example) nginx, based on the FastCGI protocol. To install::
+  #. `FastCGI for reverse proxy`_
+  #. `clixon native HTTP server`_
+
+FastCGI for reverse proxy
+"""""""""""""""""""""""""
+To build clixon RESTCONF FastCGI support for nginx or similar reverse HTTP proxy::
 
   sudo apt-get install nginx libfcgi-dev
 
-Note that fcgi may have other names on other platforms: fcgi-dev(alpine), fcgi(arch), fcgi-devkit(freebsd)
+Then, when building clixon from source (see below), configure clixon with::
 
-Note that the libfcgi-dev package may not exist in Ubuntu 18 bionic or later, you may have to `build fcgi from source`_),
+  configure --with-restconf=fcgi
 
+Note that the libfcgi-dev package might not exist in Ubuntu 18 bionic or later, in which case need to `build fcgi from source`_),
 
-RESTCONF native http
-^^^^^^^^^^^^^^^^^^^^
-For RESTCONF using the native http solution you may need to `build libevhtp from source`_ since few platforms have it as package (freebsd is one exception). It also requires openssl 1.1 API (not 1.0)
+Note that the 'fcgi' installation package might have a different name on other Linux distributions, such as "fcgi-dev" (alpine), "fcgi" (arch), "fcgi-devkit" (freebsd).
 
-.. note::
-        The openssl 1.1 API is NOT default in some older OS:s such as Ubuntu 16.0.4, CentOS 7
-
-Native http/1 requires libevent-2.1::
+Clixon native HTTP server
+"""""""""""""""""""""""""
+To build the clixon native HTTP RESTCONF server::
 
   sudo apt-get install libevent-dev
 
-Native http/2 requires libnghttp2::
+It also requires openssl 1.1 API (not 1.0)
 
-  sudo apt-get install libnghttp2
+Then `build libevhtp from source`_.
 
-  
-Build from source
-^^^^^^^^^^^^^^^^^
+Then, when building clixon from source (see below), configure clixon with(default)::
+
+  configure --with-restconf=native
+
+Build clixon from source
+^^^^^^^^^^^^^^^^^^^^^^^^
 Download clixon source code::
 
-     git clone https://github.com/clicon/clixon.git
+  git clone https://github.com/clicon/clixon.git
   
-Configure Clixon using one of the following RESTCONF variants::
+Configure Clixon using one of the following RESTCONF configurations::
 
-     configure --without-restconf
-     configure --with-restconf=native # Native http using libevhtp/libevent-2.1 (default)
-     configure --with-restconf=fcgi   # Reverse proxy
+  configure --with-restconf=fcgi  # FastCGI support for reverse proxy, the default
+                                  # when no '--with-restconf' option is specified
+  configure --with-restconf=native # clixon native HTTP server using libevhtp
+  configure --without-restconf
 
 For more configure options see: `Configure options`_.
 
 Build and install::
    
-     make                      # Compile
-     sudo make install         # Install libs, binaries, config-files and include-files
+  make                      # Compile
+  sudo make install         # Install libs, binaries, config-files and include-files
+  sudo ldconfig
+
+Building the example app and utils for running the tests
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+To build and install the example app, from the top level clixon directory::
+
+  make example
+  cd example
+  sudo make install
+
+To build the utils for running the tests, from the top level clixon directory::
+
+  sudo apt install libcurl4-openssl-dev
+  cd util
+  make
+  sudo make install
 
 FreeBSD
 -------
@@ -206,7 +227,11 @@ For RESTCONF using native http build evhtp from source as follows::
   make
   sudo make install
 
-Note: Clixon native mode requires openssl 1.1 API which is NOT default in Ubuntu 16.0.4, CentOS 7 for example.
+
+Note that evhtp requires openssl 1.1 API.
+
+Note that you will likely need to add /usr/local/lib/libevhtp to your ld.so.conf configuration
+
 
 Build fcgi from source
 ----------------------
@@ -239,14 +264,14 @@ The Clixon `configure` script (generated by autoconf) includes several options a
 
 These include (standard options are omitted)
   --enable-debug          Build with debug symbols, default: no
-  --disable-optyangs      Include optional yang files in clixon install used for example and testing, default: no
+  --enable-optyangs       Install the yang files from clixon/yang/optional, required for running the example app and tests, default: no
   --enable-publish        Enable publish of notification streams using SSE and curl
   --with-cligen=dir       Use CLIGEN here
   --without-restconf      No RESTCONF
   --with-restconf=native  RESTCONF using native http with libevhtp. This is default
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
   --disable-nghttp2       Disable native http/2 using libnghttp2 (http/1 only)
   --disable-evhtp         Disable native http/1.1 using libevhtp (http/2 only)
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
   --with-configfile=FILE  set default path to config file
   --with-libxml2          use gnome/libxml2 regex engine
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
