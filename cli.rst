@@ -3,6 +3,17 @@
 CLI
 ===
 
+::
+
+                   +---------------------------------------+
+                   |  +------------+  IPC  +------------+  |
+                   |  |    cli     | ----- |  backend   |  |
+      User <-----> |  |------------|       |------------|  |
+                   |  |cli plugins |       | be plugins |  |
+                   |  +------------+       +------------+  |
+                   +---------------------------------------+
+
+		  
 The CLI uses `<https://github.com/clicon/cligen>`_ is a central part of Clixon. CLIgen can stand on its own but is fully integrated into Clixon. This section describes the Clixon integration, for details on CLI syntax, etc, please consult the `tutorial <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_.
 
 Once the backend is started, the easiest way to use Clixon is via
@@ -53,7 +64,7 @@ In the CLI, these will generate CLI commands such as::
    show config
    example 23
 
-The effect of typing the commands above will be of calling the callbacks: `cli_show_config` and `mycallback`. Both these functions must exist as C-functions. In fact, `cli_show_config` is a library function avaliable in the Clixon libs, while `mycallback` is defined in the main example CLI plugin.
+The effect of typing the commands above is calling the callbacks: `cli_show_config` and `mycallback`. Both these functions must exist as C-functions. In fact, `cli_show_config` is a library function available in the Clixon libs, while `mycallback` is defined in the main example CLI plugin.
 
 In this way, a designer writes cli command specifications which
 invokes C-callbacks. If there are no appropriate callbacks the
@@ -64,7 +75,7 @@ Cli spec variables
 A CLI specification file typically starts with the following variables:
 
 CLICON_MODE
-  A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to _all_ modes specified in the list. You can also use wildcards `*` and `?`.
+  A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to *all* modes specified in the list. You can also use wildcards `*` and `?`.
 
 CLICON_PROMPT
   A string describing the CLI prompt using a very simple format with: ``%H`` (host) , ``%U`` (user) , ``%T`` (tty),  ``%W`` (working path).
@@ -85,6 +96,34 @@ CLICON_CLISPEC_DIR
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
 
+CLI callbacks
+-------------
+CLI callback functions are "library" functions that an application may call from a clispec. A
+user is expected to create new application-specific callbacks.
+
+As an example, consider the following clispec::
+
+   example("Callback example") <var:int32>("any number"), mycallback("myarg");
+ 
+containing a keyword (`example`) and a variable (`var`) and `mycallback` is a cli callback with argument: (`myarg`).
+
+In C, the callback has the following signature::
+
+  int mycallback(clicon_handle h, cvec *cvv, cvec *argv);
+
+Suppose a user enters the following command in the CLI::
+
+  cli> example 23
+
+The callback is called with the following parameters::
+
+  cvv: 
+     0: example 23
+     1: 23
+  argv:
+     0: "myarg"
+
+which means that `cvv` contains dynamic values set by the user, and `argv` contains static values set by the clispec designer.
   
 Modes
 -----
@@ -110,7 +149,7 @@ Finally, add a command to all modes::
   CLICON_MODE="*";
   show("Show") all("Show all");
    
-Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes will be three commands in total for the *configure* mode::
+Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes are the three commands in total for the *configure* mode::
 
   > clixon_cli -m configure
   cli> show <TAB>
@@ -131,7 +170,7 @@ CLICON_CLI_LINESCROLLING
   Set to 1 if you want CLI to scroll sideways when approaching right margin (default).
 
 CLICON_CLI_LINES_DEFAULT
-   Set to number of CLI terminal rows for pageing/scrolling. 0 means unlimited.  The number is set statically UNLESS:
+   Set to number of CLI terminal rows for pagination/scrolling. 0 means unlimited.  The number is set statically UNLESS:
 
    * there is no terminal, such as file input, in which case nr lines is 0
    * there is a terminal sufficiently powerful to read the number of lines from ioctl calls.
@@ -153,7 +192,7 @@ The design is similar to bash history but is simpler in some respects:
    - The size (number of lines) of the file is the same as the history in memory
    - Only the latest session dumping its history will survive (bash merges multiple session history).
 
-Further, tilde-expansion is supported and if history files are not found or lack appropriate access will not cause an exit but will be logged at debug level
+Further, tilde-expansion is supported and if history files are not found or lack appropriate access will not cause an exit but are logged at debug level
 
 Sub-trees
 ^^^^^^^^^
@@ -171,7 +210,7 @@ then access that subtree from other modes::
   main @subtree;
   other @subtree,c();
 
-The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks will be overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` will be invoked.
+The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks are overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` is invoked.
 
 Help strings
 ------------
@@ -243,12 +282,12 @@ This cli-spec forms the basis of the auto-cli and contains the following:
   - Keywords for the YANG symbol (eg ``x`` and ``y``).
   - Variable syntax for leafs (eg ``<k:string>``)
   - Non-terminal nodes can be entered as automatic modes with prompt showing the current path
-  - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content will be shown as alternatives.
+  - Completion callbacks for variables with existing datastore syntax (eg ``expand_dbvar()``). That is, existing datastore content is shown as alternatives.
   - Output syntax as cli, xml, json, as netconf commands
   - ``overwrite_me`` is a callback template which is overwritten by an actual callback in the clispec (eg ``cli_set()``)
 
 
-The auto-cli syntax can be copied and loaded seperately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
+The auto-cli syntax can be copied and loaded separately (in another mode file), or much simpler, just use the ``@datamodel`` tree directly in the regular cli-spec::
 
   CLICON_PROMPT="%U@%H %W> ";
   edit @datamodel, cli_auto_edit("datamodel", "candidate");
@@ -298,6 +337,30 @@ An example run of the above example is::
 The example shows an automated cli generated by the YANG model, with
 completion as well as config to cli syntax.
 
+Hidden commands
+^^^^^^^^^^^^^^^
+
+You can implement the "hidden command" cligen feature by using the
+"autocli-op" extension in `clixon-lib.yang`. This is done by
+annotating a YANG specification with that extension. In the auto-cli,
+that command will not active but not visible in the CLI.
+
+Example YANG with hide extension of "val" leaf::
+  
+   import clixon-lib{
+      prefix cl;
+   }
+   container x{
+      list y{
+         ...
+         leaf val{
+            type string;
+            cl:autocli-op hide;
+         }
+      }
+   }
+
+
 Options
 ^^^^^^^
 The config options for generated config tree is:
@@ -318,4 +381,45 @@ CLICON_CLI_GENMODEL_TYPE, How to generate and show CLI syntax.
   - ``VARS`` Keywords on non-key variables: ``x y <k>``
   - ``ALL``  Keywords on all variables: ``x y k <k>``
   - ``HIDE`` Keywords on non-key variables and hide container around lists: ``y <k>``
+  - ``OC_COMPRESS`` Compress OpenConfig paths, see https://github.com/openconfig/ygot/blob/master/docs/design.md for more information
 
+CLICON_CLI_AUTOCLI_EXCLUDE,
+  List of module names that are not generated autocli for.
+
+Bits
+----
+The Yang bits built-in type as defined in RFC 7950 Sec 9.7 provides a set of bit names. In the CLI, the names should be given in a white-spaced delimited list, such as ``"fin syn rst"``.
+
+The RFC defines a "canonical form"where the bits appear ordered by their position in YANG, but Clixon validation accepts them in any order.
+
+Given them in XML and JSON follows thus, eg XML::
+
+   <flags>fin rst syn</flags>
+
+Clixon CLI does not treat individual bits as "first-level objects". Instead it only validates the whole string of bit names. Operations (add/remove) are made atomically on the whole string.
+
+Translators
+-----------
+CLIgen supports wrapper functions that can take the output of a
+callback and transform it to something else.
+
+The CLI can perform variable translation. This is useful if you want to
+process the input, such as hashing, encrypting or in other way
+translate the input.
+
+The following example is based on the main Clixon example and is included in the regression tests. In the following CLI specification, a "translate" command sets a modifed value to the "table/parameter=translate/value"::
+
+  translate <value:string translate:cli_incstr()>, cli_set("/clixon-example:table/parameter=translate/value");
+
+If you run this example using the `cli_incstr()` function which increments the characters in the input, you get this result::
+
+  cli> translate HAL
+  cli> show configuration
+  table {
+     parameter {
+        name translate;
+        value IBM;
+     }
+  }
+
+The example is very simple and based on strings, but can be used also for other types and more advanced functions.

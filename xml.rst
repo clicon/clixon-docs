@@ -39,7 +39,7 @@ Example of XPath in a NETCONF `get-config` RPC using the XPath capability:
 XPath is a powerful language for addressing parts of an XML document, including types and expressions. The following is a valid but complex XPath:
 ::
 
-   /assembly[name="robot_4"]//shape/name[containts(text(),'bolt')]/surface/roughness
+   /assembly[name="robot_4"]//shape/name[contains(text(),'bolt')]/surface/roughness
 
 Clixon uses XPaths extensively due to their expressive power.  However, it is recommended to use instance-identifiers instead if you want optimized access.
 
@@ -111,7 +111,7 @@ Namespaces in Api-paths
 In contrast to XPath, Api-path namespaces are defined implicitly by a
 YANG context using *module-names* as prefixes.  The namespace is
 defined in the Yang module by the `namespace` keyword. Api-paths must
-have a Yang definition whereas XPaths can be compeletely defined
+have a Yang definition whereas XPaths can be completely defined
 in XML.
 
 A prefix/module-name is *inherited*, such that a child inherits the prefix
@@ -374,7 +374,7 @@ Binding is made with the ``xml_bind_yang()`` API. The bind API can be done in so
 
 - ``YB_MODULE``  Search for matching yang binding among top-level symbols of Yang modules. This is default.
 - ``YB_PARENT``  Assume yang binding of existing parent and match its children by name
-- ``YB_NONE``    Dont bind
+- ``YB_NONE``    Do not bind
 
 In the example above, the binding is ``YB_MODULE`` since the top-level symbol
 ``x`` is a top-level symbol of a module.
@@ -398,7 +398,7 @@ The following is an example of how to bind yang to an XML tree ``xt``:
 The return values from the bind API are same as parsing, as follows:
 
 - ``1``  OK yang assignment made
-- ``0``  Partial or no yang assigment made (at least one failed) and xerr set
+- ``0``  Partial or no yang assignment made (at least one failed) and xerr set
 - ``-1``  Error
 
 As an example of `YB_PARENT` Yang binding, the ``k1`` subtree is inserted under an existing XML tree which has already been bound to YANG. Such as an XML tree with the ``x`` symbol.

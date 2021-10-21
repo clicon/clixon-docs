@@ -31,38 +31,39 @@ General Public License Version 2.
 System Architecture
 -------------------
 
-::
-   
-                  +------------------------------------------+
-                  |  Frontends:          +------------+      |
-                  |  +----------+        | configfile |      |
-                  |  |   cli    |--+     +------------+      |
-                  |  +----------+   \ +----------+---------+ |
-                  |  +----------+    \| backend  | plugins | |
-      User  <-->  |  | restconf |---- | daemon   |         | |  <--> Underlying
-                  |  +----------+    /+----------+---------+ |       System
-                  |  +----------+   /    +------------+      |
-	          |  | netconf  |--+     | datastores |      |
-		  |  +----------+        +------------+      |
-                  +------------------------------------------+
+Clixon provides YANG functionality with Netconf, Restconf and CLI that
+can be integrated with a "base system" in several ways. Two primary integrations are outlined here:
+
+  * `Plugin` integration where clixon handles all user interaction with the interaction with the base system with backend plugins. This is the primary Clixon usage model.
+  * `Client` integration where the base system uses clixon primarily for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
+
+Plugin integration
+^^^^^^^^^^^^^^^^^^
+
+.. image:: overview1.jpg
+   :width: 100%
 		 
-The core of the Clixon architecture is a backend daemon with
+This describes how to integrate a base system with clixon using plugins.
+
+The Clixon architecture consists of a backend daemon with
 configuration datastores and a set of internal clients: cli, restconf
 and netconf.
 
-The clients provide frontend interfaces to users, including an
-interactive CLI, RESTCONF over HTTP, and XML NETCONF over SSH.
-Internally, the clients and backend communicate via NETCONF over a
-UNIX socket.
+The clients provide frontend interfaces to users of the system, such
+as a Network Management System (NMS) or just a live user. The
+external interfaces includes interactive CLI, RESTCONF over HTTP/HTTPS, and XML
+NETCONF over TCP or SSH.  Internally, the clients and backend
+communicate over Inter-Process Communication (IPC) bus via NETCONF
+over a UNIX socket. It is possible to run over an INET socket as well.
 
 The backend manages a configuration datastore and implements a
 transaction mechanism for configuration operations (eg, create, read,
 update, delete) . The datastore supports candidate, running and
 startup configurations.
 
-When you adapt Clixon to your system, you typically start with a set
-of YANG specifications that you want implemented. You then write
-backend plugins that interact with the underlying system. The plugins
+A system integrating Clixon using plugins, typically starts with a set
+of YANG specifications that should be implemented. You then write
+backend plugins that interact with the base system. The plugins
 are written in C using the Clixon API and a set of plugin
 callbacks. The main callback is a transaction callback, where you
 specify how configuration changes are made to your system.
@@ -73,7 +74,21 @@ CLI plugins.  You will have to write CLI rules, but Clixon can
 generate the configuration part of the CLI, including set, delete, show
 commands for a specific syntax.
    
+Notifications are supported both for CLI, netconf and restconf clients, sometimes referred to as "streams".
 
+Client integration
+^^^^^^^^^^^^^^^^^^
+.. image:: overview2.jpg
+   :width: 100%
+
+In a client architecture, the base system keeps existing APIs and
+only YANG-based configurations are exposed via Clixon. The base system
+acts as a clixon client and uses the clixon client module to subscribe
+to configuration events using Netconf message passing.
+
+In comparison, the tighter plugin architecture uses dynamically loaded plugins, callbacks and a shared datastore. See :ref:`clixon client api<client_api>` for more details.
+
+	    
 Platforms
 ---------
 
@@ -101,7 +116,7 @@ Report bugs via `Github issues <https://github.com/clicon/clixon/issues>`_
 Reference docs
 --------------
 The user-manual is this document.
-For reference documentation of the C-code, Doxygen is used. To build the reference doumentation you need to check out the source code, and type ``make doc``, eg::
+For reference documentation of the C-code, Doxygen is used. To build the reference documentation you need to check out the source code, and type ``make doc``, eg::
 
   git clone git@github.com:clicon/clixon.git
   cd clixon

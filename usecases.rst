@@ -3,7 +3,7 @@
 Usecases
 ========
 
-This section contains usescases which illustrate the flow of data from
+This section contains usecases which illustrate the flow of data from
 a user via Clixon frontends, backend to the underlying system and back.
 
 CLI read
@@ -34,6 +34,10 @@ The first usecase illustrates how a retrieval of a configured value from the sys
 2. The CLI string `show configuration text hello` is translated to internal NETCONF and sent to the backend:
 ::
 
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities>
+   </hello>]]>]]>
    <rpc username="myuser" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
      <get-config>
        <source><candidate/></source>
@@ -78,7 +82,7 @@ CLI write
 The figure illustrates the way messages flow through the system. The
 numbers illustrate the enumeration below.
 
-When setting a config value, the candidate datastore is modified and the commited to running which triggers a plugin commit transaction:
+When setting a config value, the candidate datastore is modified and the committed to running which triggers a plugin commit transaction:
 
 1. CLI example command:
 ::
@@ -89,6 +93,10 @@ When setting a config value, the candidate datastore is modified and the commite
 2. Internal netconf containing a "replace" operation:
 ::
 
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities>
+   </hello>]]>]]>
    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" username="clicon">
      <edit-config>
        <target><candidate/></target>
@@ -113,7 +121,7 @@ When setting a config value, the candidate datastore is modified and the commite
 4. The backend will reply with an OK:
 ::
 
-   <rpc-reply>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
      <ok/>
    </rpc-reply
 
@@ -146,7 +154,7 @@ underlying system. Often, commits are made at once after every edit
      <commit/>
    </rpc>
 
-2. When the backend receives the commit message, it computes the differences between candidate and running datastores, creates a transaction datastructure and initites a transaction.
+2. When the backend receives the commit message, it computes the differences between candidate and running datastores, creates a transaction data structure and initiates a transaction.
 
 3. Each plugin in turn gets callbacks to validate the transaction. The plugins verifies that the proposed changes to the system is sound. If not, the commit fails.
 
@@ -158,7 +166,7 @@ underlying system. Often, commits are made at once after every edit
 6. An OK is returned to the user.
 ::
 
-   <rpc-reply>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
      <ok/>
    </rpc-reply
 
@@ -201,7 +209,7 @@ A plugin can register an application-dependent RPC, and a client can then access
 6. The plugin returns a reply which is returned to the restonf client (for example):
 ::
 
-   <rpc-reply>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
      <x xmlns="urn:example:clixon">0</x>
      <y xmlns="urn:example:clixon">42</y>
    </rpc-reply>

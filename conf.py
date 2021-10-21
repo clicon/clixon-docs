@@ -28,7 +28,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # The full version, including alpha/beta/rc tags
-release = '4.6'
+release = '5.3'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -118,7 +118,7 @@ html_logo = "Clixon_logga_ikon.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

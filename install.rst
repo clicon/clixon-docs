@@ -26,11 +26,11 @@ Install and build CLIgen::
   make;
   sudo make install
 
-Add a clicon user and group, using useradd and usermod::
+Add a clixon user and group, using useradd and usermod::
    
-  sudo useradd -M -U clicon
-  sudo usermod -a -G clicon <youruser>  # Remember to re-log in for this to take effect
-  sudo usermod -a -G clicon www-data # Only if RESTCONF
+  sudo useradd -M -U clixon
+  sudo usermod -a -G clixon <youruser>  # Remember to re-log in for this to take effect
+  sudo usermod -a -G clixon www-data # Only if RESTCONF
   
 If you do not require RESTCONF, then continue with `Build clixon from source`_.
 
@@ -55,19 +55,19 @@ Note that the libfcgi-dev package might not exist in Ubuntu 18 bionic or later, 
 
 Note that the 'fcgi' installation package might have a different name on other Linux distributions, such as "fcgi-dev" (alpine), "fcgi" (arch), "fcgi-devkit" (freebsd).
 
-clixon native HTTP server
+Clixon native HTTP server
 """""""""""""""""""""""""
 To build the clixon native HTTP RESTCONF server::
 
   sudo apt-get install libevent-dev
 
-Then install libevhtp.
+It also requires openssl 1.1 API (not 1.0)
 
-Note that you will likely need to `build libevhtp from source`_ since few distributions have it as package (freebsd is one exception). libevhtp requires openssl 1.1 API (not 1.0) and libevent-2 (libevent-dev.
+Then `build libevhtp from source`_.
 
-Then, when building clixon from source (see below), configure clixon with::
+Then, when building clixon from source (see below), configure clixon with(default)::
 
-  configure --with-restconf=evhtp
+  configure --with-restconf=native
 
 Build clixon from source
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -77,9 +77,9 @@ Download clixon source code::
   
 Configure Clixon using one of the following RESTCONF configurations::
 
+  configure --with-restconf=native # clixon native HTTP server using libevhtp (default)
   configure --with-restconf=fcgi  # FastCGI support for reverse proxy, the default
                                   # when no '--with-restconf' option is specified
-  configure --with-restconf=evhtp # clixon native HTTP server using libevhtp
   configure --without-restconf
 
 For more configure options see: `Configure options`_.
@@ -154,7 +154,7 @@ Systemd
 -------
 
 Once installed, Clixon can be setup using systemd. The following shows an example with the backend and restconf daemons for the main example.
-Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_retsconf.service, for example.
+Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_restconf.service, for example.
 
 Systemd backend
 ^^^^^^^^^^^^^^^
@@ -184,13 +184,13 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    After=example.service
    [Service]
    Type=simple
-   User=www-data
-   WorkingDirectory=/www-data
+   User=root
    Restart=on-failure
-   ExecStart=/www-data/clixon_restconf -f /usr/local/etc/example.xml
+   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/example.xml
    [Install]
    WantedBy=multi-user.target
 
+The restconf daemon can also be started using the clixon-lib process-control RPC. For more info, see :ref:`clixon_restconf`.
 
 Docker
 ------
@@ -202,6 +202,11 @@ Clixon can run in a docker container.  As an example the `docker` directory has 
 
 The docker tests are run in the `Travis CI <https://travis-ci.org/github/clicon/clixon>`_
    
+OpenWRT
+-------
+
+See [Clixon cross-compiler for openwrt](https://github.com/clicon/clixon-openwrt)
+
 Vagrant
 -------
 
@@ -216,13 +221,10 @@ Build libevhtp from source
 --------------------------
 For RESTCONF using native http build evhtp from source as follows::
 
-  sudo git clone https://github.com/criticalstack/libevhtp.git
-  cd libevhtp/build
-  cmake -DEVHTP_DISABLE_REGEX=ON -DEVHTP_DISABLE_EVTHR=ON -DBUILD_SHARED_LIBS=ON ..
+  sudo git clone https://github.com/clicon/clixon-libevhtp.git
+  cd libevhtp
+  ./configure --libdir=/usr/lib
   make
-  sudo make install
-
-Note that you will likely also need to install cmake and libevent2/libevent-dev.
 
 Note that evhtp requires openssl 1.1 API.
 
@@ -240,6 +242,18 @@ For RESTCONF using fcgi build fcgi from source as follows::
   sudo make install
 
 
+SSH subsystem
+-------------
+
+You can expose ``clixon_netconf`` as an SSH subsystem according to `RFC 6242`. Register the subsystem in ``/etc/sshd_config``::
+
+	Subsystem netconf /usr/local/bin/clixon_netconf
+
+and then invoke it from a client using::
+
+	ssh -s <host> netconf
+
+
 Configure options
 -----------------
 
@@ -251,10 +265,20 @@ These include (standard options are omitted)
   --enable-publish        Enable publish of notification streams using SSE and curl
   --with-cligen=dir       Use CLIGEN here
   --without-restconf      No RESTCONF
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. This is default.
-  --with-restconf=evhtp   RESTCONF using native http with libevhtp
-  --with-wwwuser=<user>   Set www user different from www-data
+  --with-restconf=native  RESTCONF using native http with libevhtp. This is default
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
+  --disable-nghttp2       Disable native http/2 using libnghttp2 (http/1 only)
+  --disable-evhtp         Disable native http/1.1 using libevhtp (http/2 only)
   --with-configfile=FILE  set default path to config file
   --with-libxml2          use gnome/libxml2 regex engine
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
   --with-opt-yang-installdir=DIR  Install optional yang files here (default: ${prefix}/share/clixon)
+  --without-sigaction     Disable sigaction logic (eg SA_RESTART mode)
+  --enable-yang-patch     Enable RFC 8072 YANG patch (plain patch is always enabled)
+
+There are also some variables that can be set, such as::
+
+  ./configure LINKAGE=static ./configure         # Build static libraries
+  ./configure CFLAGS="-O1 -Wall" INSTALLFLAGS="" # Use other CFLAGS
+
+Note, you need to reconfigure and recompile from scratch if you want to build static libs

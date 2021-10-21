@@ -3,7 +3,7 @@
 Configuration
 =============
 
-Clixon configuration files are XML files modelled by YANG. By
+Clixon configuration files are XML files modeled by YANG. By
 default, the main config file is installed in ``/usr/local/etc/clixon.xml``, but can be changed by the ``-f <file>`` command-line option.
 
 The YANG specification for Clixon configuration is `clixon-config.yang
@@ -34,12 +34,16 @@ The following is the configuration file of an example:
      <CLICON_XMLDB_DIR>/usr/local/var/hello</CLICON_XMLDB_DIR>
      <CLICON_STARTUP_MODE>init</CLICON_STARTUP_MODE>
      <CLICON_MODULE_LIBRARY_RFC7895>false</CLICON_MODULE_LIBRARY_RFC7895>
+     <restconf>
+        <enable>true</enable>
+     </restconf>
    </clixon-config>
 
 The option ``CLICON_CONFIGFILE`` is special, it must be available before
 the configuration file is found (see `Loading the configuration`_),
 which means that the value in the file is a no-op.
 
+The ``restconf`` clause defines RESTCONF configuration options as described in the :ref:`clixon_restconf` section.
 
 Loading the configuration
 -------------------------
@@ -67,8 +71,6 @@ The following options control the Clixon configuration:
 
    * leaf values are overwritten
    * leaf-list values are appended
-
-
    
 
 Runtime modification
@@ -153,4 +155,3 @@ Default values
 ``CLICON_YANG_REGEXP`` which is not present in the ``hello world`` is an example of a configuration option with a default value of ``posix``::
 
    <CLICON_YANG_REGEXP>posix</CLICON_YANG_REGEXP>
-

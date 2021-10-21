@@ -15,7 +15,7 @@ Restrictions
 
 Access notification authorization (Sec 3.4.6) is NOT implemented.
 
-Data-node paths, eg ``<rule>...<path>ex:table/ex:parameter</path></rule>`` inmstance-identifiers are restricted to canonical namespace identifiers for both XML and JSON encoding. That is, if asymbol (such as ``table`` above) is a symbol in a module with prefix ``ex``, another prefix cannot be used, even though defined with a ``xmlns`` rule.
+Data-node paths, eg ``<rule>...<path>ex:table/ex:parameter</path></rule>`` instance-identifiers are restricted to canonical namespace identifiers for both XML and JSON encoding. That is, if a symbol (such as ``table`` above) is a symbol in a module with prefix ``ex``, another prefix cannot be used, even though defined with a ``xmlns`` rule.
 
 Config options
 ==============
@@ -59,7 +59,7 @@ NACM is implemented in the Clixon backend at:
 
 * Incoming RPC (module-name/protocol-operation)
 * Before modifying the data store (data create/delete/update)
-* After retreiving data (data read)
+* After retrieving data (data read)
 
 User credentials
 ----------------
@@ -79,7 +79,7 @@ and backend. In this way, a username claimed by a client can be verified against
 
 The allowed values of `CLICON_NACM_CREDENTIALS` is:
 
-* `none`: Dont match NACM user to any user credentials. Any user can pose as any other user. Set this for IP sockets, or dont use NACM.
+* `none`: Do not match NACM user to any user credentials. Any user can pose as any other user. Set this for IP sockets, or do not use NACM.
 * `exact`: Exact match between NACM user and unix socket peer user. 
 * `except`: Exact match between NACM user and unix socket peer user, `except` for root and `wwwuser`. This is default.
 
@@ -98,7 +98,7 @@ you can control who can act as the recovery user.
 
 For example, by setting ``CLICON_NACM_CREDENTIALS`` to `except` the
 RESTCONF daemon can make backend calls posing as the recovery user,
-even though it runs as `www-data`.
+even though it runs as `wwwuser`.
 
 Alternatively, ``CLICON_NACM_CREDENTIALS`` can be set to `exact` and
 the recovery user as `root`, in which case only a netconf or cli

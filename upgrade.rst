@@ -6,10 +6,11 @@ Upgrade
 When Clixon starts, the backend reads a startup configuration (see :ref:`startup modes <clixon_backend>`)
 parses it, checks for upgrades, and validates the configuration. It can also add extra XML, outside of the normal startup. On errors, it can enter a failsafe mode.
 
-Clixon has two primary upgrade methods:
+Clixon has three upgrade methods:
 
 * General-purpose datastore upgrade.
 * Module-specific manual upgrade
+* Automatic upgrade (experimental)
 
 
 General-purpose
@@ -67,7 +68,7 @@ Example:
       /* Get all xml nodes matching path */
       if (xpath_vec(xt, nsc, "/a:x/a:y", &xvec, &xlen) < 0) 
          err;
-      /* Iterate throughnodes and remove them */
+      /* Iterate through nodes and remove them */
       for (i=0; i<xlen; i++){
          if (xml_purge(xvec[i]) < 0)
 	    err;
@@ -134,7 +135,7 @@ where:
 * `from` is the revision date in the startup file of the module. It is zero if the operation is ``ADD``
 * `to` is the revision date of the YANG module in the system. It is zero if the operation is ``DEL``
   
-If no action is made by the upgrade calback, and thus the XML is not upgraded, the next step is XML/Yang validation.
+If no action is made by the upgrade callback, and thus the XML is not upgraded, the next step is XML/Yang validation.
 
 An out-dated XML may still pass validation and the system will go up in normal state.
 
@@ -222,7 +223,7 @@ However, on-line repair *cannot* be made in the following circumstances:
 First, copy the (broken) startup config to candidate. This is necessary since you cannot make `edit-config` calls to the startup db:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <copy-config>
       <source><startup/></source>
       <target><candidate/></target>
@@ -233,7 +234,7 @@ You can now edit the XML in candidate. However, there are some restrictions on t
 For example, assume `x` is obsolete syntax, then this is *not* accepted:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <edit-config>
       <target><candidate/></target>
       <config>
@@ -245,7 +246,7 @@ For example, assume `x` is obsolete syntax, then this is *not* accepted:
 Instead, assuming `y` is a valid syntax, the following operation is allowed since `x` is not explicitly accessed:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <edit-config>
       <target><candidate/></target>
       <config operation='replace'>
@@ -257,8 +258,75 @@ Instead, assuming `y` is a valid syntax, the following operation is allowed sinc
 Finally, the candidate is validate and committed:
 ::
    
-  <rpc>
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <commit/>
   </rpc>
 
 The example shown in this Section is also available as a regression `repair test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_repair.sh>`_.
+
+Automatic upgrades
+------------------
+There is an EXPERIMENTAL xml changelog feature based on
+"draft-wang-netmod-module-revision-management-01" (Zitao Wang et al)
+where changes to the Yang model are documented and loaded into
+Clixon. The implementation is not complete.
+
+When upgrading, the system parses the changelog and tries to upgrade
+the datastore automatically. This feature is experimental and has
+several limitations.
+
+You enable the automatic upgrading by registering the changelog upgrade method in ``clixon_plugin_init()`` using wildcards::
+
+   upgrade_callback_register(h, xml_changelog_upgrade, NULL, 0, 0, NULL);
+
+The transformation is defined by a list of changelogs. Each changelog defined how a module (defined by a namespace) is transformed from an old revision to a new. Example from `auto upgrade test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_auto.sh>`_::  
+
+  <changelogs xmlns="http://clicon.org/xml-changelog">
+    <changelog>
+      <namespace>urn:example:b</namespace>
+      <revfrom>2017-12-01</revfrom>
+      <revision>2017-12-20</revision>
+      ...
+    <changelog>
+  </changelogs>
+
+Each changelog consists of set of (ordered) steps::
+
+    <step>
+      <name>1</name>
+      <op>insert</op>
+      <where>/a:system</where>
+      <new><y>created</y></new>
+    </step>
+    <step>
+      <name>2</name>
+      <op>delete</op>
+      <where>/a:system/a:x</where>
+    </step>
+
+Each step has an (atomic) operation:
+
+* rename - Rename an XML tag
+* replace - Replace the content of an XML node
+* insert - Insert a new XML node
+* delete - Delete and existing node
+* move - Move a node to a new place
+
+A *step* has the following arguments:
+
+* where - An XPath node-vector pointing at a set of target nodes. In most operations, the vector denotes the target node themselves, but for some operations (such as insert) the vector points to parent nodes.
+* when - A boolean XPath determining if the step should be evaluated for that (target) node.
+
+Extended arguments:
+
+* tag - XPath string argument (rename)
+* new - XML expression for a new or transformed node (replace, insert)
+* dst - XPath node expression (move)
+
+Step summary:
+
+* rename(where:targets, when:bool, tag:string)
+* replace(where:targets, when:bool, new:xml)
+* insert(where:parents, when:bool, new:xml)
+* delete(where:parents, when:bool)
+* move(where:parents, when:bool, dst:node)

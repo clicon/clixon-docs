@@ -22,9 +22,12 @@ mechanism.
    backend
    datastore
    usecases
+   client
    cli
+   netconf
    restconf
    xml
    nacm
+   pagination
    upgrade
    misc

@@ -5,7 +5,7 @@ Quick start
 
 .. This is a comment
    
-This section describes how to run the Hello world example available in soure code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_.
+This section describes how to run the Hello world example available in source code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_.
 
 Clixon is not a system in itself, it is a support system for an
 application. In this case, the "application" is hello world. The hello
@@ -76,12 +76,14 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 ::
 
    olof@vandal> clixon_netconf -q
-   <rpc><edit-config><target><candidate/></target><config><hello xmlns="urn:example:hello"><world/></hello></config></edit-config></rpc>]]>]]>
-   <rpc-reply><ok/></rpc-reply>]]>]]>
-   <rpc><commit/></rpc>]]>]]>
-   <rpc-reply><ok/></rpc-reply>]]>]]>
-   <rpc><get-config><source><running/></source></get-config></rpc>]]>]]>
-   <rpc-reply><data><hello xmlns="urn:example:hello"><world/></hello></data></rpc-reply>]]>]]>
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities></hello>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><edit-config><target><candidate/></target><config><hello xmlns="urn:example:hello"><world/></hello></config></edit-config></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><ok/></rpc-reply>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><commit/></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><ok/></rpc-reply>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><running/></source></get-config></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><data><hello xmlns="urn:example:hello"><world/></hello></data></rpc-reply>]]>]]>
    olof@vandal> 
 
 Restconf
@@ -90,7 +92,7 @@ Restconf
 Clixon can use two RESTCONF compile-time variants:
   
 *  `FCGI` : Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication.  A reverse proxy needs to be configured.
-*  `Native http`: web-server using `libevhtp <https://github.com/criticalstack/libevhtp>`_. The libevhtp web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
+*  `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
 
 FCGI
 ^^^^
@@ -126,7 +128,7 @@ Start and run
 Regardless of which RESTCONF variant is used, next step is to start the restconf daemon:
 ::
 
-   sudo /www-data/clixon_restconf
+   sudo clixon_restconf
 
 Start sending restconf commands (using Curl):
 ::
@@ -165,8 +167,10 @@ Or Netconf:
 ::
 
    $ sudo docker exec -it clixon/clixon clixon_netconf
-   <rpc><get-config><source><candidate/></source></get-config></rpc>]]>]]>
-   <rpc-reply><data/></rpc-reply>]]>]]>
+   <?xml version="1.0" encoding="UTF-8"?>
+   <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.1</capability></capabilities></hello>]]>]]>
+   <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get-config><source><candidate/></source></get-config></rpc>]]>]]>
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><data/></rpc-reply>]]>]]>
 
 Or using restconf using curl on exposed port 8080:
 ::
