@@ -284,34 +284,34 @@ Result netconf session::
      <y xmlns="urn:example:clixon">52</y>
   </rpc-reply>]]>]]>
 
-Callback guidelines
-^^^^^^^^^^^^^^^^^^^
-
-Since Clixon callbacks are loaded as dynamically loaded modules, the
-code running in a callback may affect the workings of the main
-program. They `share fate` in the sense that if the callback crashes,
-so does the backend main program.  The developer of callback code therefore has
-responsibility to ensure the succesful operation of the main program.
-
-This includes the use of global resources, such as signals, or privilege levels.
+Plugin callback guidelines
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
-        Callbacks may affect the main program and should not block, or modify global resources
-	
-Further, Clixon programs run as non-blocking `single-threaded`
-applications. This means that callback code must honor this
-programming model, i.e., not block, make asynchronous calls or introduce
-large latencies, since this will block the main program.
+        This information is important to understand for the stability of clixon
 
-It is possible to fork or create threads but only for activities that
-do not affect the clixon data structures or flow control.
+The Clixon programs run as non-blocking `single-threaded`
+applications. It calls functions from within dynamically loaded modules.
+The callback code must be written with this programming model in mind.
+The behavior of the callback directly impacts the behavior of the caller
+and the whole system.
 
-The following are some guidelines on how to avoid affecting the main program:
+The most serious effect is when crash within a callback happens. This
+will cause the whole program to crash.
 
-  * Try to ensure the callback does not crash (such as a "SEGV") since it crashes the main program
-  * Do not change signal behaviour, such as blocking or assigning signal handlers
-  * Do not change process privileges
-  * Do not make asynchronous calls
+A more subtle problem is the environment of the program. Clixon will
+configure the environment, and it expects that the callback will return
+with the exact same environment intact. If you change a signal handler,
+a terminal configuration, etc. `you must restore the state as it was
+on entry`. Failure to do this can cause problems that are difficult to
+isolate and fix.
+
+A list of things to watch out for (but not complete!):
+
+  * a crash in the plugin
+  * change of signal behaviour, such as blocking or assigning signal handlers
+  * change of process privileges
+  * asynchronous calls
   * If you fork or create threads, ensure the main program continues uninterrupted
 
   
