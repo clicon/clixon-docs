@@ -36,7 +36,7 @@ Example:
 
   static clixon_plugin_api api = {
      ...
-     .ca_datastore_repair=example_upgrade
+     .ca_datastore_upgrade=example_upgrade
   };
   
   /*! General-purpose datastore upgrade callback called once on startup

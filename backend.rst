@@ -310,6 +310,7 @@ A list of things to watch out for (but not complete!):
 
   * a crash in the plugin
   * change of signal behaviour, such as blocking or assigning signal handlers
+  * change of terminal settings (for CLI callbacks)
   * change of process privileges
   * asynchronous calls
   * If you fork or create threads, ensure the main program continues uninterrupted
