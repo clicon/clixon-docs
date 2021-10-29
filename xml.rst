@@ -799,6 +799,43 @@ where ``CX_ELMNT`` selects element children (no attributes or body text).
 
 However, it is recommended to use the `Searching in XML`_ for more efficient
 searching.
-  
 
 
+Character encoding
+==================
+
+Clixon implements encoding of character data as defined in `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_, Section 2.4.
+
+It can be illustrated by some examples. Assume a data-field "value" of
+type "string" inclduing some special characters (wrt XML):
+"<description/>". This string can be input using NETCONF or RESTCONF using XML and JSON as follows:
+
+1. Restconf POST using JSON, eg: ``{"value": "<description/>"}``
+2. Restconf POST using XML regular x3 encoding, eg: ``<value>&lt;description/&gt;</value>``
+3. Restconf POST using XML and CDATA: ``<value><![CDATA[<description/>]]></value>``
+4. Netconf edit-config using XML regular encoding: ``<value>&lt;description/&gt;</value>``
+5. Netconf edit-config using XML CDATA: ``<value><![CDATA[<description/>]]></value>``
+
+The input is received by the backend where the value is stored in the backend as follows:
+
+1. ``<value>&lt;description/&gt;</value>``
+2. ``<value>&lt;description/&gt;</value>``
+3. ``<value><![CDATA[<description/>]]></value>``
+4. ``<value>&lt;description/&gt;</value>``
+5. ``<value><![CDATA[<description/>]]></value>``
+
+Note that in most cases, the data is just propagated from input to datastore, except in the JSON to XML translation(case 1).
+
+For output assuming the value above, there are two dataformats to consider in the datastore above: 1) with regular x3 encoding and 2) using CDATA.
+
+There are the following cases:
+
+1. Restconf GET datastore entry 1 using JSON: ``"{"value": "<description/>"}``
+2. Restconf GET datastore entry 2 using JSON: ``"{"value": "<description/>"}``
+3. Restconf GET datastore entry 1 using XML: ``<value>&lt;description/&gt;</value>``
+4. Restconf GET datastore entry 2 using XML: ``<value><![CDATA[<description/>]]></value>``
+5. Netconf get-config datastore entry 1: ``<value>&lt;description/&gt;</value>``
+6. Netconf get-config datastore entry 2: ``<value><![CDATA[<description/>]]></value>``
+
+Internally, data is saved in cleartext whoch is encoded when
+translated to XML.  CDATA encoding is an exception where it is stored internally as well.
