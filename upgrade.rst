@@ -31,8 +31,7 @@ available, or actions such as the following need to be done in the whole datasto
 A recommended method, as shown in the example, is to make a pattern
 matching using XPath and then perform actions on the resulting nodes.
 
-Example:
-::
+Example::
 
   static clixon_plugin_api api = {
      ...

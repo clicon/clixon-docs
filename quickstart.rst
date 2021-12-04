@@ -5,32 +5,66 @@ Quick start
 
 .. This is a comment
    
-This section describes how to run the Hello world example available in source code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_.
+This section describes how to run the *hello world* example available in source code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_. 
 
 Clixon is not a system in itself, it is a support system for an
 application. In this case, the "application" is hello world. The hello
 world application is very simple where the application semantics is
-completely described by a YANG specification and a CLI specification.
+completely described by a YANG and CLI specification.
 
-A more advanced application will have backend (and frontend) plugins
-to add application-specific semantics. This is not necessary in the
+A more advanced application have backend and frontend plugins
+that define application-specific semantics. No plugins are present in the
 hello world application.
 
-Content
--------
-Files relevant to the hello example are:
+The hello world example can be run both natively on the host and in a docker container.
+
+Host native
+-----------
+
+Clixon
+^^^^^^^
+
+Go through the :ref:`install instructions <clixon_install>` to install
+Clixon on your platform.  This includes installing CLIgen, Clixon,
+creating users, groups, etc.
+
+In short::
+   
+    git clone https://github.com/clicon/cligen.git
+    cd cligen
+    ./configure
+    make && sudo make install
+    git clone https://github.com/clicon/clixon.git
+    cd clixon
+    ./configure
+    make && sudo make install         
+
+Then proceed with host application install.
+
+Files
+^^^^^
+
+Files relevant to the hello world example are:
 
 * `hello.xml <https://github.com/clicon/clixon-examples/tree/master/hello/src/hello.xml>`_: the XML configuration file
 * `clixon-hello@2019-04-17.yang <https://github.com/clicon/clixon-examples/tree/master/hello/yang/clixon-hello@2019-04-17.yang>`_: the YANG spec
 * `hello_cli.cli <https://github.com/clicon/clixon-examples/tree/master/hello/src/hello_cli.cli>`_: the CLIgen spec
-* `Makefile <https://github.com/clicon/clixon-examples/tree/master/hello/src/Makefile.in>`_: where plugins are built and installed
+* `startup_db <https://github.com/clicon/clixon-examples/tree/master/hello/src/startup_db>`_: The startup datastore containing restconf port configuration
+* `Makefile <https://github.com/clicon/clixon-examples/tree/master/hello/src/Makefile.in>`_: install of specs, normally compile of plugins
 
-Compile and run
----------------
 
-Before you start, go through the :ref:`install instructions <clixon_install>` for your platform.
-::
+Install and run
+^^^^^^^^^^^^^^^
 
+Checkout and configure the examples on the top-level::
+
+    git clone https://github.com/clicon/clixon-examples.git
+    cd clixon-examples
+    ./configure
+
+Compile and install::
+
+    cd hello/src
     make && sudo make install
 
 Start backend in the background:
@@ -72,7 +106,7 @@ The following example shows how to add a very simple configuration `hello world`
 Netconf
 -------
 
-Clixon also provides a Netconf interface. The following example starts a netconf client form the shell, adds the hello world config, commits it, and shows it:
+Clixon also provides a Netconf interface. The following example starts a netconf client form the shell vi stdio, adds the hello world config, commits it, and shows it:
 ::
 
    olof@vandal> clixon_netconf -q
@@ -89,44 +123,14 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 Restconf
 --------
 
-Clixon can use two RESTCONF compile-time variants:
-  
-*  `FCGI` : Reverse proxy such as `Nginx <https://nginx.org>`_  using an internal FCGI socket communication.  A reverse proxy needs to be configured.
-*  `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
+Clixon by default uses `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
 
-FCGI
-^^^^
-In the case of the FCGI solution, a reverse proxy such as nginx needs to be installed, and edit config file `/etc/nginx/sites-available/default`::
+As an alternative, you can use the `FCGI` solution, where instead a reverse proxy such as `Nginx <https://nginx.org>`_  uses an internal FCGI socket communication to communicate with Clixon.  A reverse proxy, such as NGINX, needs to be configured. For more info about the fcgi solution, see :ref:`clixon_restconf`.
 
-   server {
-      ...
-      location / {
-         fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
-         include fastcgi_params;
-      }
-      # Enable this for restconf notification streams
-      location /streams {
-         fastcgi_pass unix:/www-data/fastcgi_restconf.sock;
-	 include fastcgi_params;
- 	 proxy_http_version 1.1;
-	 proxy_set_header Connection "";
-      }
-   }
-
-Note that the second part is necessary only for notification streams.
-
-Start nginx daemon::
-   
-   sudo /etc/init.d/nginx start
-
-or using systemd::
-   
-  sudo systemctl start nginx.service
   
 Start and run
 ^^^^^^^^^^^^^
-Regardless of which RESTCONF variant is used, next step is to start the restconf daemon:
-::
+Regardless of which RESTCONF variant is used, start the restconf daemon as follows::
 
    sudo clixon_restconf
 
@@ -144,8 +148,8 @@ Start sending restconf commands (using Curl):
    }
 
 
-Run a container
----------------
+Docker container
+----------------
 You can run the hello example as a pre-built docker container, on a `x86_64` Linux. See instructions in the `clixon docker hello example <https://github.com/clicon/clixon-examples/tree/master/hello/docker>`_.
 
 First, the container is started with the backend running:

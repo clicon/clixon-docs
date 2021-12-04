@@ -6,18 +6,18 @@ Backend
  .. image:: backend1.jpg
    :width: 100%
 	       
-The backend daemon is the central Clixon component. It consists of a main module and a number of dynamically loaded plugins. The backend has four APIs:
+The backend daemon is the central component in the Clixon architecture. It consists of a main module and a number of dynamically loaded plugins. The backend has four APIs:
 
 *configuration*
-  An XML file read at startup, possibly amended with `-o` options.
-*Internal interface*
-  A NETCONF socket to frontend clients. This is by default a UNIX domain socket but can also be an IPv4 or IPv6 TCP socket.
+  An XML file read at startup, possibly amended with `-o` options. 
+*Internal interface / IPC*
+  A NETCONF socket to frontend clients. This is by default a UNIX domain socket but can also be an IPv4 or IPv6 TCP socket but with limited functionality.
 *Datastores*
-  XML files storing configuration. The three main datastores are `candidate`, `running` and `startup`. A user edits the candidate datastore, commits the changes to  running which triggers callbacks in the plugins.
+  XML (or JSON) files storing configuration. The three main datastores are `candidate`, `running` and `startup`. A user edits the candidate datastore, commits the changes to  running which triggers callbacks in plugins.
 *Application*
-  Backend plugins configure the underlying system with application-specific APIs. These API:s depend on how the underlying system is configured, examples include configuration files or a socket, for example.
+  Backend plugins configure the base system with application-specific APIs. These API:s depend on how the underlying system is configured, examples include configuration files or a socket.
 
-Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon uses a datastore cache.
+Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon in most cases uses a datastore cache.
    
 Command-line options
 --------------------
@@ -25,22 +25,23 @@ Command-line options
 The backend have the following command-line options:
   -h              Help
   -D <level>      Debug level
-  -f <file>       CLICON config file
+  -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
-  -d <dir>        Specify backend plugin directory (default: none)
-  -p <dir>        Yang directory path (see CLICON_YANG_DIR)
-  -b <dir>        Specify XMLDB database directory
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -d <dir>        Specify backend plugin directory
+  -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
+  -b <dir>        Specify datastore directory
   -F              Run in foreground, do not run as daemon
   -z              Kill other config daemon and exit
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
-  -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
-  -P <file>       PID filename (default: /usr/local/var/hello.pidfile)
+  -u <path|addr>  Internal socket domain path or IP addr (see -a)
+  -P <file>       Process ID filename
   -1              Run once and then quit (do not wait for events)
   -s <mode>       Specify backend startup mode: none|startup|running|init)
-  -c <file>       Load extra xml configuration, but don't commit.
-  -g <group>      Client membership required to this group (default: clicon)
+  -c <file>       Load extra XML configuration file, but do not commit.
+  -q              Quit startup directly after upgrading and print result on stdout
   -U <user>       Run backend daemon as this user AND drop privileges permanently
+  -g <group>      Client membership required to this group (default: clicon)
   -y <file>       Load yang spec file (override yang main module)
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
@@ -48,12 +49,12 @@ The backend have the following command-line options:
 Logging and debugging
 ^^^^^^^^^^^^^^^^^^^^^
 
-At debug, the backend can be run in the foreground and with debug flags:
+In case of debugging, the backend can be run in the foreground and with debug flags:
 ::
 
    clixon_backend -FD 1
 
-Logging is done on syslog.  Alternatively, logging can be made on a file using the `-l` option:
+Logging is by default on syslog.  Alternatively, logging can be made on a file using the `-l` option:
 ::
 
    clixon_backend -lf<file>
@@ -67,7 +68,7 @@ In a debugging mode, it can be useful to run in `once-only` mode, where the back
 
 Startup
 -------
-There are four different backend startup modes selected by the `-s` option. The difference is in how the running state is handled, ie what state the machine is in when you start the daemon and how loading the configuration affects it:
+The backend can perform startup in four different modes. The difference is how the running state is handled, i.e., what state the system is in when you start the daemon and how loading the configuration affects it:
 
 `none`
    Do not touch running state. Typically after crash when running state and db are synched.
@@ -78,8 +79,7 @@ There are four different backend startup modes selected by the `-s` option. The 
 `startup`
    Commit startup configuration into running state. After reboot when no persistent running db exists.
 
-You use the `-s` to select startup mode:
-::
+Use the ``-s`` option to select startup mode, example::
    
    clixon_backend -s running
 
@@ -103,42 +103,42 @@ The following config option is related to startup:
 CLICON_BACKEND_RESTCONF_PROCESS
    Enable process-control of restconf daemon, ie start/stop restconf daemon internally using fork/exec. Disable if you start the restconf daemon by other means.
   
-Socket
-------
+IPC Socket
+----------
 ::
 
-   Frontends:   socket  +----------+
-   CLI,           |     | backend  |
+   Frontends:           +----------+
+   CLI,          IPC    | backend  |
    netconf      <--->   | daemon   |
    restconf             |          |
                         +----------+
 
-The Clixon backend creates a socket that the frontends can connect to.  Communication is made over this socket using internal Netconf.
+The Clixon backend creates a socket that the frontend clients can connect to.  Communication is made over this IPC socket using internal Netconf.
 The following config options are related to the internal socket:
 
 CLICON_SOCK_FAMILY
-   Address family for communicating with clixon_backend. One of: UNIX, IPv4, or IPv6. Can also be set with `-a` command-line option. Default is `UNIX` which denotes a UNIX socket.
+   Address family for communicating with clixon_backend. One of: UNIX, IPv4, or IPv6. Can also be set with `-a` command-line option. Default is ``UNIX`` which denotes a UNIX domain socket.
 
 CLICON_SOCK
-  If family above is AF_UNIX: Unix socket for communicating with clixon_backend. If family is AF_INET: IPv4 address";
+  If the address family of the socket is ``AF_UNIX``: Unix socket for communicating with clixon_backend. If the family is ``AF_INET`` it denottes the IPv4 address;
 
 CLICON_SOCK_PORT
   Inet socket port for communicating with clixon_backend (only IPv4|IPv6). Default is port `4535`.
 
 CLICON_SOCK_GROUP
-  Group membership to access clixon_backend unix socket. Default is `clicon`.
+  Group membership to access clixon_backend UNIX socket. Default is `clicon`. This is not available for IP sockets.
 
 
 Backend files
 -------------
 
-A couple of config options control files related to the backend, as follows:
+The following config options control files related to the backend:
 
 CLICON_BACKEND_DIR
-  Location of backend .so plugins. Load all `.so` plugins in this dir as backend plugins 
+  Location of backend ``.so`` plugins. Load all ``.so`` plugins in this dir as backend plugins in alphabetical order
 
 CLICON_BACKEND_REGEXP
-  Regexp of matching backend plugins in CLICON_BACKEND_DIR. default: `*.so` 
+  Regexp of matching backend plugins in CLICON_BACKEND_DIR. default: ``*.so``
 
 CLICON_BACKEND_PIDFILE
   Process-id file of backend daemon
@@ -146,54 +146,17 @@ CLICON_BACKEND_PIDFILE
 Backend plugins
 ---------------
 
-Backend plugins are the "glue" that binds the Clixon system to the
-underlying system. The backend invokes *callbacks* in the plugins when
-events.
-
-Plugins are added by the application developer and adds "semantics" to
-a Clixon system. The CLI, Restconf and Netconf applications also use
-callbacks.
-
-Plugins are written in C as dynamically loaded modules (``.so`` files). At startup, the backend daemon looks in the directory pointed to by the config option ``CLICON_BACKEND_DIR``, and loads all files with `.so` suffixes from that dir in alphabetical order.
-
-For example, to load all backend plugins from: `/usr/local/lib/example/backend`:
-::
-
-   <CLICON_BACKEND_DIR>/usr/local/lib/example/backend</CLICON_BACKEND_DIR>
-
-You can filter which plugins to load by specifying a regular expression. For example, the following will only load backend plugins starting with "example":
-::
-
-   <CLICON_BACKEND_REGEXP>^example*.so$</CLICON_BACKEND_REGEXP>
-   
-Callbacks are registered in two ways:
-  - *clixon_plugin_init* : returning an API struct containing a fixed set of callbacks
-  - *register functions* : Some specific clixon features use registering functions instead. This allows for multiple callbacks.
+This section describes backend-specific plugins, see :ref:`clixon_plugins` for a general description of plugins.
 
 Clixon_plugin_init
 ^^^^^^^^^^^^^^^^^^
-A plugin must have a init function called `clixon_plugin_init`. If
-this function does not exist, the backend will fail.
 
-The backend calls ``clixon_plugin_init`` and expects it to return an API
-struct (``clixon_plugin_api``) defining all callbacks. The init function may return ``NULL`` in which case the backend logs this and continues.
+Apart from the generic plugin callbacks (init, start, etc), the following callbacks are specific to the backend:
 
-Once the plugin is loaded, it awaits callbacks from the backend.
-
-The following callbacks are defined for backend plugins in *clixon_plugin_api*:
-
-init
-   Clixon plugin init function, called immediately after plugin is loaded into the backend. The name of the function must be called ``clixon_plugin_init``. It returns a struct with the name of the plugin, and all other callback names.
-start
-   Called when application is started and initialization is complete, but before the application is placed in the background and drop privileges (see `dropping privileges`_), if those operations are requested.
 pre_daemon
    Called just before server daemonizes(forks). Not called if in foreground.
 daemon
    Called after the server has daemonized and before privileges are dropped. 
-exit
-   Called just before plugin is unloaded 
-extension
-  Called at parsing of yang modules containing an extension statement.  A plugin may identify the extension by its name, and perform actions on the yang statement, such as transforming the yang in-memory. A callback is made for every statement, which means that several calls per extension can be made.
 statedata
   Provide state data XML from a plugin
 reset
@@ -201,119 +164,16 @@ reset
 upgrade
   General-purpose upgrade called once when loading the startup datastore
 trans_{begin,validate,complete,commit,commit_done,revert,end,abort}
-  Transaction callbacks which are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
+  Transaction callbacks are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
 
 Registered callbacks
 ^^^^^^^^^^^^^^^^^^^^
 
-A second group of callbacks use register functions. This is a more detailed mechanism than the fixed callbacks described previously, but are only defined to a limited sets of functions:
+The callback also supports three forms of registered callbacks:
 
-* ``rpc_callback_register()`` - for user-defined RPC callbacks.
+* ``rpc_callback_register()`` - for user-defined RPC callbacks, see :ref:`clixon_plugins`.
 * ``upgrade_callback_register()`` - for upgrading, see :ref:`clixon_upgrade`.
 * ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`clixon_pagination`.
-
-A user may register may register a callback for an incoming RPC, and
-that function will be called. 
-
-There may be several callbacks for the same RPC. The order the
-callbacks are registered are as follows:
-
-1. plugin_init
-2. backend_rpc_init (where system callbacks are registered)
-3. plugin_start
-
-Which means if you register a copy-config callback in (1), it will be called *before* the system copy-config callback registered from (2) backend_rpc_init. If you register a copy-config in (3) plugin-start it will be called *after* the system copy-config.
-
-Second, if there are more than one reply (eg ``<rpc-reply/><rpc-reply/>``) only the first reply will be parsed and used by the cli/netconf/restconf clients.
-
-If you want to take the original and modify it, you should therefore register the callback in plugin_start (3) so that your callback will be called after the system RPC. Then you should modify the original reply (not add a new reply).
-
-Example: RPC callback
-^^^^^^^^^^^^^^^^^^^^^
-
-This example shows how to define a new RPC in YANG, register a callback function in C, read and write a parameter.
-It is revised slightly from the main example.
-
-YANG::
-
-    module clixon-example {
-      namespace "urn:example:clixon";
-      ...
-      rpc example {
-          input {
-	      leaf x {
-		type string;
-		...
- 	  output {
-	      leaf y {
-		type string;
-                ...
-		
-Register RPC in clixon_plugin_init()::		
-
-    clixon_plugin_api *clixon_plugin_init(clicon_handle h)
-    {
-       ...
-       rpc_callback_register(h, example_rpc, NULL, "urn:example:clixon", "example");
-
-Callback function reading value input x, modifying value and writing it as output value y::
-
-   static int 
-   example_rpc(clicon_handle h,            /* Clicon handle */
-               cxobj        *xe,           /* Request: <rpc><xn></rpc> */
-	       cbuf         *cbret,        /* Reply eg <rpc-reply>... */
-	       void         *arg,          /* client_entry */
-	       void         *regarg)       /* Argument given at register */
-   {
-       char *val;
-       val = xml_find_body(xe, "x");       /* Read x value of incoming rpc */
-       cprintf(cbret, "<rpc-reply xmlns=\"%s\">", NETCONF_BASE_NAMESPACE);
-       val[0]++;                           /* Increment first char */
-       /* Construct reply */
-       cprintf(cbret, "<y xmlns=\"urn:example:clixon\">%s</y>", val);
-       cprintf(cbret, "</rpc-reply>");
-
-Result netconf session::
-
-  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="42">
-     <example xmlns="urn:example:clixon">
-        <x>42</x>
-     </example>
-  </rpc>]]>]]>
-  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="42">
-     <y xmlns="urn:example:clixon">52</y>
-  </rpc-reply>]]>]]>
-
-Plugin callback guidelines
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. note::
-        This information is important to understand for the stability of clixon
-
-The Clixon programs run as non-blocking `single-threaded`
-applications. It calls functions from within dynamically loaded modules.
-The callback code must be written with this programming model in mind.
-The behavior of the callback directly impacts the behavior of the caller
-and the whole system.
-
-The most serious effect is when crash within a callback happens. This
-will cause the whole program to crash.
-
-A more subtle problem is the environment of the program. Clixon will
-configure the environment, and it expects that the callback will return
-with the exact same environment intact. If you change a signal handler,
-a terminal configuration, etc. `you must restore the state as it was
-on entry`. Failure to do this can cause problems that are difficult to
-isolate and fix.
-
-A list of things to watch out for (but not complete!):
-
-  * a crash in the plugin
-  * change of signal behaviour, such as blocking or assigning signal handlers
-  * change of terminal settings (for CLI callbacks)
-  * change of process privileges
-  * asynchronous calls
-  * If you fork or create threads, ensure the main program continues uninterrupted
 
   
 Transactions

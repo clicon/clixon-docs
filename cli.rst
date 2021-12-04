@@ -20,6 +20,30 @@ Once the backend is started, the easiest way to use Clixon is via
 the CLI. Clixon comes with a generated CLI, the *auto-cli*, where all
 configuration-related syntax is generated from YANG. You can also create a completely manually-made CLI.
 
+Command-line options
+^^^^^^^^^^^^^^^^^^^^
+
+The `clixon_cli` client has the following command-line options:
+  -h              Help
+  -D <level>      Debug level
+  -f <file>       Clixon config file
+  -E <dir>        Extra configuration directory
+  -F <file>       Read commands from file (default stdin)
+  -1              RUn once, do not enter interactive mode
+  -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
+  -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)
+  -d <dir>        Specify cli plugin directory
+  -m <mode>       Specify plugin syntax mode
+  -q              Quiet mode, do not print greetings or prompt, terminate on ctrl-C
+  -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
+  -G              Print auo-cli CLI syntax generated from YANG
+  -L              Debug print dynamic CLI syntax including completions and expansions
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Stderr is default. 
+  -y <file>       Load yang spec file (override yang main modul)e
+  -c <file>       Specify cli spec file
+  -U <user>       Over-ride unix user with a pseudo user for NACM.
+  -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
+
 Using the CLI
 -------------
 
@@ -131,6 +155,8 @@ The CLI can have different *modes* which is controlled by a config option and so
 
 CLICON_CLI_MODE
   Startup CLI mode. This should match a ``CLICON_MODE`` variable setting in one of the clispec files. Default is "base".
+CLICON_CLI_VARONLY
+  Do not include keys in cvec in cli vars callbacks
 
 Inside the clispec files ``CLICON_MODE`` is used to specify to which modes the syntax in a specific file defines. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
 
@@ -171,11 +197,12 @@ CLICON_CLI_LINESCROLLING
 
 CLICON_CLI_LINES_DEFAULT
    Set to number of CLI terminal rows for pagination/scrolling. 0 means unlimited.  The number is set statically UNLESS:
-
    * there is no terminal, such as file input, in which case nr lines is 0
    * there is a terminal sufficiently powerful to read the number of lines from ioctl calls.
+   In other words, this setting is used ONLY on raw terminals such as serial consoles.
 
-In other words, this setting is used ONLY on raw terminals such as serial consoles.
+CLICON_CLI_TAB_MODE
+   Set CLI tab mode. See detailed info in YANG source
 
 History
 -------

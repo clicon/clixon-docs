@@ -7,7 +7,7 @@ Clixon documentation
 ====================
 
 Clixon is a YANG-based configuration manager, with interactive CLI,
-NETCONF and RESTCONF interfaces, an embedded database and transaction
+NETCONF and RESTCONF interfaces, an embedded database and a transaction
 mechanism.
 
 .. toctree::
@@ -19,13 +19,14 @@ mechanism.
    quickstart
    standards
    configuration
+   plugins
    backend
    datastore
-   usecases
-   client
    cli
    netconf
    restconf
+   usecases
+   client
    xml
    nacm
    pagination

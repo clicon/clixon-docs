@@ -17,8 +17,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'clixon'
-#copyright = '2019, Olof Hagsand'
+project = 'Clixon'
+#copyright = '2021, Olof Hagsand'
 author = 'Olof Hagsand'
 
 # The suffix of source filenames.
@@ -28,7 +28,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # The full version, including alpha/beta/rc tags
-release = '5.3'
+release = '5.4'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'

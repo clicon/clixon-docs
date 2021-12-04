@@ -33,41 +33,44 @@ The `clixon_netconf` client has the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
-  -q              Quiet mode, do not run hello protocol
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -q              Quiet mode, do not send hello message
+  -H              Do not expect hello message from server.
   -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
-  -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
+  -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)
   -d <dir>        Specify netconf plugin directory
-  -p <dir>        Yang directory path (see CLICON_YANG_DIR)
+  -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -y <file>       Load yang spec file (override yang main module)
   -U <user>       Over-ride unix user with a pseudo user for NACM.
   -t <sec>        Timeout in seconds. Quit after this time.
-  -e              Dont ignore errors on packet input.
+  -e              Do not ignore errors on packet input.
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
 Options
 ^^^^^^^
-The configuration file options related to RESTCONF common to both fcgi and native mode are the following:
+The configuration file options related to NETCONF are the following:
 
-CLICON_RESTCONF_DIR
-   Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
+CLICON_NETCONF_DIR
+   Location of netconf .so plugins loaded alphabetically
 
-CLICON_RESTCONF_PATH
-   FCGI unix socket. Should be specified in webserver (only fcgi)
+CLICON_NETCONF_HELLO_OPTIONAL
+   If true, an RPC can be processed directly with no preceeding hello message.
+   This is not according to the standard RFC 6241 Sec 8.1.
 
-CLICON_RESTCONF_PRETTY
-   RESTCONF return value is pretty-printed or not
+CLICON_NETCONF_MESSAGE_ID_OPTIONAL
+   If true, an RPC can be sent without a message-id.
+   This is not according to the standard RFC 6241 Sec 4.1.
 
 
 Starting
 --------
-The netconf client (``clixon_netconf``) can be started on the command line using stdin/stdout::
+The Netconf client (``clixon_netconf``) can be started on the command line using stdin/stdout::
 
   > clixon_netconf -qf /usr/local/etc/clixon.conf < my.xml
 
-It then reads and parses netconf commands on stdin, eventually invokes
-netconf plugin callbacks, then establishes a connection to the backend
-and usually sends the netconf message over IPC to the backend. Some
+It then reads and parses Netconf commands on stdin, eventually invokes
+Netconf plugin callbacks, then establishes a connection to the backend
+and usually sends the Netconf message over IPC to the backend. Some
 commands (eg hello) are terminated in the client. The reply from the
 backend is then displayed on stdout.
 
@@ -113,13 +116,13 @@ Overview of a callhome architecture with a device (where clixon resides) and a c
   +-----------------+
 
 
-The steps to make a netconf callhome is as follows:
+The steps to make a Netconf callhome is as follows:
 
 1) Start the ssh client using ``-o ProxyUseFdpass=yes -o ProxyCommand="callhome-client"``. Callhome-client listens on port 4334 for incoming TCP connections.
 2) Start the callhome program on the server making tcp connect to client on port 4334 establishing a tcp stream with the client
 3) The callhome program starts ``sshd -i`` using the established stream socket 
 4) The callhome-client returns with an open stream socket to the ssh client establishing an SSH stream to the server
-5) Netconf messages are sent on stdin to the ssh client in turn using the established SSH stream and the netconf subsystem to clixon, which returns a reply.
+5) Netconf messages are sent on stdin to the ssh client in turn using the established SSH stream and the Netconf subsystem to clixon, which returns a reply.
 
 The callhome and callhome-client referred to above are implemented by the utility functions: ``util/clixon_netconf_ssh_callhome`` and ``util/clixon_netconf_ssh_callhome_client``.
 

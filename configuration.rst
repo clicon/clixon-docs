@@ -3,23 +3,22 @@
 Configuration
 =============
 
-Clixon configuration files are XML files modeled by YANG. By
-default, the main config file is installed in ``/usr/local/etc/clixon.xml``, but can be changed by the ``-f <file>`` command-line option.
+Clixon configuration files are encoded in XML and modeled by YANG. By
+default, the main config file is installed as ``/usr/local/etc/clixon.xml``, but can be changed by the ``-f <file>`` command-line option.
 
 The YANG specification for Clixon configuration is `clixon-config.yang
-<https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config.yang>`_. This configuration file is updated regularly.
+<https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config@2021-11-11.yang>`_. This configuration file is updated regularly.
 
 Normally, all Clixon processes (backend, cli, netconf, restconf) use
 the same configuration, although some options are not valid for all
-processes.
+processes. You can however have different configuration files for different clients by using the ``-f`` option.
 
-Please consult the `YANG spec <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config.yang>`_ directly if you want detailed description of config options.
+Please consult the `clixon-config YANG spec <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config@2021-11-11.yang>`_ directly if you want detailed description of config options.
 
 Example
 -------
 
-The following is the configuration file of an example:
-::
+The following is the configuration file of a simple example::
    
    <clixon-config xmlns="http://clicon.org/config">
      <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
@@ -48,7 +47,7 @@ The ``restconf`` clause defines RESTCONF configuration options as described in t
 Loading the configuration
 -------------------------
 
-There are several ways to manage how Clixon finds its configuration files, in priority order:
+Clixon finds its configuration files, according to the following method:
 
   1. Start a clixon program with the ``-f <FILE>`` option. For example::
 
@@ -56,10 +55,10 @@ There are several ways to manage how Clixon finds its configuration files, in pr
 
   2. At install time, Use the ``--with-configfile=FILE`` option to configure a default location::
 
-	./configure -f FILE
+	./configure --with-configfile=FILE
 
   3. At install time: ``./configure --with-sysconfig=<dir>`` when configuring. Then FILE is ``<dir>/clixon.xml``
-  4. At install time: ``./configure --sysconfig=<dir>`` when configuring. Then FILE is `<dir>/etc/clixon.xml`
+  4. At install time: ``./configure --sysconfig=<dir>`` when configuring. Then FILE is ``<dir>/etc/clixon.xml``
   5. If none of the above: FILE is ``/usr/local/etc/clixon.xml``
 
 The following options control the Clixon configuration:
@@ -67,7 +66,7 @@ The following options control the Clixon configuration:
 ``CLICON_CONFIGFILE``
    The configure file itself. Due to bootstrapping reasons, its value is meaningless in a file but can be useful for documentation purposes.
 ``CLICON_CONFIGDIR``
-   A directory of extra configuration files loaded after the main configuration. It can alsp be specified using the ``-E <dir>`` command-line option. These extra configuration files are read in alphabetical order after the main configuration as follows:
+   A directory of extra configuration files loaded after the main configuration. It can also be specified using the ``-E <dir>`` command-line option. These extra configuration files are read in alphabetical order after the main configuration as follows:
 
    * leaf values are overwritten
    * leaf-list values are appended
@@ -76,22 +75,22 @@ The following options control the Clixon configuration:
 Runtime modification
 --------------------
 
-You can modify clixon options at runtime by using the `-o` option to
+You can modify clixon options at runtime by using the ``-o`` option to
 modify the configuration specified in the configuration file. For
-example, add `usr/local/share/ietf` to the list of directories where yang files are searched for::
+example, add ``usr/local/share/ietf`` to the list of directories where yang files are searched for::
 
   clixon_cli -o CLICON_YANG_DIR=/usr/local/share/ietf
 
 Features
 --------
-`CLICON_FEATURE` is a list of values, describing how Clixon supports feature.
+``CLICON_FEATURE`` is a list of values, describing how Clixon supports features.
 
 A value is specified as one of the following:
 
-- `<module>:<feature>` : enable a specific feature in a specific module
-- `*:*` : enable all features in all modules
-- `<module>:*` : enable all features in the specified module
-- `*:<feature>` : enable the specific feature in all modules.
+- ``<module>:<feature>`` : enable a specific feature in a specific module
+- ``*:*`` : enable all features in all modules
+- ``<module>:*`` : enable all features in the specified module
+- ``*:<feature>`` : enable the specific feature in all modules.
 
 Example:: 
 
@@ -99,7 +98,7 @@ Example::
       <CLICON_FEATURE>ietf-netconf:*</CLICON_FEATURE>
       <CLICON_FEATURE>*:*</CLICON_FEATURE>
       
-Supplying the `-o` option adds a value to the feature list.
+Supplying the ``-o`` option adds a value to the feature list.
       
 Clixon have three hardcoded features:
 
@@ -124,7 +123,7 @@ which means that Yang files are searched for in ``/usr/local/share/clixon`` and 
 The following configuration file options control the loading of Yang files:
 
 ``CLICON_YANG_DIR``
-   A list of directories (yang dir path) where Clixon searches for module and submodules.
+   A list of directories (yang dir path) where Clixon searches for module and submodules *recursively*.
 ``CLICON_YANG_MAIN_FILE``
    Load a specific Yang module given by a file. 
 ``CLICON_YANG_MODULE_MAIN``
@@ -132,7 +131,7 @@ The following configuration file options control the loading of Yang files:
 ``CLICON_YANG_MODULE_REVISION``
    Specifies a revision to the main module. 
 ``CLICON_YANG_MAIN_DIR``
-   Load all yang modules in this directory.
+   Load all yang modules in this directory, not recursively.
 
 Note that the special ``YANG_INSTALLDIR`` autoconf configure option, by default ``/usr/local/share/clixon`` should be included in the yang dir path for Clixon system files to be found.
 
@@ -149,9 +148,3 @@ containing the same Yang module. Clixon will prefer the one without a
 revision date if such a file exists. If no file has a revision date,
 Clixon will prefer the newest.
 
-Default values
---------------
-
-``CLICON_YANG_REGEXP`` which is not present in the ``hello world`` is an example of a configuration option with a default value of ``posix``::
-
-   <CLICON_YANG_REGEXP>posix</CLICON_YANG_REGEXP>

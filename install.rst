@@ -2,9 +2,6 @@
 
 Installation
 ============
-Clixon runs on Linux, `FreeBSD port <https://www.freshports.org/devel/clixon>`_. CPU architectures include x86_64, i686, ARM32.
-
-You can also run Clixon in a docker container.
 
 Ubuntu Linux
 ------------
@@ -36,14 +33,29 @@ If you do not require RESTCONF, then continue with `Build clixon from source`_.
 
 RESTCONF HTTP Support
 """""""""""""""""""""
-Clixon's RESTCONF implementation currently supports two HTTP configurations:
+The RESTCONF implementation supports two HTTP configurations:
 
+  #. `Clixon native HTTP server`_
   #. `FastCGI for reverse proxy`_
-  #. `clixon native HTTP server`_
+
+
+Clixon native HTTP server
+"""""""""""""""""""""""""
+Native http server requires libevent, openssl 1.1 and libevhtp
+
+Install libevent and TLS::
+
+  sudo apt-get install libevent-dev libssl-dev
+
+The Libevhtp install is slightly modified for Clixon and needs to be built from source: `build libevhtp from source`_.
+
+Thereafter configure using default options::
+
+    configure
 
 FastCGI for reverse proxy
 """""""""""""""""""""""""
-To build clixon RESTCONF FastCGI support for nginx or similar reverse HTTP proxy::
+FastCGI requires  support for Nginx or similar reverse HTTP proxy::
 
   sudo apt-get install nginx libfcgi-dev
 
@@ -51,24 +63,11 @@ Then, when building clixon from source (see below), configure clixon with::
 
   configure --with-restconf=fcgi
 
-Note that the libfcgi-dev package might not exist in Ubuntu 18 bionic or later, in which case need to `build fcgi from source`_),
+Note that the libfcgi-dev package might not exist in Ubuntu 18 bionic or later, in which case need to `build fcgi from source`_.
 
-Note that the 'fcgi' installation package might have a different name on other Linux distributions, such as "fcgi-dev" (alpine), "fcgi" (arch), "fcgi-devkit" (freebsd).
+Note also that the 'fcgi' installation package might have a different name on other Linux distributions, such as "fcgi-dev" (alpine), "fcgi" (arch), "fcgi-devkit" (freebsd).
 
-Clixon native HTTP server
-"""""""""""""""""""""""""
-To build the clixon native HTTP RESTCONF server::
-
-  sudo apt-get install libevent-dev
-
-It also requires openssl 1.1 API (not 1.0)
-
-Then `build libevhtp from source`_.
-
-Then, when building clixon from source (see below), configure clixon with(default)::
-
-  configure --with-restconf=native
-
+  
 Build clixon from source
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Download clixon source code::
@@ -77,10 +76,10 @@ Download clixon source code::
   
 Configure Clixon using one of the following RESTCONF configurations::
 
-  configure --with-restconf=fcgi  # FastCGI support for reverse proxy, the default
-                                  # when no '--with-restconf' option is specified
-  configure --with-restconf=native # clixon native HTTP server using libevhtp
-  configure --without-restconf
+  configure --with-restconf=native # clixon native HTTP server using libevhtp (default)
+  configure --with-restconf=fcgi   # FastCGI support for reverse proxy, the default
+                                   # when no '--with-restconf' option is specified
+  configure --without-restconf     # Do not build restconf
 
 For more configure options see: `Configure options`_.
 
@@ -88,7 +87,7 @@ Build and install::
    
   make                      # Compile
   sudo make install         # Install libs, binaries, config-files and include-files
-  sudo ldconfig
+  sudo ldconfig             # To link new synamic libraries
 
 Building the example app and utils for running the tests
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -105,6 +104,8 @@ To build the utils for running the tests, from the top level clixon directory::
   make
   sudo make install
 
+See also the :ref:`clixon_quickstart` section for building a complete *hello world* example.
+  
 FreeBSD
 -------
 
@@ -117,7 +118,7 @@ ports collection, the installation locations comply
 with FreeBSD standards and you have some assurance
 that the installed package is correct and functional.
 
-The nginx setup for RESTCONF is altered - the system user
+The Nginx setup for RESTCONF is altered - the system user
 www is used, and the restconf daemon is placed in
 /usr/local/sbin.
 
@@ -153,7 +154,7 @@ is done.
 Systemd
 -------
 
-Once installed, Clixon can be setup using systemd. The following shows an example with the backend and restconf daemons for the main example.
+Once installed, Clixon can be setup using systemd. The following shows an example with the backend and restconf daemons from the main example.
 Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_restconf.service, for example.
 
 Systemd backend
@@ -194,28 +195,33 @@ The restconf daemon can also be started using the clixon-lib process-control RPC
 
 Docker
 ------
-Clixon can run in a docker container.  As an example the `docker` directory has code for building and running the clixon test suite::
+Clixon can run in a docker container.  As an example the `docker` directory has boilerplate code for building Clixon in a container::
 
-  cd docker/main
+  cd docker/base
   make docker
-  make test
 
-The docker tests are run in the `Travis CI <https://travis-ci.org/github/clicon/clixon>`_
+For complete examples see:
+
+* `Hello world <https://github.com/clicon/clixon-examples/tree/master/hello/docker>`_
+* `Clixon CI test container <https://github.com/clicon/clixon/tree/master/docker/main>`_
+* `Openconfig <https://github.com/clicon/clixon-examples/tree/master/openconfig/docker>`_
+
    
-OpenWRT
--------
-
-See [Clixon cross-compiler for openwrt](https://github.com/clicon/clixon-openwrt)
-
 Vagrant
 -------
 
-Clixon uses vagrant in testing. For example to start a freebsd vagrant host, install Clixon and run the test suite, do  ::
+Clixon uses vagrant in testing. For example to start a Freebsd vagrant host, install Clixon and run the test suite, do  ::
 
   cd test/vagrant
-  ./vagrant.sh freebsd/FreeBSD-12.1-STABLE
+  ./vagrant.sh generic/freebsd12
 
-Other platforms include: ubuntu/bionic64 and generic/centos8
+Other platforms include: ubuntu/bionic64 and generic/centos8. To look at how Clixon is installed natively on those platforms please look in the build scripts under test/vagrant/.
+
+OpenWRT
+-------
+
+See `Clixon cross-compiler for Openwrt <https://github.com/clicon/clixon-openwrt>`_
+
 
 Build libevhtp from source
 --------------------------
@@ -227,10 +233,9 @@ For RESTCONF using native http build evhtp from source as follows::
   make
   sudo make install
 
-
 Note that evhtp requires openssl 1.1 API.
 
-Note that you will likely need to add /usr/local/lib/libevhtp to your ld.so.conf configuration
+Note that you will likely need to add ``/usr/local/lib/libevhtp`` to your ``ld.so.conf`` configuration
 
 
 Build fcgi from source
@@ -264,24 +269,24 @@ The Clixon `configure` script (generated by autoconf) includes several options a
 
 These include (standard options are omitted)
   --enable-debug          Build with debug symbols, default: no
-  --enable-optyangs       Install the yang files from clixon/yang/optional, required for running the example app and tests, default: no
-  --enable-publish        Enable publish of notification streams using SSE and curl
-  --with-cligen=dir       Use CLIGEN here
-  --without-restconf      No RESTCONF
-  --with-restconf=native  RESTCONF using native http with libevhtp. This is default
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
-  --disable-nghttp2       Disable native http/2 using libnghttp2 (http/1 only)
-  --disable-evhtp         Disable native http/1.1 using libevhtp (http/2 only)
-  --with-configfile=FILE  set default path to config file
-  --with-libxml2          use gnome/libxml2 regex engine
-  --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
-  --with-opt-yang-installdir=DIR  Install optional yang files here (default: ${prefix}/share/clixon)
-  --without-sigaction     Disable sigaction logic (eg SA_RESTART mode)
   --enable-yang-patch     Enable RFC 8072 YANG patch (plain patch is always enabled)
+  --enable-publish        Enable publish of notification streams using SSE and curl
+  --disable-evhtp         Disable native http/1.1 using libevhtp (ie http/2 only)
+  --disable-nghttp2       Disable native http/2 using libnghttp2 (ie http/1 only)
+  --with-cligen=dir       Use CLIGEN here
+  --with-restconf=native  RESTCONF using native http with libevhtp. (DEFAULT)
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
+  --without-restconf      No RESTCONF
+  --with-configfile=FILE  Set default path to config file
+  --with-libxml2          Use gnome/libxml2 regex engine
+  --without-sigaction     Disable sigaction logic (some platforms do not support SA_RESTART mode)
+  --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
+  --with-yang-standard-dir=DIR  Location of standard IETF/IEEE YANG specs for tests and example (default: $prefix/share/yang/standard)
+
 
 There are also some variables that can be set, such as::
 
-  ./configure LINKAGE=static ./configure         # Build static libraries
+  ./configure LINKAGE=static                     # Build static libraries
   ./configure CFLAGS="-O1 -Wall" INSTALLFLAGS="" # Use other CFLAGS
 
 Note, you need to reconfigure and recompile from scratch if you want to build static libs

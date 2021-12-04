@@ -3,7 +3,7 @@
 Overview
 ========
 
-Clixon is a management framework that can be used by networking
+Clixon is a configuration management framework used by networking
 devices and other computer systems.  Clixon provides a datastore, CLI,
 NETCONF and RESTCONF interfaces all defined by YANG.
 
@@ -32,10 +32,10 @@ System Architecture
 -------------------
 
 Clixon provides YANG functionality with Netconf, Restconf and CLI that
-can be integrated with a "base system" in several ways. Two primary integrations are outlined here:
+can be integrated with an existing "base system" in several ways. The integrations are:
 
-  * `Plugin` integration where clixon handles all user interaction with the interaction with the base system with backend plugins. This is the primary Clixon usage model.
-  * `Client` integration where the base system uses clixon primarily for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
+  * A `plugin` integration where clixon handles all user interaction with the base system using backend plugins. This is the _primary_ Clixon usage model.
+  * A `client` integration where the base system uses clixon for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
 
 Plugin integration
 ^^^^^^^^^^^^^^^^^^
@@ -43,30 +43,30 @@ Plugin integration
 .. image:: overview1.jpg
    :width: 100%
 		 
-This describes how to integrate a base system with clixon using plugins.
+This describes how to integrate a base system with Clixon using plugins.
 
 The Clixon architecture consists of a backend daemon with
 configuration datastores and a set of internal clients: cli, restconf
 and netconf.
 
 The clients provide frontend interfaces to users of the system, such
-as a Network Management System (NMS) or just a live user. The
-external interfaces includes interactive CLI, RESTCONF over HTTP/HTTPS, and XML
+as a Network Management System (NMS) or an interactive human user. The
+external interfaces include interactive CLI, RESTCONF over HTTP/HTTPS, and XML
 NETCONF over TCP or SSH.  Internally, the clients and backend
-communicate over Inter-Process Communication (IPC) bus via NETCONF
+communicate over an inter-process communication (IPC) bus via NETCONF
 over a UNIX socket. It is possible to run over an INET socket as well.
 
-The backend manages a configuration datastore and implements a
+The backend manages configuration datastores and implements a
 transaction mechanism for configuration operations (eg, create, read,
 update, delete) . The datastore supports candidate, running and
 startup configurations.
 
 A system integrating Clixon using plugins, typically starts with a set
-of YANG specifications that should be implemented. You then write
-backend plugins that interact with the base system. The plugins
-are written in C using the Clixon API and a set of plugin
-callbacks. The main callback is a transaction callback, where you
-specify how configuration changes are made to your system.
+of YANG specifications. Backend plugins are written that interact with
+the base system. The plugins are written in C using the Clixon API and
+a set of plugin callbacks. The main callback is a transaction
+callback, where you specify how configuration changes are made to your
+system.
 
 You can also design an interactive CLI using `CLIgen
 <http://www.cligen.se>`_, where you specify the CLI commands and write
@@ -74,7 +74,7 @@ CLI plugins.  You will have to write CLI rules, but Clixon can
 generate the configuration part of the CLI, including set, delete, show
 commands for a specific syntax.
    
-Notifications are supported both for CLI, netconf and restconf clients, sometimes referred to as "streams".
+Notifications (streams) are supported both for CLI, NETCONF and RESTCONF clients.
 
 Client integration
 ^^^^^^^^^^^^^^^^^^
@@ -93,7 +93,8 @@ Platforms
 ---------
 
 Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work. Linux
-platforms include 32 and 64 bits Ubuntu, Alpine, Raspian, etc.
+platforms include Ubuntu, Alpine, Centos, and Raspian. CPU architectures
+include x86_64, i686, and ARM32.
 
 Standards
 ---------
@@ -103,11 +104,11 @@ How to get Clixon
 -----------------
 Get the Clixon source code from `Github <http://github.com/clicon/clixon>`_::
 
-   git clone git@github.com:clicon/clixon.git
+   git clone https://github.com/clicon/clixon.git
 
 Support
 -------
-For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_. Please ask for access.
+For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_. Use the invite link on Clixon home-page or ask for access.
 
 Bug reports
 -----------

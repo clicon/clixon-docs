@@ -6,10 +6,11 @@ Standards
 YANG
 ----
 
-YANG and XML is the heart of Clixon.  Yang modules are used as a
-specification for handling XML configuration data. The YANG spec is
-used to generate an interactive CLI, netconf and restconf clients. It
-also specifies the format of the XML datastore.
+YANG and XML are central to Clixon.  Yang modules are used as a
+specification for encoding XML or JSON configuration and state
+data. The YANG spec is also used to generate an interactive CLI,
+NETCONF and RESTCONF clients, as well as the format of the XML
+datastore.
 
 The YANG standards that Clixon follows include:
 
@@ -17,45 +18,45 @@ The YANG standards that Clixon follows include:
 * `YANG 1.1 RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_
 * `YANG module library RFC 7895 <http://www.rfc-editor.org/rfc/rfc7895.txt>`_
 
-However, Clixon deviates from the YANG standard as follows (reference to RFC7950 sections in parenthesis):
+Clixon deviates from the YANG standard as follows (reference to RFC7950 sections in parenthesis):
 
 Not implemented:
 
 * action (7.15)
 * augment in a uses sub-clause (7.17) (module-level augment is implemented)
-* require-instance
 * instance-identifier type (9.13)
 * status (7.21.2)
 * YIN (13)
 * Default values on leaf-lists (7.7.2)
-* Lists without keys (non-config lists may lack keys)
 * error-message is not implemented as sub-statement of "range", "length" and "pattern"
 
 Further:
 
-* Clixon supports the following extended XPath functions (10):
+Clixon supports the following extended XPath functions (10):
+  
    - current()
    - deref()
    - derived-from(),
    - derived-from-or-self()
+   - bit-is-set()
   
-* But the following extended XPath functions are *not* supported (10):
+* The following extended XPath functions are *not* supported (10):
+  
    - re-match()
    - enum-value()
-   - bit-is-set()
 
 See also support of standard XPath functions `XML and XPath`_
      
 * if-feature-expr() is restricted to single layer expressions with and/or (7.20.2):
-   - ``x and y`` and ``x or y`` is supported
+   - ``x and y`` and ``x or y`` *is* supported
    - ``x or (not y and z)`` is *not* supported 
 
 Regular expressions
 ^^^^^^^^^^^^^^^^^^^
-Clixon supports two regular expressions engines:
+Clixon supports two regular expression engines:
 
 `Posix`
-   Posix is the default method, The regexps:s are translated to posix before matching with the standard Linux regex engine. This translation is not complete but can be considered "good-enough" for most yang use-cases. For reference, all standard `Yang models <https://github.com/YangModels/yang>`_ have been tested.
+   The default method, The regexps:s are translated to posix before matching with the standard Linux regex engine. This translation is not complete but can be considered "good-enough" for most yang use-cases. For reference, all standard `Yang models <https://github.com/YangModels/yang>`_ have been tested.
 `Libxml2`
    Libxml2  uses the XSD regex engine. This is a complete XSD engine but you need to compile and link with libxml2 which may add overhead.
 
@@ -78,7 +79,6 @@ Clixon implements the following NETCONF RFC:s:
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
 * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. RESTCONF call home not implemented
-* `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
@@ -113,7 +113,7 @@ Default values
 
 Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retrieval. This means that get-config will report all default values, not only those explicitly set. 
 
-`RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes described in the RFC, Clixon implements "report-all" with-respect to GET and GET-CONFIG operations, but "explicit" with respect to how configurations are saved in datastores.
+`RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes described in the RFC, Clixon implements "report-all" with-respect to ``get`` and ``get-config`` operations, but "explicit" with respect to how configurations are saved in datastores.
 
 RESTCONF
 --------
@@ -123,24 +123,26 @@ Clixon supports the two RESTCONF compile-time variants: *FCGI* and *Native*. Bot
 The following features of RFC8040 are supported:
 
 * OPTIONS, HEAD, GET, POST, PUT, DELETE, PATCH
-* stream notifications (Sec 6)
-* query parameters: "insert", "point", "content", "depth", "start-time" and "stop-time".
+* Stream notifications (Sec 6)
+* Query parameters: `insert`, `point`, `content`, `depth`, `start-time` and `stop-time`.
 * Monitoring (Sec 9)
 
-The following features are not implemented:
+The following features are *not* implemented:
 
 * ETag/Last-Modified
-* Query parameters: "fields", "filter", "with-defaults"
+* Query parameters: `fields`, `filter`, `with-defaults`
 
 RESTCONF event notification as described in RFC7950 section 6 is supported as follows:
-* is supported by *FCGI* 
+
 * is *not* supported by *native* 
+* is supported by *FCGI* 
 
 `NMDA` is partly supported according to `RFC 8324 <https://tools.ietf.org/html/rfc8342>`_ and `RFC 8527 <https://tools.ietf.org/html/rfc8527>`_. With-defaults and with-origin are not implemented.
 
 `RFC 8072: YANG Patch Media Type <https://www.rfc-editor.org/rfc/rfc8072.txt>`_ is not implemented.
 
 In the native mode, clixon also supports:
+
 * HTTP/1 as a transport implemented by libevhtp
 * HTTP/2 (RFC7540) as a transport implemented by libnghttp2.
 * Transport Layer Security (TLS) implemented by libopenssl,
@@ -162,7 +164,7 @@ The following XPath axes are supported:
 
 * child,
 * descendant,
-* descendant_or_self,
+* descendant-or-self,
 * self
 * parent
 
@@ -182,7 +184,6 @@ The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 sta
 
 The following standard XPath functions are *not* supported:
 
-* bit-is-set
 * boolean
 * ceiling
 * comment
@@ -205,7 +206,18 @@ The following standard XPath functions are *not* supported:
 * sum
 * translate
 
+Pagination
+----------
 
+The pagination solution is based on the following drafts:
+
+- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-00>`_
+- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-nc-02>`_
+- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-rc-02>`_
+
+See :ref:`clixon_pagination` for more info.
+
+  
 Unicode
 -------
 Unicode is not supported in YANG and XML.

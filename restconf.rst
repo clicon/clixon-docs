@@ -36,11 +36,12 @@ Installation
 ------------
 
 The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
+
+  --disable-evhtp         Disable native http/1.1 using libevhtp (ie http/2 only)
+  --disable-nghttp2       Disable native http/2 using libnghttp2 (ie http/1 only)
+  --with-restconf=native  RESTCONF using native http with libevhtp. (DEFAULT)
+  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
   --without-restconf      No RESTCONF
-  --with-restconf=native  RESTCONF using native http with libevhtp. This is default
-  --disable-nghttp2       Disable native http/2 using libnghttp2
-  --disable-evhtp         Disable native http/1.1 using libevhtp
-  --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy. Note fcgi feature must be set
 
 After that perform system-wide compilation::
 
@@ -54,13 +55,13 @@ The restconf daemon have the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
-  -p <dir>        Yang directory path (see CLICON_YANG_DIR)
-  -b <dir>        Specify XMLDB database directory
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
+  -y <file>       Load yang spec file (override yang main module)
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
-  -u <path|addr>  Internal socket domain path or IP addr (see -a)(default: /usr/var/hello.sock)
+  -u <path|addr>  Internal socket domain path or IP addr (see -a)
   -r              Do not drop privileges if run as root
-  -W <user>       Run restconf daemon as this user, drop according to CLICON_RESTCONF_PRIVILEGES
+  -W <user>       Run restconf daemon as this user, drop according to ``CLICON_RESTCONF_PRIVILEGES``
   -R <xml>        Restconf configuration in-line overriding config file
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
@@ -73,23 +74,24 @@ The following RESTCONF configuration options can be defined in the clixon config
 
 CLICON_RESTCONF_DIR
    Location of restconf .so plugins. Load all .so plugins in this dir as restconf code plugins.
-CLICON_BACKEND_RESTCONF_PROCESS
-   Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore. 
-CLICON_ANONYMOUS_USER
-   If RESTCONF authentication auth-type=none then use this user
-CLICON_RESTCONF_USER
-   Run clixon_restconf daemon as this user
-CLICON_RESTCONF_USER
-   Run clixon_restconf daemon as this user
-CLICON_RESTCONF_PRIVILEGES
-   Restconf daemon drop privileges mode, one of: none, drop_perm, drop_temp
 CLICON_RESTCONF_INSTALLDIR
    Path to dir of clixon-restconf daemon binary as used by backend if started internally
 CLICON_RESTCONF_STARTUP_DONTUPDATE
    Disable automatic update of startup on restconf edit operations
+   This is not according to standard RFC 8040 Sec 1.4.
+CLICON_RESTCONF_USER
+   Run clixon_restconf daemon as this user, default is `www-data`.
+CLICON_RESTCONF_PRIVILEGES
+   Restconf daemon drop privileges mode, one of: none, drop_perm, drop_temp
 CLICON_RESTCONF_HTTP2_PLAIN
-   Enable plain (non-tls) HTTP/2, default: true
+   Enable plain (non-tls) HTTP/2.
+CLICON_BACKEND_RESTCONF_PROCESS
+   Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore. 
+CLICON_ANONYMOUS_USER
+   If RESTCONF authentication auth-type=none then use this user
 
+More more documentation of the options, see the source YANG file.
+   
 Advanced config
 ---------------
 

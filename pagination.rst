@@ -6,13 +6,17 @@ Pagination
 .. This is a comment
 
 Pagination and scrolling is the technique of showing large amount of data in smaller
-chunks. Pagination was introduced in Clixon 5.3. Expect further development and changes.
+chunks. Pagination was introduced in Clixon 5.3 and updated in 5.4. Expect further development and changes.
 
 Overview
 --------
 
-The pagination protocol is loosely based on `<https://tools.ietf.org/id/draft-wwlh-netconf-list-pagination-nc-01.html>`_ and others for lists and leaf-lists.
+The pagination solution is based on the following drafts:
 
+- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-00>`_
+- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-nc-02>`_
+- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-rc-02>`_
+  
 The pagination in Clixon is currently restricted to the `offset` and `limit` attributes. For example, the following requests a list of 120 items in chunks of 20::
 
    get offset=0 limit=20
@@ -45,10 +49,15 @@ is unchanged, such as::
    get offset=100 limit=20
    unlock-db
 
-The use of locks guarantees a consistent view (snapshot) of the state
-data, but ultimately needs to be implemented by the pagination plugin
-code. Clixon provides a framework, but the semantics must be implemented
-by the plugin.
+The use of locks guarantees a consistent view (snapshot) of config
+data, but risks undefinite blocking in a CLI pagination situation for example.
+
+For state pagination data, database locks are not useful. Instead
+clixon extends the database lock mechanism with a specific
+`state-paginate-lock` lock that can be used by the state paginate callback
+developer. It works the same way as a database lock, but there is no
+config database associated with it, it is specially made for paginated
+state data only.
 
    
 Pagination protocol
@@ -65,9 +74,10 @@ In NETCONF a similar request is::
    <rpc>
       <get>
          <filter type="xpath" select="/es:members/es:uint8-numbers" xmlns:es="http://example.com/ns/example-social"/>
-         <list-pagination xmlns="http://clicon.org/clixon-netconf-list-pagination">true</list-pagination>
-   	 <offset xmlns="http://clicon.org/clixon-netconf-list-pagination">20</offset>
-	 <limit xmlns="http://clicon.org/clixon-netconf-list-pagination">10</limit>
+         <list-pagination xmlns="urn:ietf:params:xml:ns:yang:ietf-list-pagination-nc">
+   	    <offset>20</offset>
+	    <limit>10</limit>
+	 </list-pagination>
       </get>
    </rpc>
 
@@ -127,7 +137,6 @@ In the main example, cli_pagination is called as follows::
   
    show state <xpath:string> cli, cli_pagination("", "es", "http://example.com/ns/example-social", "cli", "10");
 
-
 An application can use the `cli_pagination` callback, or create a
 tailor-made CLI callback based on the example callback.
 
@@ -163,10 +172,8 @@ Essentially, the state callback requests state data for list/leaf-list `xpath` i
 If `locked` is true, the plugin can cache the state data, return
 further requests from the same cache until the lock on the "runníng"
 database is released, thus forming an (implicit) transaction.  For
-this, the ca_lockdb callback can be used as an end to the transaction.
+this, the ca_lockdb callback can be used as an end to the transaction of ``state-paginate-lock``.
 Note that there is not explicit "start transaction", the first locked
 pagination request acts as one.
-
-
 
 See a detailed example in the main example.
