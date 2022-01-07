@@ -1,7 +1,11 @@
 .. _clixon_upgrade:
+.. sectnum::
+   :start: 17
+   :depth: 3
 
+*******
 Upgrade
-=======
+*******
 
 When Clixon starts, the backend reads a startup configuration (see :ref:`startup modes <clixon_backend>`)
 parses it, checks for upgrades, and validates the configuration. It can also add extra XML, outside of the normal startup. On errors, it can enter a failsafe mode.
@@ -12,10 +16,8 @@ Clixon has three upgrade methods:
 * Module-specific manual upgrade
 * Automatic upgrade (experimental)
 
-
 General-purpose
----------------
-
+===============
 A plugin registers a `ca_datastore_upgrade` function which gets called
 once on startup. This upgrade should be seen as a generic wrapper
 function to basic repair or upgrade of existing datastores. The
@@ -80,7 +82,7 @@ matching the XPath `/a:x/a:y` using canonical prefixes, which are then
 deleted.
   
 Module-specific upgrade
------------------------
+=======================
 Module-specific upgrade is only available if module-state is enabled, see :ref:`Module library support <clixon_datastore>`.
 
 If the module-state of the startup configuration does not match the
@@ -99,7 +101,7 @@ A module has changed if one of the following is true:
 - A module present in both the startup and the system has a different revision date (CHANGE)
 
 Registering a callback
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 A user registers upgrade callbacks in the backend `clixon_plugin_init()` function. The signature of upgrade callback is as follows:
 ::
    
@@ -118,7 +120,7 @@ One example of registering an upgrade of an interface module:
    upgrade_callback_register(h, upgrade_interfaces, "urn:example:interfaces", NULL);
 
 Upgrade callback
-^^^^^^^^^^^^^^^^
+----------------
 When Clixon loads a startup datastore with outdated modules, the matching
 upgrade callbacks will be called.
 
@@ -143,7 +145,7 @@ failsafe mode so that the user may perform manual upgrading of the
 configuration.
 
 Example upgrade
-^^^^^^^^^^^^^^^
+---------------
 The `Clixon main example <https://github.com/clicon/clixon/blob/master/example/main/example_backend.c>`_ shows code for upgrading of an interface module. The example is inspired by the ietf-interfaces module that made a subset of the upgrades shown in the examples.
 
 The code is split in two steps.
@@ -158,9 +160,8 @@ The `upgrade_2016_to_2018` callback does the following transforms:
   * Wrap ``/interfaces/interface/descr`` to ``/interfaces/interface/docs/descr``
   * Change type ``/interfaces/interface/statistics/in-octets`` to ``decimal64`` and divide all values with 1000
 
-
 Extra XML
----------
+=========
 If the Yang validation succeeds and the startup configuration has been committed to the running database, a user may add "extra" XML.
 
 There are two ways to add extra XML to running database after start. Note that this XML is "merged" into running, not "committed".
@@ -184,9 +185,8 @@ plugin_reset() in example_backend.c).
 The extra-xml feature is not available if startup mode is `none`. It
 will also not occur in failsafe mode.
 
-
 Failsafe mode
--------------
+=============
 If the startup fails, the backend looks for a `failsafe` configuration
 in ``<CLICON_XMLDB_DIR>/failsafe_db``. If such a config is not found, the
 backend terminates. In this mode, running and startup mode are
@@ -201,9 +201,8 @@ contain syntax errors or invalidated XML.
 If the startup mode was `running`, the the `tmp` database will contain
 syntax errors or invalidated XML.
 
-
 Repair
-------
+======
 If the system is in failsafe mode (or fails to start), a user can
 repair a broken configuration and then restart the backend. This can
 be done out-of-band by editing the startup db and then restarting
@@ -264,7 +263,7 @@ Finally, the candidate is validate and committed:
 The example shown in this Section is also available as a regression `repair test script <https://github.com/clicon/clixon/tree/master/test/test_upgrade_repair.sh>`_.
 
 Automatic upgrades
-------------------
+==================
 There is an EXPERIMENTAL xml changelog feature based on
 "draft-wang-netmod-module-revision-management-01" (Zitao Wang et al)
 where changes to the Yang model are documented and loaded into

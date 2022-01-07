@@ -1,11 +1,14 @@
 .. _clixon_standards:
+.. sectnum::
+   :start: 4
+   :depth: 3
 
+*********
 Standards
-=========
+*********
 
 YANG
-----
-
+====
 YANG and XML are central to Clixon.  Yang modules are used as a
 specification for encoding XML or JSON configuration and state
 data. The YANG spec is also used to generate an interactive CLI,
@@ -52,7 +55,7 @@ See also support of standard XPath functions `XML and XPath`_
    - ``x or (not y and z)`` is *not* supported 
 
 Regular expressions
-^^^^^^^^^^^^^^^^^^^
+-------------------
 Clixon supports two regular expression engines:
 
 `Posix`
@@ -70,9 +73,8 @@ You then need to set the following configure option:
 
   <CLICON_YANG_REGEXP>libxml2</CLICON_YANG_REGEXP>
 
-
 NETCONF
--------
+=======
 Clixon implements the following NETCONF RFC:s:
 
 * `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
@@ -109,15 +111,13 @@ Capability is preferred over default subtrees. This has two reasons:
 2. Subtree filtering does not support namespaces yet.
 
 Default values
-^^^^^^^^^^^^^^
-
+--------------
 Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retrieval. This means that get-config will report all default values, not only those explicitly set. 
 
 `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes described in the RFC, Clixon implements "report-all" with-respect to ``get`` and ``get-config`` operations, but "explicit" with respect to how configurations are saved in datastores.
 
 RESTCONF
---------
-
+========
 Clixon supports the two RESTCONF compile-time variants: *FCGI* and *Native*. Both implements `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
 
 The following features of RFC8040 are supported:
@@ -149,7 +149,7 @@ In the native mode, clixon also supports:
 * ALPN as defined in RFC 7301 for http/1, http/2 protocol selection
 
 XML and XPath
--------------
+=============
 Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
 
 The XML-related standards include:
@@ -207,22 +207,22 @@ The following standard XPath functions are *not* supported:
 * translate
 
 Pagination
-----------
-
+==========
 The pagination solution is based on the following drafts:
 
 - `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-00>`_
 - `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-nc-02>`_
 - `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-rc-02>`_
 
-See :ref:`clixon_pagination` for more info.
+See :ref:`Pagination section <clixon_pagination>` for more info.
 
-  
 Unicode
--------
+=======
 Unicode is not supported in YANG and XML.
 
 JSON
-----
+====
+Clixon implements JSON according to:
 
-Clixon implements JSON according to  `ECMA JSON Data Interchange Syntax <http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf>`_ and  `RFC 7951 JSON Encoding of Data Modeled with YANG <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
+- `ECMA JSON Data Interchange Syntax <http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf>`_
+- `RFC 7951 JSON Encoding of Data Modeled with YANG <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.

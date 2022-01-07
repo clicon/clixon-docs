@@ -1,10 +1,12 @@
 .. _clixon_quickstart:
+.. sectnum::
+   :start: 3
+   :depth: 3
 
+***********
 Quick start
-===========
+***********
 
-.. This is a comment
-   
 This section describes how to run the *hello world* example available in source code at: `clixon hello example <https://github.com/clicon/clixon-examples/tree/master/hello/src>`_. 
 
 Clixon is not a system in itself, it is a support system for an
@@ -19,11 +21,10 @@ hello world application.
 The hello world example can be run both natively on the host and in a docker container.
 
 Host native
------------
+===========
 
 Clixon
-^^^^^^^
-
+------
 Go through the :ref:`install instructions <clixon_install>` to install
 Clixon on your platform.  This includes installing CLIgen, Clixon,
 creating users, groups, etc.
@@ -42,8 +43,7 @@ In short::
 Then proceed with host application install.
 
 Files
-^^^^^
-
+-----
 Files relevant to the hello world example are:
 
 * `hello.xml <https://github.com/clicon/clixon-examples/tree/master/hello/src/hello.xml>`_: the XML configuration file
@@ -54,7 +54,7 @@ Files relevant to the hello world example are:
 
 
 Install and run
-^^^^^^^^^^^^^^^
+---------------
 
 Checkout and configure the examples on the top-level::
 
@@ -77,10 +77,8 @@ Start cli:
 
     clixon_cli
 
-
 Using the CLI
--------------
-
+=============
 The example CLI allows you to modify and view the data model using `set`, `delete` and `show` via generated code.
 
 The following example shows how to add a very simple configuration `hello world` using the generated CLI. The config is added to the candidate database, shown, committed to running, and then deleted.
@@ -104,8 +102,7 @@ The following example shows how to add a very simple configuration `hello world`
    olof@vandal> 
 
 Netconf
--------
-
+=======
 Clixon also provides a Netconf interface. The following example starts a netconf client form the shell vi stdio, adds the hello world config, commits it, and shows it:
 ::
 
@@ -121,15 +118,14 @@ Clixon also provides a Netconf interface. The following example starts a netconf
    olof@vandal> 
 
 Restconf
---------
+========
+By default, Clixon uses `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
 
-Clixon by default uses `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
-
-As an alternative, you can use the `FCGI` solution, where instead a reverse proxy such as `Nginx <https://nginx.org>`_  uses an internal FCGI socket communication to communicate with Clixon.  A reverse proxy, such as NGINX, needs to be configured. For more info about the fcgi solution, see :ref:`clixon_restconf`.
+As an alternative, you can use the `FCGI` solution, where instead a reverse proxy such as `Nginx <https://nginx.org>`_  uses an internal FCGI socket communication to communicate with Clixon.  A reverse proxy, such as NGINX, needs to be configured. For more info about the fcgi solution, see :ref:`Restconf section<clixon_restconf>`.
 
   
 Start and run
-^^^^^^^^^^^^^
+-------------
 Regardless of which RESTCONF variant is used, start the restconf daemon as follows::
 
    sudo clixon_restconf
@@ -149,7 +145,7 @@ Start sending restconf commands (using Curl):
 
 
 Docker container
-----------------
+================
 You can run the hello example as a pre-built docker container, on a `x86_64` Linux. See instructions in the `clixon docker hello example <https://github.com/clicon/clixon-examples/tree/master/hello/docker>`_.
 
 First, the container is started with the backend running:
@@ -182,7 +178,7 @@ Or using restconf using curl on exposed port 8080:
   $ curl -X GET http://localhost:8080/restconf/data/hello:system
    
 Next steps
-----------
+==========
 The hello world example only has a Yang spec and a template CLI
 spec. For more advanced applications, customized backend, CLI, netconf
 and restconf code callbacks becomes necessary.

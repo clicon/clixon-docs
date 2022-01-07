@@ -1,7 +1,11 @@
 .. _clixon_overview:
-
+.. sectnum::
+   :start: 1
+   :depth: 3
+   
+********
 Overview
-========
+********
 
 Clixon is a configuration management framework used by networking
 devices and other computer systems.  Clixon provides a datastore, CLI,
@@ -27,10 +31,8 @@ and free YANG based configuration tool.
 Clixon is open-source and dual licensed. Either Apache License, Version 2.0 or GNU
 General Public License Version 2.
 
-
 System Architecture
--------------------
-
+===================
 Clixon provides YANG functionality with Netconf, Restconf and CLI that
 can be integrated with an existing "base system" in several ways. The integrations are:
 
@@ -38,7 +40,7 @@ can be integrated with an existing "base system" in several ways. The integratio
   * A `client` integration where the base system uses clixon for configurations as a "side-car". There is some ongoing work to make Clixon also work for this usage.
 
 Plugin integration
-^^^^^^^^^^^^^^^^^^
+------------------
 
 .. image:: overview1.jpg
    :width: 100%
@@ -77,7 +79,7 @@ commands for a specific syntax.
 Notifications (streams) are supported both for CLI, NETCONF and RESTCONF clients.
 
 Client integration
-^^^^^^^^^^^^^^^^^^
+------------------
 .. image:: overview2.jpg
    :width: 100%
 
@@ -90,32 +92,31 @@ In comparison, the tighter plugin architecture uses dynamically loaded plugins, 
 
 	    
 Platforms
----------
-
+=========
 Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work. Linux
 platforms include Ubuntu, Alpine, Centos, and Raspian. CPU architectures
 include x86_64, i686, and ARM32.
 
 Standards
----------
-Clixon supports standards including YANG, NETCONF, RESTCONF, XML and XPath. See :ref:`clixon_standards` for more details.
+=========
+Clixon supports standards including YANG, NETCONF, RESTCONF, XML and XPath. See :ref:`Standards section<clixon_standards>` for more details.
 
 How to get Clixon
------------------
+=================
 Get the Clixon source code from `Github <http://github.com/clicon/clixon>`_::
 
    git clone https://github.com/clicon/clixon.git
 
 Support
--------
+========
 For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_. Use the invite link on Clixon home-page or ask for access.
 
 Bug reports
------------
+===========
 Report bugs via `Github issues <https://github.com/clicon/clixon/issues>`_
 
 Reference docs
---------------
+==============
 The user-manual is this document.
 For reference documentation of the C-code, Doxygen is used. To build the reference documentation you need to check out the source code, and type ``make doc``, eg::
 

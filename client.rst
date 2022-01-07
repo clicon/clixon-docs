@@ -1,7 +1,11 @@
 .. _client_api:
+.. sectnum::
+   :start: 14
+   :depth: 3
 
+**********
 Client API
-==========
+**********
 
 Clixon's client API provides a simple way to communicate with the
 built-in XML datastore. This can be used to fetch or manipulate
@@ -17,8 +21,7 @@ with the aim of replacing one with the other.
 
 
 Comparison between Clixon and ConfD
------------------------------------
-
+===================================
 Cisco ConfD is a well known configuration manager which also
 maintains the configuration in its built-in datastore. Just like
 Clixon, ConfD offers an API for configuration access and manipulation.

@@ -1,7 +1,11 @@
 .. _clixon_pagination:
+.. sectnum::
+   :start: 16
+   :depth: 3
 
+**********
 Pagination
-==========
+**********
 
 .. This is a comment
 
@@ -9,8 +13,7 @@ Pagination and scrolling is the technique of showing large amount of data in sma
 chunks. Pagination was introduced in Clixon 5.3 and updated in 5.4. Expect further development and changes.
 
 Overview
---------
-
+========
 The pagination solution is based on the following drafts:
 
 - `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-00>`_
@@ -37,8 +40,7 @@ Clixon pagination encompasses several aspects:
 
    
 Locked pagination
------------------
-
+=================
 Using NETCONF, one can lock the datastore during a session to ensure that the data
 is unchanged, such as::
 
@@ -61,8 +63,7 @@ state data only.
 
    
 Pagination protocol
--------------------
-
+===================
 In a RESTCONF a pagination request looks as follows::
    
    GET /localhost/restconf/data/example-social:members/uint8-numbers?offset=20&limit=10 HTTP/1.1
@@ -102,10 +103,8 @@ In return, Clixon returns a reply with the requested number of entries (in NETCO
       </data>
    </rpc-reply>
 
-
 CLI scrolling
--------------
-
+=============
 CLIgen has a scrolling mechanism that can be integrated with pagination. For example, showing the list from the example above::
 
    clixon_cli
@@ -117,8 +116,7 @@ CLIgen has a scrolling mechanism that can be integrated with pagination. For exa
    --More--
 
 CLI callbacks
-^^^^^^^^^^^^^
-
+-------------
 CLI scrolling is implemented by the `cligen_output` function similar
 to `printf` in syntax. By using cligen_output for all output, CLIgen
 ensures a scrolling mechanism.
@@ -142,8 +140,7 @@ tailor-made CLI callback based on the example callback.
 
 
 Backend pagination API
-----------------------
-
+======================
 While pagination of config data is built-in, state data needs backend plugin
 callbacks. There is a special state pagination callback API where a
 callback is bound to an xpath, and is called when a pagination request is made on an xpath.

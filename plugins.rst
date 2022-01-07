@@ -1,13 +1,17 @@
 .. _clixon_plugins:
+.. sectnum::
+   :start: 6
+   :depth: 3
 
+*******
 Plugins
-=======
+*******
 
 Plugins are the "glue" that binds the underlying system to Clixon and where
 application semantics is added by an application developer.
 
 The backend, CLI, Restconf and Netconf applications may use plugins,
-although the main use of plugins are the :ref:`clixon_backend` plugins.
+although the main use of plugins are the :ref:`Backend section <clixon_backend>` plugins.
 
 Plugins are written in C as dynamically loaded modules (``.so``
 files). At startup, the application looks in the assigned directory and loads all files with ``.so`` suffixes from that dir in *alphabetical* order.
@@ -28,12 +32,12 @@ Callbacks are registered in two ways:
   - *clixon_plugin_init* : Return an API struct containing a fixed set of callbacks
   - *register functions* : Register callback functions for more complex interaction
 
-Further, CLI callbacks as described in :ref:`clixon_cli` are special
+Further, CLI callbacks as described in :ref:`CLI section <clixon_cli>` are special
 in the way that they are invoked from CLIgen specifications, not from
 the application itself.
     
 Clixon_plugin_init
-------------------
+==================
 On startup, the application loads each plugin and calls
 ``clixon_plugin_init`` in that plugin.   The function is expected to return an API
 struct ``clixon_plugin_api`` defining a set of static callbacks. The init
@@ -74,18 +78,17 @@ start
 exit
    Called just before plugin is unloaded at exit
 extension
-  Called at parsing of yang modules containing an extension statement.  A plugin may identify the extension by its name, and perform actions on the yang statement, such as transforming the yang in-memory. A callback is made for every statement, which means that several calls per extension can be made. See :ref:`clixon_misc` and the main example on how to use extensions.
+  Called at parsing of yang modules containing an extension statement.  A plugin may identify the extension by its name, and perform actions on the yang statement, such as transforming the yang in-memory. A callback is made for every statement, which means that several calls per extension can be made. See :ref:`Misc section<clixon_misc>` and the main example on how to use extensions.
 
-See :ref:`clixon_backend` for backend specific callbacks, as well as corresponding manual sections for netconf/restconf/cli callbacks.
+See :ref:`Backend section<clixon_backend>` for backend specific callbacks, as well as corresponding manual sections for netconf/restconf/cli callbacks.
 
-Registering callbacks
----------------------
-
+Registered callbacks
+====================
 A second group of callbacks use register functions. This is a more detailed mechanism than the fixed callbacks described previously, but are only defined to a limited sets of functions:
 
 * ``rpc_callback_register()`` - for user-defined RPC callbacks. Applicable for NETCONF, RESTCONF and backend.
-* ``upgrade_callback_register()`` - for upgrading, see :ref:`clixon_upgrade`. Applicable only for backend.
-* ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`clixon_pagination`. Applicable only for backend.
+* ``upgrade_callback_register()`` - for upgrading, see :ref:`Upgrade section <clixon_upgrade>`. Applicable only for backend.
+* ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`Pagination section<clixon_pagination>`. Applicable only for backend.
 
 A user may register may register a callback for an incoming RPC, and
 that function will be called. 
@@ -104,8 +107,7 @@ Second, if there are more than one reply (eg ``<rpc-reply/><rpc-reply/>``) only 
 If you want to take the original and modify it, you should therefore register the callback in plugin_start (3) so that your callback will be called after the system RPC. Then you should modify the original reply (not add a new reply).
 
 Example: RPC callback
-^^^^^^^^^^^^^^^^^^^^^
-
+---------------------
 This example shows how to define a new RPC in YANG for the backend, register a callback function in C, read and write a parameter.
 It is revised slightly from the main example.
 
@@ -160,8 +162,7 @@ Result netconf session::
   </rpc-reply>]]>]]>
 
 Plugin callback guidelines
---------------------------
-
+==========================
 .. note::
         This information is important to understand for the stability of clixon
 

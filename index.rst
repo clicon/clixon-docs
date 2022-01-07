@@ -25,10 +25,10 @@ mechanism.
    cli
    netconf
    restconf
+   yang
    usecases
    client
    xml
-   nacm
    pagination
    upgrade
    misc

@@ -1,7 +1,11 @@
 .. _clixon_datastore:
+.. sectnum::
+   :start: 8
+   :depth: 3
 
+*********
 Datastore
-=========
+*********
 ::
 
                         +-----------+
@@ -26,8 +30,7 @@ Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCON
 Note that there may appear other datastores, Clixon is not limited to the three datastores above. For example, a `tmp` datastore appears in several cases as an intermediate datastore.
 	 
 Datastore files
----------------
-
+===============
 The mandatory `CLICON_XMLDB_DIR` option determines where the
 datastores are placed. Example:
 ::
@@ -35,7 +38,7 @@ datastores are placed. Example:
    <CLICON_XMLDB_DIR>/usr/local/var/example</CLICON_XMLDB_DIR>
 
 The permission of the datastores files is accessible to the user that
-starts the backend only. Typically this is `root`, but if the backend is started as a non-privileged user, or if privileges are dropped (see :ref:`clixon_backend`) this may be another user, such as in the following example where `clicon` is used:
+starts the backend only. Typically this is `root`, but if the backend is started as a non-privileged user, or if privileges are dropped (see :ref:`Backend section<clixon_backend>`) this may be another user, such as in the following example where `clicon` is used:
 ::
 
    sh> ls -l /usr/local/var/example
@@ -47,8 +50,7 @@ Note that a user typically does not access the datastores directly, it is possib
 
    
 Datastore format
-----------------
-
+================
 By default, the datastore files use pretty-printed XML, with the top-symbol `config`. The following is an example of a valid datastore:
 ::
 
@@ -68,8 +70,7 @@ The format of the datastores can be changed using the following options:
 Note that the format settings applies to all datastores.
 
 Module library support
-----------------------
-
+======================
 Clixon can store Yang module-state information according to `RFC 7895: YANG module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_ in the
 datastores. With module state, you know which Yang version the XML belongs to, which is useful when upgrading, see :ref:`upgrade <clixon_upgrade>`.
 
@@ -103,8 +104,7 @@ datastore handler strips the module-state info. It is only shown in
 the datastore itself.
 
 Datastore caching
------------------
-
+=================
 Clixon datastore cache behaviour is controlled by the `CLICON_DATASTORE_CACHE` and can have the following values:
 
 `nocache`

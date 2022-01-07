@@ -1,13 +1,17 @@
 .. _clixon_usecases:
+.. sectnum::
+   :start: 13
+   :depth: 3
 
+********
 Usecases
-========
+********
 
 This section contains usecases which illustrate the flow of data from
 a user via Clixon frontends, backend to the underlying system and back.
 
 CLI read
---------
+========
 
 ::
 
@@ -25,7 +29,7 @@ CLI read
 
 The first usecase illustrates how a retrieval of a configured value from the system is made.
 
-1. The user makes a `show config` call using the hello world example(see :ref:`clixon_quickstart`). In the following examples uses `text` as modifier, and filters on `hello` top-level symbol:
+1. The user makes a `show config` call using the hello world example(see :ref:`Quickstart section<clixon_quickstart>`). In the following examples uses `text` as modifier, and filters on `hello` top-level symbol:
 ::
 
    cli> show configuration text hello 
@@ -64,7 +68,7 @@ The user can also retrieve state data. Instead of reading from the running datas
 
    
 CLI write
----------
+=========
 
 ::
 
@@ -126,7 +130,7 @@ When setting a config value, the candidate datastore is modified and the committ
    </rpc-reply
 
 Commit
-------
+======
 
 ::
    
@@ -171,7 +175,7 @@ underlying system. Often, commits are made at once after every edit
    </rpc-reply
 
 RESTCONF RPC
-------------
+============
 ::
 
                                    4   1

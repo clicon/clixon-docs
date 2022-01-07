@@ -1,7 +1,11 @@
 .. _clixon_backend:
+.. sectnum::
+   :start: 7
+   :depth: 3
 
+*******
 Backend
-=======
+*******
 
  .. image:: backend1.jpg
    :width: 100%
@@ -20,8 +24,7 @@ The backend daemon is the central component in the Clixon architecture. It consi
 Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon in most cases uses a datastore cache.
    
 Command-line options
---------------------
-
+====================
 The backend have the following command-line options:
   -h              Help
   -D <level>      Debug level
@@ -47,8 +50,7 @@ The backend have the following command-line options:
 
   
 Logging and debugging
-^^^^^^^^^^^^^^^^^^^^^
-
+---------------------
 In case of debugging, the backend can be run in the foreground and with debug flags:
 ::
 
@@ -67,7 +69,7 @@ In a debugging mode, it can be useful to run in `once-only` mode, where the back
    clixon_backend -F1D 1
 
 Startup
--------
+=======
 The backend can perform startup in four different modes. The difference is how the running state is handled, i.e., what state the system is in when you start the daemon and how loading the configuration affects it:
 
 `none`
@@ -104,7 +106,7 @@ CLICON_BACKEND_RESTCONF_PROCESS
    Enable process-control of restconf daemon, ie start/stop restconf daemon internally using fork/exec. Disable if you start the restconf daemon by other means.
   
 IPC Socket
-----------
+==========
 ::
 
    Frontends:           +----------+
@@ -130,8 +132,7 @@ CLICON_SOCK_GROUP
 
 
 Backend files
--------------
-
+=============
 The following config options control files related to the backend:
 
 CLICON_BACKEND_DIR
@@ -144,13 +145,12 @@ CLICON_BACKEND_PIDFILE
   Process-id file of backend daemon
 
 Backend plugins
----------------
+===============
 
-This section describes backend-specific plugins, see :ref:`clixon_plugins` for a general description of plugins.
+This section describes backend-specific plugins, see :ref:`Plugin section<clixon_plugins>` for a general description of plugins.
 
 Clixon_plugin_init
-^^^^^^^^^^^^^^^^^^
-
+------------------
 Apart from the generic plugin callbacks (init, start, etc), the following callbacks are specific to the backend:
 
 pre_daemon
@@ -167,17 +167,16 @@ trans_{begin,validate,complete,commit,commit_done,revert,end,abort}
   Transaction callbacks are invoked for two reasons: validation requests or commits.  These callbacks are further described in `transactions`_ section.
 
 Registered callbacks
-^^^^^^^^^^^^^^^^^^^^
-
+--------------------
 The callback also supports three forms of registered callbacks:
 
-* ``rpc_callback_register()`` - for user-defined RPC callbacks, see :ref:`clixon_plugins`.
-* ``upgrade_callback_register()`` - for upgrading, see :ref:`clixon_upgrade`.
-* ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`clixon_pagination`.
+* ``rpc_callback_register()`` - for user-defined RPC callbacks, see :ref:`Plugin section <clixon_plugins>`.
+* ``upgrade_callback_register()`` - for upgrading, see :ref:`Upgrade section <clixon_upgrade>`.
+* ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`Pagination section<clixon_pagination>`.
 
   
 Transactions
-------------
+============
 Clixon follows NETCONF in its validate and commit semantics.
 Using the CLI or another frontend, you edit the `candidate` configuration, which is first
 `validated` for consistency and then `committed` to the `running`
@@ -242,14 +241,13 @@ the transaction is aborted and the commit reverted:
   +--------->+--------->+ abort
 
 Callbacks
-^^^^^^^^^
-
-There are two XML trees:
+---------
+In the the context of a callback, there are two XML trees:
 
 src
-  This is the original XML tree, such as "running"
+  The original XML tree, such as "running"
 target
-  This is the new XML tree, such as "candidate"
+  The new XML tree, such as "candidate"
   
 There are three vectors pointing into the XML trees:
 
@@ -317,8 +315,7 @@ For example, assume the tree (A B) is replaced with (B C), then the two trees ar
 
   
 Privileges
-----------
-
+==========
 The backend process itself does not really require any specific
 access, but it may be an important topic for an application using
 clixon when the plugins are designed. A plugin may need to access
@@ -336,8 +333,7 @@ example as follows(there may be others):
     <CLICON_XMLDB_DIR>/tmp/mytest</CLICON_XMLDB_DIR>
 
 Dropping privileges
-^^^^^^^^^^^^^^^^^^^
-
+-------------------
 You may want to start the backend as root and then drop privileges
 to a non-root user which is a common technique to limit exposure of exploits.
 
@@ -352,11 +348,10 @@ unprivileged user (`clicon` in the example abobe). It will also change
 ownership of several files to the user, including datastores and the
 clicon socket (if the socket is unix domain).
 
-Note that the unprivileged user must exist on the system, see :ref:`clixon_install`.
+Note that the unprivileged user must exist on the system, see :ref:`Install section<clixon_install>`.
  
 Drop privileges temporary
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
+-------------------------
 If you drop privileges permanently, you need to access all privileged
 resources initially before the drop. For a plugin designer, this means
 that you need to access privileges system resources in the

@@ -1,8 +1,12 @@
 .. _clixon_xml:
+.. sectnum::
+   :start: 15
+   :depth: 3
 
-=============
+
+*************
 XML and paths
-=============
+*************
 
 This section describes XML trees and how to navigate in trees using paths.
 
@@ -16,14 +20,12 @@ Clixon uses paths to navigate in XML trees.  Clixon uses the following three met
 
 Paths
 =====
-
 * *XML Path Language* defined in `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_ as part of XML and used in  `NETCONF <http://www.rfc-editor.org/rfc/rfc6241.txt>`_.
 * *Instance-identifier*  defined in `RFC 7950: The YANG 1.1 Data Modeling Language <https://www.rfc-editor.org/rfc/rfc7950.txt>`_, a subset of XPath and used in `NACM <https://www.rfc-editor.org/rfc/rfc8341.txt>`_,.
 * *Api-path* defined and used in `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_
 
 XPath
 -----
-
 Example of XPath in a NETCONF `get-config` RPC using the XPath capability:
 ::
 
@@ -45,7 +47,6 @@ Clixon uses XPaths extensively due to their expressive power.  However, it is re
 
 Namespaces in XPaths
 --------------------
-
 XPath uses `XML names <https://www.w3.org/TR/REC-xml-names/>`_, requiring an *XML namespace context* using the `xmlns` attribute to bind namespaces and prefixes.  An XML namespace
 context can specify both:
 
@@ -68,7 +69,6 @@ then symbol `x` belongs to "urn:example:default" and symbols `y`, `z` and `i` be
 
 Instance-identifier
 -------------------
-
 Instance-id:s are defined in YANG for some minor usage but appears in
 for example NACM and provides a useful subset of XPath. The subset is as follows (see Section 9.13 in `YANG 1.1 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_):
 
@@ -107,7 +107,6 @@ which corresponds to the XPath: `a[i=3][j=4]/c`. Note that you cannot express an
 
 Namespaces in Api-paths
 -----------------------
-
 In contrast to XPath, Api-path namespaces are defined implicitly by a
 YANG context using *module-names* as prefixes.  The namespace is
 defined in the Yang module by the `namespace` keyword. Api-paths must
@@ -132,7 +131,6 @@ where, as above, `x` belongs to "urn:example:default" and `y`, and `z` belong to
 
 XML trees
 =========
-
 XML objects are typed as follows `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_:
 
 * Element: non-terminal node with child nodes
@@ -158,7 +156,6 @@ can have an internal tree representation as follows (``e`` represents XML elemen
 
 Yang binding
 ------------
-
 Typically, XML elements are associated with a YANG data node
 specification(``yang_stmt``). A YANG data node is either a
 container, leaf, leaf-list, list, or anydata.
@@ -198,7 +195,6 @@ Annotating the tree representation with YANG specification, could yield the foll
 
 Sorted tree
 -----------
-
 Once an XML tree is bound to YANG, it can be sorted. 
 
 The tree is sorted using a "multi-layered" approach:
@@ -246,7 +242,6 @@ elements as they are given in the YANG specification (layer
 
 Creating XML
 ============
-
 The creation of and XML tree goes thorough three steps:
 
 1. Syntactic creation. This is done either via parsing or via manual API calls.
@@ -257,7 +252,6 @@ Steps 2 and 3 are optional.
 
 Creating XML from a string
 --------------------------
-
 A simple way to create an cxobj is to parse it from a string:
 ::
 
@@ -316,7 +310,6 @@ The JSON parse API also includes:
   
 Creating XML programmatically
 -----------------------------
-
 You may also manually create a tree by ``xml_new()``, ``xml_new_body()``,
 ``xml_addsub()``, ``xml_merge()`` and other functions. Instead of parsing a string, a
 tree is built manually. This may be more efficient but more work to
@@ -343,7 +336,6 @@ The following example creates the same XML tree as in the above examples using A
 
 Binding YANG to XML
 -------------------
-
 A further step is to ensure that the XML tree complies to a YANG
 specification. This is an optional step since you can handle XML
 without YANG, but often necessary in Clixon, since some functions
@@ -406,7 +398,6 @@ As an example of `YB_PARENT` Yang binding, the ``k1`` subtree is inserted under 
    
 Config data
 -----------
-
 To create a copy of configuration data, a user retrieve a copy from the datastore to get a cxobj handle. This tree is fully bound, sorted and defaults set.
 Read-only operations may then be done on the in-memory tree.
 
@@ -464,7 +455,6 @@ Note that the result tree is sorted and YANG bound as well.
    
 Inserting
 ---------
-
 Inserting a subtree can be made in several ways. The most straightforward is using parsing and the ``YB_PARENT`` YANG binding::
 
        cxobj *xy;
@@ -489,7 +479,6 @@ YANG. Otherwise, the system will order the insertion of the subtree automaticall
        
 Removing
 --------
-
 A subtree can be permanently removed, or just pruned in order to insert it somewhere else.
 and graft subtrees.
 
@@ -510,7 +499,6 @@ tree, or being inserted under another parent.
 
 Copying
 -------
-
 An XML tree ``x0`` can be copied as follows::
 
    cxobj *x1;
@@ -526,7 +514,6 @@ In these cases, the new object ``x1`` can be use as a separate tree for insertio
   
 Searching in XML
 =================
-
 Clixon search indexes are either *implicitly* created from the YANG
 specification, or *explicitly* created using the API.
 
@@ -547,7 +534,6 @@ searches, it is important that you use indexes, either implicit, or explicit.
 
 Auto-generated indexes
 ----------------------
-
 Auto-generated (or implicit) YANG-based search indexes are based on ``list`` and ``leaf-lists``. For
 any list with keys ``k1,...kn``, a set of indexes are created and an optimized search
 can be made using the keys in the order they are defined. 
@@ -627,7 +613,6 @@ In the following cases, implicit indexes are *not* created:
 
 Explicit indexes
 ----------------
-
 In those cases where implicit YANG indexes cannot be used, indexes can
 be explicitly declared for fast access. Clixon uses a YANG extension to declare such indexes: `search_index` as shown in the example above for leaf ``w``::
 
@@ -642,7 +627,6 @@ The corresponding direct API call is: ``yang_list_index_add()``
 
 Direct children
 ---------------
-
 The basic C API for searching direct children of a cxobj is the ``clixon_xml_find_index()`` API.
 
 An example call is as follows:
@@ -690,7 +674,6 @@ and the search was done using *O(logN)*.
      
 Using paths in XML
 ------------------
-
 If deeper searches are needed, i.e., not just to direct children,
 Clixon `paths`_ can be used to make a search request. There
 are three path variants, each with its own pros and cons:
@@ -747,7 +730,6 @@ The corresponding API for XPath is ``xpath_vec()``.
 
 Multiple keys
 -------------
-
 Optimized *O(logN)* lookup works with multiple key YANG `lists` but not
 for explicit indexes. Further, less significant keys can be omitted
 which may result multiple result nodes.
@@ -768,7 +750,6 @@ The following lookups are made with *O(N)*:
 
 Internal representation
 =======================
-
 A cxobj has several components, which are all accessible via the API. For example:
 
 +------------+-----------------------------------------------------------+
@@ -803,7 +784,6 @@ searching.
 
 Character encoding
 ==================
-
 Clixon implements encoding of character data as defined in `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_, Section 2.4.
 
 It can be illustrated by some examples. Assume a data-field "value" of

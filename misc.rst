@@ -1,4 +1,7 @@
 .. _clixon_misc:
+.. sectnum::
+   :start: 18
+   :depth: 3
 
 ****
 Misc
@@ -6,114 +9,11 @@ Misc
 
 These are sections that do not fit into the rest of the document.
 
-CLI
-===
-
-Differences to CLIgen
----------------------
-
-Clixon adds some features and structure to CLIgen which include:
-
-- A plugin framework for both textual CLI specifications(.cli) and object files (.so)
-- Object files contains compiled C functions referenced by callbacks in the CLI specification. For example, in the cli spec command: `a,fn()`, `fn` must exist in the object file as a C function.
-- The CLIgen `treename` syntax does not work.
-- A CLI specification file is enhanced with the CLIgen variables `CLICON_MODE`, `CLICON_PROMPT`, `CLICON_PLUGIN`.
-- Clixon generates a command syntax from the Yang specification that can be referenced as `@datamodel`. This is useful if you do not want to hand-craft CLI syntax for configuration syntax.
-
-Example of `@datamodel` syntax:
-::
-   
-  set    @datamodel, cli_set();
-  merge  @datamodel, cli_merge();
-  create @datamodel, cli_create();
-  show   @datamodel, cli_show_auto("running", "xml");		   
-
-The commands (eg `cli_set`) will be called with the first argument an api-path to the referenced object.
-
-
-How to deal with large specs
-----------------------------
-CLIgen is designed to handle large specifications in runtime, but it may be
-difficult to handle large specifications from a design perspective.
-
-Here are some techniques and hints on how to reduce the complexity of large CLI specs:
-
-Sub-modes
-^^^^^^^^^
-The `CLICON_MODE` is used to specify in which modes the syntax in a specific file should be added. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
-
-First, lets add a basic set in each:
-::
-   
-  CLICON_MODE="configure";
-  show configure;
-
-First, lets add a basic set in each:
-::
-   
-  CLICON_MODE="configure";
-  show configure;
-
-Note that CLI command trees are *merged* so that show commands in other files are shown together. Thus, for example:
-::
-
-  CLICON_MODE="operation:files";
-  show("Show") files("files");
-
-will result in both commands in the operation mode:
-::
-
-  > clixon_cli -m operation 
-  cli> show <TAB>
-    routing      files
-
-but 
-::
-
-  > clixon_cli -m operation 
-  cli> show <TAB>
-    routing      files
-  
-Sub-trees
-^^^^^^^^^
-You can also use sub-trees and the the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes:
-::
-   
-  CLICON_MODE="subtree";
-  subcommand{
-    a, a();
-    b, b();
-  }
-
-then access that subtree from other modes:
-::
-   
-  CLICON_MODE="configure";
-  main @subtree;
-  other @subtree,c();
-
-The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks will be overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` will be invoked.
-  
-C-preprocessor
-^^^^^^^^^^^^^^
-
-You can also add the C preprocessor as a first step. You can then define macros, include files, etc. Here is an example of a Makefile using cpp:
-::
-   
-   C_CPP    = clispec_example1.cpp clispec_example2.cpp
-   C_CLI    = $(C_CPP:.cpp=.cli
-   CLIS     = $(C_CLI)
-   all:     $(CLIS)
-   %.cli : %.cpp
-        $(CPP) -P -x assembler-with-cpp $(INCLUDES) -o $@ $<
-
-
 Error and logs
 ==============
 
 Initialization
 --------------
-
 Clixon core applications typically have a command-line option controlling the logs as follows:
 
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
@@ -132,8 +32,6 @@ where:
 * `upto`: log priority as defined by syslog(3), eg: LOG_DEBUG, LOG_INFO,..
 * `flags`: a bitmask of where logs appear, values are: ``CLICON_LOG_STDERR``, ``_STDOUT``, ``_SYSLOG``, ``_FILE``.
 
-
-  
 Error call
 ----------
 An error is typically called by ``clicon_err()`` and a return value of ``-1`` as follows::
@@ -172,77 +70,9 @@ An application can specialize error handling for a specific category by using `c
 In this example, "Myerror" will appear in the log string.
   
 
-Extensions
-==========
-
-Clixon implements YANG extensions.  There are several uses, but one is
-to "annotate" a YANG specification with application-specific data that can be used
-in plugin code for some reason.
-
-An extension with an argument is introduced in YANG as follows::
-
-   module example-lib {
-      namespace "urn:example:lib";
-      extension mymode {
-         argument annotation;
-      }
-
-Such an extension can then be used in YANG declarations in two ways, either
-*inline* or *augmented*.
-
-An inlined extension is useful in a YANG module that the designer has
-control over and can add extension reference directly in the YANG
-specification.
-
-Assume for example that an interface declaration is extended with the extension declared above, as follows::
-
-   module my-interface {
-     import example-lib{
-       prefix exl;
-     }
-     container "interfaces" {
-       list "interface" {
-         exl:mymode "my-interface";
-         ...
-
-If you instead use an external YANG, where you cannot edit the YANG
-itself, you can use augmentation instead, as follows::
-
-  module my-augments {
-   import example-lib{
-      prefix exl;
-   }
-   import ietf-interfaces{
-      prefix if;
-   }
-   augment "/if:interfaces/if:interface"{
-      exl:mymode "my-interface";
-   }
-   ...
-
-When this is done, it is possible to access the extension value in
-plugin code and use that value to perform application-specific
-actions. For example, assume an XML interface object ``x`` retrieve
-the annotation argument::
-
-     char      *value = NULL;
-     yang_stmt *y = xml_spec(x);
-
-     if (yang_extension_value(y, "mymode", "urn:example:lib", &value) < 0)
-        err;
-     if (value != NULL){
-        // use extension value
-        if (strcmp(value, "my-interface") == 0)
-	   ...
-	 
-A more advanced usage is possible via an extension callback
-(``ca_callback``) which is defined for backend, cli, netconf and
-restconf plugins. This allows for advanced YANG transformations. Please
-consult the main example to see how this could be done.
 
 High availability
 =================
-
 This is a brief note on a potential future feature.
 
 Clixon is mainly a stand-alone app tightly coupled to the application/device with "shared fate", that is, if clixon fails, so does the application.
@@ -259,7 +89,6 @@ Regarding clients:
 
 Process handling
 ================
-
 Clixon has a simple internal process handling currently used for :ref:`internal restconf <clixon_restconf>` but can also be used for user applications.
 The process data structure has a unique name with pids created for "active" processes. There are three states:
 
@@ -281,7 +110,6 @@ stop
 
 State machine
 -------------
-
 The state machine for a process is as follows::   
 
    --> STOPPED --(re)start-->    RUNNING(pid)
@@ -316,7 +144,6 @@ When running, several things may happen:
 
 Event notifications
 ===================
-
 Clixon implements RFC 5277 NETCONF Event Notifications
 
 The main example illustrates an EXAMPLE stream notification that triggers every 5s. First, declare a notification in YANG::
@@ -349,61 +176,4 @@ This can also be triggered via the CLI::
   cli>
 
 Restconf notifications (FCGI only) is also supported, 
-
-Leafrefs
-========
-
-Some notes on `YANG leafref <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ implementation in Clixon, especially as used in `openconfig modules <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01>`_,  which rely heavily on leafrefs.
-
-Typically, a YANG leafref declaration looks something like this::
-
-  container c {  
-    leaf x {
-      type leafref {
-        path "../config/name";   /* "deferring node" */
-        require-instance <bool>; /* determines existing deferred node */
-      }
-    }
-    container config {
-      leaf name {
-        type unit32;             /* "deferred node" */
-      }
-    }
-  }
-
-This YANG example is typical of Openconfig lists defined in the `openconfig modeling <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01#section-8.1.2>`_, where a key leaf references a "config" node further down in the tree.
-
-Other typical uses is where the path is an absolute path, such as eg ``path "/network-instances/network-instance/config/name";``
-  
-Types
------
-
-Consider the YANG example above, the type of ``x`` is the deferred node:s, in this example ``uint32``.
-The validation/commit process, as well as the autocli type system and completion handles accordingly.
-
-For example, if the deferred node is a more complex type such as identityref with options "a, b", the completion of "x" will show the options "a,b".
-
-Require-instance
-----------------
-Assume the yang above have the following two XML trees::
-
-  <c>
-    <x>foo</x>
-  </c>
-
-and::
-
-  <c>
-    <x>foo</x>
-    <config>
-      <name>foo</name>
-    </config>
-  </c>
-  
-The validity of the trees is controlled by the `require-instance property <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ . According to this semantics:
-
- - if require-instance is false (or not present) both trees above are valid,
- - if require-instance is true, theupper tree is invalid and the lower is valid
-
-In most models defined by openconfig and ietf, require-instance is typically false.
 

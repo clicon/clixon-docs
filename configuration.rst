@@ -1,7 +1,11 @@
 .. _clixon_configuration:
+.. sectnum::
+   :start: 5
+   :depth: 3
 
+*************
 Configuration
-=============
+*************
 
 Clixon configuration files are encoded in XML and modeled by YANG. By
 default, the main config file is installed as ``/usr/local/etc/clixon.xml``, but can be changed by the ``-f <file>`` command-line option.
@@ -16,8 +20,7 @@ processes. You can however have different configuration files for different clie
 Please consult the `clixon-config YANG spec <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config@2021-11-11.yang>`_ directly if you want detailed description of config options.
 
 Example
--------
-
+=======
 The following is the configuration file of a simple example::
    
    <clixon-config xmlns="http://clicon.org/config">
@@ -42,11 +45,10 @@ The option ``CLICON_CONFIGFILE`` is special, it must be available before
 the configuration file is found (see `Loading the configuration`_),
 which means that the value in the file is a no-op.
 
-The ``restconf`` clause defines RESTCONF configuration options as described in the :ref:`clixon_restconf` section.
+The ``restconf`` clause defines RESTCONF configuration options as described in the :ref:`restconf section <clixon_restconf>` section.
 
 Loading the configuration
--------------------------
-
+=========================
 Clixon finds its configuration files, according to the following method:
 
   1. Start a clixon program with the ``-f <FILE>`` option. For example::
@@ -73,8 +75,7 @@ The following options control the Clixon configuration:
    
 
 Runtime modification
---------------------
-
+====================
 You can modify clixon options at runtime by using the ``-o`` option to
 modify the configuration specified in the configuration file. For
 example, add ``usr/local/share/ietf`` to the list of directories where yang files are searched for::
@@ -82,7 +83,7 @@ example, add ``usr/local/share/ietf`` to the list of directories where yang file
   clixon_cli -o CLICON_YANG_DIR=/usr/local/share/ietf
 
 Features
---------
+========
 ``CLICON_FEATURE`` is a list of values, describing how Clixon supports features.
 
 A value is specified as one of the following:
@@ -108,7 +109,7 @@ Clixon have three hardcoded features:
 
 
 Finding YANG files
-------------------
+==================
 The example have two options for finding Yang files::
    
      <CLICON_YANG_DIR>/usr/local/share/clixon</CLICON_YANG_DIR>
@@ -148,3 +149,13 @@ containing the same Yang module. Clixon will prefer the one without a
 revision date if such a file exists. If no file has a revision date,
 Clixon will prefer the newest.
 
+Standard YANG files
+===================
+The main examples and tests require IETF RFC standard YANGs. If you
+want to run the main example or run tests, you need to make them locally
+available by checking out ``https://github.com/YangModels/yang`` which has subdir ``standard``.
+You can change this location by::
+
+    ./configure --with-yang-standard-dir=DIR
+
+Note that you do not need this for the clixon runtime.

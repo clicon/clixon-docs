@@ -1,16 +1,26 @@
 .. _clixon_install:
+.. sectnum::
+   :start: 2
+   :depth: 3
 
+************
 Installation
-============
+************
 
 Ubuntu Linux
-------------
-This section can be used for many other Linux distributions.
+============
+
+This section describes how to build Clixon from source on Ubuntu
+Linux. You can use this as a base for other platforms as well since
+many steps (such as prereqs) are similar.
+
+Further, the `vagrant`_ scripts show how to build for some other Linux variants, such as Centos.
 
 Prerequisites
-^^^^^^^^^^^^^
+-------------
+
 General prerequisites
-"""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^
 Install packages::
 
   sudo apt-get install flex bison
@@ -32,29 +42,28 @@ Add a clixon user and group, using useradd and usermod::
 If you do not require RESTCONF, then continue with `Build clixon from source`_.
 
 RESTCONF HTTP Support
-"""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^
 The RESTCONF implementation supports two HTTP configurations:
 
   #. `Clixon native HTTP server`_
   #. `FastCGI for reverse proxy`_
 
-
 Clixon native HTTP server
-"""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^
 Native http server requires libevent, openssl 1.1 and libevhtp
 
 Install libevent and TLS::
 
   sudo apt-get install libevent-dev libssl-dev
 
-The Libevhtp install is slightly modified for Clixon and needs to be built from source: `build libevhtp from source`_.
+The Libevhtp install is slightly modified for Clixon and needs to be built from source: `libevhtp`_.
 
 Thereafter configure using default options::
 
     configure
 
 FastCGI for reverse proxy
-"""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^
 FastCGI requires  support for Nginx or similar reverse HTTP proxy::
 
   sudo apt-get install nginx libfcgi-dev
@@ -63,13 +72,12 @@ Then, when building clixon from source (see below), configure clixon with::
 
   configure --with-restconf=fcgi
 
-Note that the libfcgi-dev package might not exist in Ubuntu 18 bionic or later, in which case need to `build fcgi from source`_.
+Note that the libfcgi-dev package might not exist in Ubuntu 18 bionic or later, in which case need to build `fcgi`_ from source.
 
 Note also that the 'fcgi' installation package might have a different name on other Linux distributions, such as "fcgi-dev" (alpine), "fcgi" (arch), "fcgi-devkit" (freebsd).
 
-  
-Build clixon from source
-^^^^^^^^^^^^^^^^^^^^^^^^
+Build Clixon from source
+------------------------
 Download clixon source code::
 
   git clone https://github.com/clicon/clixon.git
@@ -87,10 +95,10 @@ Build and install::
    
   make                      # Compile
   sudo make install         # Install libs, binaries, config-files and include-files
-  sudo ldconfig             # To link new synamic libraries
+  sudo ldconfig             # To link new dynamic libraries
 
-Building the example app and utils for running the tests
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Building the example and utils
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To build and install the example app, from the top level clixon directory::
 
   make example
@@ -104,10 +112,11 @@ To build the utils for running the tests, from the top level clixon directory::
   make
   sudo make install
 
-See also the :ref:`clixon_quickstart` section for building a complete *hello world* example.
+See also the :ref:`Quickstart section<clixon_quickstart>` section for building a complete *hello world* example.
+
   
 FreeBSD
--------
+=======
 
 FreeBSD has ports for both cligen and clixon available.
 You can install them as binary packages, or you can build
@@ -123,7 +132,7 @@ www is used, and the restconf daemon is placed in
 /usr/local/sbin.
 
 Binary package install
-^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 To install the pre-built binary package, use the FreeBSD pkg command:
 ::
    
@@ -132,8 +141,7 @@ To install the pre-built binary package, use the FreeBSD pkg command:
 This will install clixon and all the dependencies needed.
 
 Build from source on FreeBSD
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+----------------------------
 If you prefer you can also build clixon from the
 `FreeBSD ports collection <https://www.freebsd.org/doc/handbook/ports-using.html>`_
 
@@ -151,14 +159,14 @@ for the port tries to assure that the master branch will
 compile always, but no FreeBSD specific functional testing
 is done.
 
-Systemd
--------
 
+Systemd
+=======
 Once installed, Clixon can be setup using systemd. The following shows an example with the backend and restconf daemons from the main example.
 Install them as /etc/systemd/system/example.service and /etc/systemd/system/example_restconf.service, for example.
 
 Systemd backend
-^^^^^^^^^^^^^^^
+---------------
 The backend service is installed at /etc/systemd/system/example.service, for example. Note that in this example, the backend installation requires the restconf service, which is not necessary.
 ::
 
@@ -176,7 +184,7 @@ The backend service is installed at /etc/systemd/system/example.service, for exa
 
 
 Systemd restconf
-^^^^^^^^^^^^^^^^
+----------------
 The Restconf service is installed at /etc/systemd/system/example_restconf.service, for example::
    
    [Unit]
@@ -191,10 +199,10 @@ The Restconf service is installed at /etc/systemd/system/example_restconf.servic
    [Install]
    WantedBy=multi-user.target
 
-The restconf daemon can also be started using the clixon-lib process-control RPC. For more info, see :ref:`clixon_restconf`.
+The restconf daemon can also be started using the clixon-lib process-control RPC. For more info, see :ref:`Restconf section<clixon_restconf>`.
 
 Docker
-------
+======
 Clixon can run in a docker container.  As an example the `docker` directory has boilerplate code for building Clixon in a container::
 
   cd docker/base
@@ -208,8 +216,7 @@ For complete examples see:
 
    
 Vagrant
--------
-
+=======
 Clixon uses vagrant in testing. For example to start a Freebsd vagrant host, install Clixon and run the test suite, do  ::
 
   cd test/vagrant
@@ -218,13 +225,15 @@ Clixon uses vagrant in testing. For example to start a Freebsd vagrant host, ins
 Other platforms include: ubuntu/bionic64 and generic/centos8. To look at how Clixon is installed natively on those platforms please look in the build scripts under test/vagrant/.
 
 OpenWRT
--------
-
+=======
 See `Clixon cross-compiler for Openwrt <https://github.com/clicon/clixon-openwrt>`_
 
 
-Build libevhtp from source
---------------------------
+Prereqs from source
+===================
+
+Libevhtp
+--------
 For RESTCONF using native http build evhtp from source as follows::
 
   sudo git clone https://github.com/clicon/clixon-libevhtp.git
@@ -238,8 +247,8 @@ Note that evhtp requires openssl 1.1 API.
 Note that you will likely need to add ``/usr/local/lib/libevhtp`` to your ``ld.so.conf`` configuration
 
 
-Build fcgi from source
-----------------------
+FCGI
+----
 For RESTCONF using fcgi build fcgi from source as follows::
 
   git clone https://github.com/FastCGI-Archives/fcgi2
@@ -249,10 +258,8 @@ For RESTCONF using fcgi build fcgi from source as follows::
   make
   sudo make install
 
-
 SSH subsystem
--------------
-
+=============
 You can expose ``clixon_netconf`` as an SSH subsystem according to `RFC 6242`. Register the subsystem in ``/etc/sshd_config``::
 
 	Subsystem netconf /usr/local/bin/clixon_netconf
@@ -261,10 +268,8 @@ and then invoke it from a client using::
 
 	ssh -s <host> netconf
 
-
 Configure options
------------------
-
+=================
 The Clixon `configure` script (generated by autoconf) includes several options apart from the standard ones.
 
 These include (standard options are omitted)
