@@ -8,7 +8,7 @@ CLI
 ***
 
 .. image:: cli1.jpg
-   :width: 100%
+   :width: 80%
 
 Overview
 ========
@@ -558,8 +558,8 @@ The autocli-op extension has semantics for the following values:
 * ``hide-database`` - Do not show the config in eg show commands.
 * ``hide-database-auto-completion`` - Combine the two alternatives above
 
-Upgrade from Clixon 5.4
------------------------
+Upgrade from pre Clixon 5.5
+---------------------------
 The new autocli configuration described here was introduced in Clixon
 5.5. In previous versions, the autocli was configured using
 regular config options.
