@@ -271,11 +271,11 @@ Overview
 --------
 Consider a (simplified) YANG specification, such as::
 
-  module mod {
-    container x{
-      list y{
-        key k;
-        leaf k{
+  module example {
+    container table {
+      list parameter{
+        key name;
+        leaf name{
           type string;
         }
       }
@@ -284,8 +284,8 @@ Consider a (simplified) YANG specification, such as::
 
 An example of a generated syntax is as follows (again simplified)::
 
-   x; {
-      y <k:string>;
+   table; {
+      parameter <name:string>;
    }
 
 The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`` into the Clixon CLI as follows::
@@ -300,21 +300,21 @@ The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`
 
 For example, the `set` part is expanded using the CLIgen tree-operator to something like::
 
-  set x, cli_auto_set(); {
-        y <k:string>, cli_auto_set();
+  set table, cli_auto_set(); {
+        parameter <name:string>, cli_auto_set();
   }
   
 An example run of the above example is as follows::
 
   > clixon_cli
-  cli> set x ?
+  cli> set table ?
     <cr>
-    y                    
-  cli> set x y 23
+    parameter         
+  cli> set table parameter 23
   cli> show config
-  x {
-     y {
-        k 23;
+  table {
+     parameter {
+        name 23;
      }
   }
   cli>
@@ -470,7 +470,6 @@ Specific fields for compress are:
    Extension prefix must be set.
    Example: ``oc-ext:openconfig-version``
 
-
 Tree expansion
 --------------
 In the example above, the tree-reference ``@datamodel`` is used to
@@ -519,21 +518,15 @@ Clixon provides a dedicated YANG extension for the autocli for this purpose: ``c
 
 The following example shows the main example usage of the "hide" extension of the "hidden" leaf::
 
-   import clixon-lib{
-      prefix cl;
+   import clixon-autocli{
+      prefix autocli;
    }
    container table{
       list parameter{
-	 key name;
-	 leaf name{
-	    type string;
-	 }
-         leaf value{
-            type string;
-	 }
+         ...
          leaf hidden{
             type string;
-            cl:autocli-op hide;
+            autocli:hide;
          }
       }
    }
@@ -544,7 +537,7 @@ The CLI ``hidden`` command is not shown but the command still exists::
   value
   <cr>
   cli /> set table parameter a hidden 99
-  cli /> olof@alarik /> show configuration 
+  cli /> show configuration 
   table {
     parameter {
         name a;
@@ -552,20 +545,55 @@ The CLI ``hidden`` command is not shown but the command still exists::
     }
   }
    
-The autocli-op extension has semantics for the following values:
+The following autocli extensions are defined:
 
-* ``hide`` - Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but can be used for the autocli as well.
-* ``hide-database`` - Do not show the config in eg show commands.
-* ``hide-database-auto-completion`` - Combine the two alternatives above
+``hide``
+   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node. Also, do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
 
+Edit modes
+----------
+The autocli supports *automatic edit modes* where by entering a ``CR``, you enter an edit mode. An edit mode is created for every YANG container or list.
+
+For example, the example YANG previously given and the following cli-spec::
+
+   edit @datamodelshow, cli_auto_edit("basemodel");
+   up, cli_auto_up("basemodel");
+   top, cli_auto_top("basemodel");
+   set @datamodel, cli_auto_set();
+
+Then an example session for illustration is as follows, where first a small config is created, then a list instance mode is entered(``parameter a``), a value changed, and a container mode (``table``)::
+
+  cli /> set table parameter a value 42
+  cli /> set table parameter b value 77
+  cli /> edit table parameter a
+  cli /clixon-example:table/parameter=a/> 
+  cli /clixon-example:table/parameter=a/> show configuration
+    name a;
+    value 42;
+  cli /clixon-example:table/parameter=a/> set value 99
+  cli /clixon-example:table/parameter=a/> up
+  cli /clixon-example:table> show configuration 
+    parameter {
+      name a;
+      value 99;
+    }
+  parameter {
+      name b;
+      value 77;
+  }
+  cli /clixon-example:table> top
+  cli /> 
+   
 Upgrade from pre Clixon 5.5
 ---------------------------
 The new autocli configuration described here was introduced in Clixon
 5.5. In previous versions, the autocli was configured using
 regular config options.
 
-Note extensions and tree references are backward compatible and need not be modified.
+Note, tree references are backward compatible and need not be modified.
 
+Config file
+^^^^^^^^^^^
 Instructions to upgrade from pre-5.5 to the new configuration model:
 
 CLICON_CLI_GENMODEL
@@ -589,6 +617,13 @@ CLICON_CLI_GENMODEL_TYPE
 CLICON_CLI_GENMODEL_COMPLETION
     Use ``<autocli><completion-default>x<...>`` instead, where ``x`` is true or false.
 
+Extenstions
+^^^^^^^^^^^
+
+The hide extensions from `clixon-lib` are moved to new extensions in `clixon-autocli` as follows:
+
+hide, hide-database, hide-database-auto-completion
+  Use ``hide`` in autocli instead. The semantics is same as ``hide-database-auto-completion``
 
 Advanced
 ========
