@@ -548,8 +548,10 @@ The CLI ``hidden`` command is not shown but the command still exists::
 The following autocli extensions are defined:
 
 ``hide``
-   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node. Also, do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
-
+   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node. 
+``hide-show``
+   Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
+   
 Edit modes
 ----------
 The autocli supports *automatic edit modes* where by entering a ``CR``, you enter an edit mode. An edit mode is created for every YANG container or list.
@@ -617,13 +619,17 @@ CLICON_CLI_GENMODEL_TYPE
 CLICON_CLI_GENMODEL_COMPLETION
     Use ``<autocli><completion-default>x<...>`` instead, where ``x`` is true or false.
 
-Extenstions
-^^^^^^^^^^^
-
+Extensions
+^^^^^^^^^^
 The hide extensions from `clixon-lib` are moved to new extensions in `clixon-autocli` as follows:
 
-hide, hide-database, hide-database-auto-completion
-  Use ``hide`` in autocli instead. The semantics is same as ``hide-database-auto-completion``
+hide
+  Use ``hide`` in autocli instead. 
+hide-database
+  Use ``hide-show`` in autocli instead.
+hide-database-auto-completion
+  Use both ``hide`` and ``hide-show`` in autocli instead.
+  
 
 Advanced
 ========
