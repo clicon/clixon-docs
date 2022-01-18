@@ -371,6 +371,17 @@ The following options set default values to the auto-cli, some of these may be f
    - `kw-nokey` : Keywords on non-key variables: ``a <x> y <y>``. This is default.
    - `kw-all` : Keywords on all variables: ``a x <x> y <y>``
 
+`edit-mode-default`
+   Open automatic edit-modes for some YANG keywords and do not allow others.
+    A CLI edit mode opens a carriage-return option and changes the context to be 
+    in that local context.
+    For example::
+
+      cli> interfaces interface e0<cr>
+      eth0> 
+
+   Default is to generate edit-modes for all containers and lists.";
+   
 `treeref-state-default`
    If `true`, generate CLI from YANG state/non-config statements, not only from config data. 
    The motivation for this option is that many specs have very large state parts. In particular, some openconfig YANG specifications have  ca 10 times larger state than config parts.
@@ -483,31 +494,11 @@ defined:
 * ``@basemodel`` - The most basic tree including everything
 * ``@datamodel`` - The most common tree for configuration with state
 * ``@datamodelshow`` - A tree made for showing configuration syntax
+* ``@datamodelmode`` - A tree for editing modes
 * ``@datamodelstate`` - A tree for showing state as well as configuration
 
 Note to use ``@datamodelstate`` config option ``treeref-state-default`` must be set.
   
-Labels
-^^^^^^
-The tree variants are implemented using filtering of CLIgen
-labels. While ``@basemodel`` includes all labels, the other trees have
-removed some labels.
-
-For most uses, the pre-defined trees above are enough, using explicit label filtering is more powerful.
-
-The currently defined labels are:
-
-* ``termfirstkeys`` : terminal entries of LIST keys, except the last keys in multi-key cases.
-* ``termlist`` : Terminal entries of YANG LIST nodes.
-* ``terminal`` : Terminal entries of non-empty YANG LEAF/LEAF_LISTs nodes.
-* ``leafvar``  : Children of non-key LEAF nodes.
-* ``nonconfig`` : State nodes which have YANG ``config false`` as child
-
-As an example, the ``@datamodel`` tree is ``basemodel`` with labels removed as follows::
-
-   @basemodel, @remove:termfirstkeys, @remove:termlist, @remove:termleaf, @remove:nonconfig;
-
-which is an alternative way of specifying the datamodel tree.   
   
 YANG Extensions
 ---------------
@@ -629,7 +620,6 @@ hide-database
   Use ``hide-show`` in autocli instead.
 hide-database-auto-completion
   Use both ``hide`` and ``hide-show`` in autocli instead.
-  
 
 Advanced
 ========
@@ -652,7 +642,6 @@ then access that subtree from other modes::
   other @subtree,c();
 
 The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks are overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` is invoked.
-
 
 Translators
 -----------
@@ -679,6 +668,33 @@ If you run this example using the `cli_incstr()` function which increments the c
   }
 
 The example is very simple and based on strings, but can be used also for other types and more advanced functions.
+
+Autocli tree labels
+-------------------
+The autocli trees described in `tree expansion`_ are implemented using filtering of CLIgen
+labels. While ``@basemodel`` includes all labels, the other trees have
+removed some labels.
+
+For most uses, the pre-defined trees above are enough, using explicit label filtering is more powerful.
+
+The currently defined labels are:
+
+* ``act-list``      : Terminal entries of YANG LIST nodes.
+* ``act-container`` : Terminal entries of YANG CONTAINER nodes.
+* ``ac-leaf``       : Leaf/leaf-list nodes
+* ``act-prekey``    : Terminal entries of LIST leaf keys, except the last keys in multi-key cases.
+* ``act-lastkey``   : Terminal entries of LIST leaf keys, except the last keys in multi-key cases.
+* ``act-leafconst`` : Terminal entries of non-empty non-key YANG LEAF/LEAF_LISTs command nodes.
+* ``act-leafvar``   : Terminal entries of non-key YANG LEAF/LEAF_LISTs variable nodes.
+* ``ac-state``      : Nodes which have YANG ``config false`` as child
+* ``ac-config``     : Nodes nodes which do not have any state nodes as siblings
+
+As an example, the ``@datamodel`` tree is ``basemodel`` with labels removed as follows::
+
+   @basemodel, @remove:act-prekey, @remove:act-list, @remove:act-leaf, @remove:ac-state;
+
+which is an alternative way of specifying the datamodel tree.   
+
 
 Extensions to CLIgen
 --------------------
