@@ -57,15 +57,15 @@ designer must write a new callback function.
 Example usage
 -------------
 The following example shows an auto-cli session from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_ how to add an interface in candidate, validate and commit it to running, then look at it as xml and cli and finally delete it::
-   
+
    clixon_cli -f /usr/local/etc/example.xml 
-   cli> set interfaces interface eth9 ?
+   user@host> set interfaces interface eth9 ?
      description               enabled                   ipv4                     
      ipv6                      link-up-down-trap-enable  type                     
-   cli> set interfaces interface eth9 type ex:eth
-   cli> validate 
-   cli> commit 
-   cli> show configuration xml 
+   user@host> set interfaces interface eth9 type ex:eth
+   user@host> validate 
+   user@host> commit 
+   user@host> show configuration xml 
    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
      <interface>
        <name>eth9</name>
@@ -73,11 +73,11 @@ The following example shows an auto-cli session from the `main example <https://
        <enabled>true</enabled>
      </interface>
    </interfaces>
-   cli> show configuration cli
+   user@host> show configuration cli
    set interfaces interface eth9 
    set interfaces interface eth9 type ex:eth
    set interfaces interface eth9 enabled true
-   cli> delete interfaces interface eth9
+   user@host> delete interfaces interface eth9
 
 Command-line options
 --------------------
@@ -155,7 +155,7 @@ Help strings
 ------------
 Help strings are specified using the following example syntax: ``("help string")``. help strings are shown at queries, eg "?"::
 
-    cli> show <?>
+    user@host> show <?>
        all       Show all
        routing   Show routing
        files     Show files
@@ -201,13 +201,13 @@ Finally, add a command to all modes::
 Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes are the three commands in total for the *configure* mode::
 
   > clixon_cli -m configure
-  cli> show <TAB>
+  user@host> show <TAB>
     all     routing      files
 
 but only two commands  in the *operation* mode::
 
   > clixon_cli -m operation 
-  cli> show <TAB>
+  user@host> show <TAB>
     all      files
 
 Cli-spec variables
@@ -218,7 +218,7 @@ CLICON_MODE
   A colon-separated list of CLIgen `modes`. The CLI spec in the file are added to *all* modes specified in the list. You can also use wildcards ``*`` and '`?``.
 
 CLICON_PROMPT
-  A string describing the CLI prompt using a very simple format with: ``%H`` (host) , ``%U`` (user) , ``%T`` (tty),  ``%W`` (working path).
+  A string describing the CLI prompt using a very simple format with: ``%H`` (host) , ``%U`` (user) , ``%T`` (tty),  ``%W`` (last element of working path), ``%w`` (full working path).
 
 CLICON_PLUGIN
   The name of the object file containing callbacks in this file.
@@ -240,7 +240,7 @@ In C, the callback has the following signature::
 
 Suppose a user enters the following command in the CLI::
 
-  cli> example 23
+  user@host> example 23
 
 The callback is called with the following parameters::
 
@@ -261,7 +261,7 @@ parsed and merged into the top-level Clixon CLI.
 
 The autocli is configured using three basic mechanisms:
 
-1. `Config file`_: Modify behavior of the generated tree
+1. `Config file`_ : Modify behavior of the generated tree
 2. `Tree expansion`_: How the generated cli is merged into the overall CLI
 3. `YANG Extensions`_: Modify CLI behavior via YANG
 
@@ -307,22 +307,20 @@ For example, the `set` part is expanded using the CLIgen tree-operator to someth
 An example run of the above example is as follows::
 
   > clixon_cli
-  cli> set table ?
+  user@host /> set table ?
     <cr>
     parameter         
-  cli> set table parameter 23
-  cli> show config
+  user@host /> set table parameter 23
+  user@host /> show config
   table {
      parameter {
         name 23;
      }
   }
-  cli>
+  user@host />
 
 where the generated autocli extends the Clixon CLI with YANG-derived configuration statements.
 
-Each one is described in detail in the following sub-sections.
-   
 Config file
 -----------
 The clixon config file has a ``<autocli>`` sub-clause for global
@@ -334,29 +332,27 @@ with default autocli settings is as follows::
     ...
     <autocli>
       <module-default>true</module-default>
-      <completion-default>true</completion-default>
       <list-keyword-default>kw-nokey</list-keyword-default>
       <treeref-state-default>false</treeref-state-default>
+      <edit-mode-default>list container</edit-mode-default>
+      <completion-default>true</completion-default>
     </autocli>
   </clixon-config>
 
-The autocli configuration options are defined by the
-``clixon-autocli`` YANG file. It consists of a set of default *options*, followed by a set of *rules*.
+The autocli configuration consists of a set of default *options*, followed by a set of *rules*. For more info see the ``clixon-autocli.yang`` specification.
 
 Options
 ^^^^^^^
 The following options set default values to the auto-cli, some of these may be further refined by successive rules.
 
 `module-default`
-   Include YANG modules for generation of autocli.
-   If `true`, all modules with a top-level datanode are generated, ie
-   they get a top-level entry in the ``@basemodel`` tree.
-   If `false`, you need to explicitly enable modules for autocli generation
-   using `module enable rules`_.
-   Default is `true`.
+   How to generate the autocli from modules:
+
+   - If `true`, all modules with a top-level datanode are generated, ie they get a top-level entry in the ``@basemodel`` tree. This is default
+   - If `false`, you need to explicitly enable modules for autocli generation  using `module enable rules`_.
 
 `list-keyword-default`
-   This option defines how the autocli is generated for YANG lists. 
+   How to generate the autocli from YANG lists. 
    There are several variants defined. To understand the different variants, consider a simple YANG LIST defintion as follows::
 
       list a {
@@ -365,28 +361,29 @@ The following options set default values to the auto-cli, some of these may be f
 	 leaf y;
       }
 
-   The different variants with the resulting generated cli are as follows:
+   The different variants with the resulting autocli are as follows:
    
    - `kw-none` : No extra keywords, only variables: ``a <x> <y>``
    - `kw-nokey` : Keywords on non-key variables: ``a <x> y <y>``. This is default.
    - `kw-all` : Keywords on all variables: ``a x <x> y <y>``
 
+`treeref-state-default`
+   If generate autocli from YANG *state* data. The motivation for this option is that many specs have very large state parts. In particular, some openconfig YANG specifications have  ca 10 times larger state than config parts.
+
+   - If `true`, generate CLI from YANG state/non-config statements, not only from config data. 
+   - If `false` do not generate autocli commands from YANG state data. This is default.
+
 `edit-mode-default`
    Open automatic edit-modes for some YANG keywords and do not allow others.
-    A CLI edit mode opens a carriage-return option and changes the context to be 
-    in that local context.
-    For example::
+   A CLI edit mode opens a carriage-return option and changes the context to be 
+   in that local context.
+   For example::
 
-      cli> interfaces interface e0<cr>
+      user@host> interfaces interface e0<cr>
       eth0> 
 
-   Default is to generate edit-modes for all containers and lists.";
+   Default is to generate edit-modes for all YANG containers and lists. For more info see `edit modes`_
    
-`treeref-state-default`
-   If `true`, generate CLI from YANG state/non-config statements, not only from config data. 
-   The motivation for this option is that many specs have very large state parts. In particular, some openconfig YANG specifications have  ca 10 times larger state than config parts.
-   Default is `false`.
-
 `completion-default`
    Generate code for CLI completion of existing db symbols. 
    That is, check existing configure database for completion options.
@@ -394,7 +391,7 @@ The following options set default values to the auto-cli, some of these may be f
    
 Rules
 ^^^^^
-You can define a set of rules to further define the autocli. 
+To complement options, a set of rules to further define the autocli can be defined. 
 Common rule fields are:
 
 `name`
@@ -545,37 +542,37 @@ The following autocli extensions are defined:
    
 Edit modes
 ----------
-The autocli supports *automatic edit modes* where by entering a ``CR``, you enter an edit mode. An edit mode is created for every YANG container or list.
+The autocli supports *automatic edit modes* where by entering a ``<cr>``, you enter an edit mode. An edit mode is created for every YANG container or list.
 
 For example, the example YANG previously given and the following cli-spec::
 
-   edit @datamodelshow, cli_auto_edit("basemodel");
+   edit @datamodelmode, cli_auto_edit("basemodel");
    up, cli_auto_up("basemodel");
    top, cli_auto_top("basemodel");
    set @datamodel, cli_auto_set();
 
 Then an example session for illustration is as follows, where first a small config is created, then a list instance mode is entered(``parameter a``), a value changed, and a container mode (``table``)::
 
-  cli /> set table parameter a value 42
-  cli /> set table parameter b value 77
-  cli /> edit table parameter a
-  cli /clixon-example:table/parameter=a/> 
-  cli /clixon-example:table/parameter=a/> show configuration
+  user@host /> set table parameter a value 42
+  user@host /> set table parameter b value 77
+  user@host /> edit table parameter a
+  user@host parameter=a/> 
+  user@host parameter=a/> show configuration
     name a;
     value 42;
-  cli /clixon-example:table/parameter=a/> set value 99
-  cli /clixon-example:table/parameter=a/> up
-  cli /clixon-example:table> show configuration 
-    parameter {
+  user@host parameter=a/> set value 99
+  user@host parameter=a/> up
+  user@host table> show configuration 
+  parameter {
       name a;
       value 99;
-    }
+  }
   parameter {
       name b;
       value 77;
   }
-  cli /clixon-example:table> top
-  cli /> 
+  user@host table> top
+  user@host /> 
    
 Upgrade from pre Clixon 5.5
 ---------------------------
@@ -585,8 +582,8 @@ regular config options.
 
 Note, tree references are backward compatible and need not be modified.
 
-Config file
-^^^^^^^^^^^
+Config file upgrade
+^^^^^^^^^^^^^^^^^^^
 Instructions to upgrade from pre-5.5 to the new configuration model:
 
 CLICON_CLI_GENMODEL
@@ -658,8 +655,8 @@ The following example is based on the main Clixon example and is included in the
 
 If you run this example using the `cli_incstr()` function which increments the characters in the input, you get this result::
 
-  cli> translate HAL
-  cli> show configuration
+  user@host> translate HAL
+  user@host> show configuration
   table {
      parameter {
         name translate;
@@ -688,6 +685,8 @@ The currently defined labels are:
 * ``act-leafvar``   : Terminal entries of non-key YANG LEAF/LEAF_LISTs variable nodes.
 * ``ac-state``      : Nodes which have YANG ``config false`` as child
 * ``ac-config``     : Nodes nodes which do not have any state nodes as siblings
+
+Labels with prefix ``act_`` are *terminal* labels in the sense that they mark a terminal command, ie the node itself; while labels with ``ac_`` represent the non-terminal, ie the whole sub-tree.
 
 As an example, the ``@datamodel`` tree is ``basemodel`` with labels removed as follows::
 
@@ -767,14 +766,14 @@ will result in both commands in the operation mode:
 ::
 
   > clixon_cli -m operation 
-  cli> show <TAB>
+  user@host> show <TAB>
     routing      files
 
 but 
 ::
 
   > clixon_cli -m operation 
-  cli> show <TAB>
+  user@host> show <TAB>
     routing      files
   
 Sub-trees
