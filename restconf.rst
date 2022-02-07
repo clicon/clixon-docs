@@ -131,7 +131,6 @@ The restconf config can also be defined locally within the clixon config file, s
   <restconf>
       <enable>true</enable>
       <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
-      <auth-type>none</auth-type>
    </restconf>
 
 Datastore
@@ -146,7 +145,6 @@ And the detailed restconf is defined in the regular running datastore by adding 
    <restconf xmlns="http://clicon.org/restconf">
       <enable>true</enable>
       <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
-      <auth-type>none</auth-type>
    </restconf>
    
 In the latter case, the restconf daemon reads its config from the running datastore on startup. 
@@ -409,11 +407,12 @@ FCGI
 ====
 This section describes the RESTCONF FCGI mode using NGINX.
 
-You need to configure three things:
+You need to configure the following:
 
-  1. Restconf config in the Clixon config file
-  2. Reverse proxy configuration
-  3. Start the restconf daemon (see `starting`_)
+  1. Configure clixon with ``--with-restconf=fcgi``
+  2. Restconf config in the Clixon config file
+  3. Reverse proxy configuration
+  4. Start the restconf daemon (see `starting`_)
 
 Restconf config
 ---------------
@@ -426,7 +425,6 @@ The restconf daemon can be started in several ways as described in Section `auth
       <restconf>
          <enable>true</enable>
          <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
-         <auth-type>none</auth-type>
       </restconf>
    </clixon-config>
 
