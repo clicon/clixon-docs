@@ -64,7 +64,7 @@ state data only.
    
 Pagination protocol
 ===================
-In a RESTCONF a pagination request looks as follows::
+In RESTCONF a pagination request looks as follows::
    
    GET /localhost/restconf/data/example-social:members/uint8-numbers?offset=20&limit=10 HTTP/1.1
    Host: example.com

@@ -694,7 +694,6 @@ As an example, the ``@datamodel`` tree is ``basemodel`` with labels removed as f
 
 which is an alternative way of specifying the datamodel tree.   
 
-
 Extensions to CLIgen
 --------------------
 Clixon adds some features and structure to CLIgen which include:
@@ -750,10 +749,11 @@ First, lets add a basic set in each:
   CLICON_MODE="configure";
   show configure;
 
-First, lets add a basic set in each:
+and
+
 ::
    
-  CLICON_MODE="configure";
+  CLICON_MODE="operation";
   show configure;
 
 Note that CLI command trees are *merged* so that show commands in other files are shown together. Thus, for example:
@@ -767,14 +767,14 @@ will result in both commands in the operation mode:
 
   > clixon_cli -m operation 
   user@host> show <TAB>
-    routing      files
+    configure      files
 
 but 
 ::
 
-  > clixon_cli -m operation 
+  > clixon_cli -m configure
   user@host> show <TAB>
-    routing      files
+    configure
   
 Sub-trees
 ^^^^^^^^^

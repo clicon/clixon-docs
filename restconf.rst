@@ -24,7 +24,7 @@ Clixon backend.  It comes in two variants, as shown in the figure above:
   2. A reverse proxy (such as NGINX) and FastCGI where web and restconf function is separated. NGINX is used to make all HTTP configuration.
 
 The restconf daemon communicates with the backend using
-internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``CLICON_RESTCONF_PATH``.
+internal netconf over the ``CLIXON_SOCK``. If FCGI is used, there is also a FCGI socket specified by ``fcgi-socket`` in ``clixon-config/restconf``.
 
 The restconf daemon reads its initial config options from the configuration file on startup. The native http variant can read config options from the backend as an alternative to reading everything from clixon options.
 
@@ -34,7 +34,6 @@ Note that there is some complexity in the configuration of the
 different variants of native Clixon restconf involving HTTP/1 vs
 HTTP/2, TLS vs plain HTTP, client cert vs basic authentication and
 external vs internal daemon start.
-
 
 Installation
 ============
@@ -129,13 +128,11 @@ The restconf config can also be defined locally within the clixon config file, s
 
   <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
   <CLICON_BACKEND_RESTCONF_PROCESS>false/CLICON_BACKEND_RESTCONF_PROCESS>
-  <clixon-config xmlns="http://clicon.org/config">
-     <restconf>
-        <enable>true</enable>
-	<fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
-     </restconf>
-   </clixon-config>
-
+  <restconf>
+      <enable>true</enable>
+      <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
+      <auth-type>none</auth-type>
+   </restconf>
 
 Datastore
 ---------
@@ -149,6 +146,7 @@ And the detailed restconf is defined in the regular running datastore by adding 
    <restconf xmlns="http://clicon.org/restconf">
       <enable>true</enable>
       <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
+      <auth-type>none</auth-type>
    </restconf>
    
 In the latter case, the restconf daemon reads its config from the running datastore on startup. 
@@ -190,6 +188,8 @@ Applies if clixon is configured with ``--with-restconf=fcgi``. Fcgi-specific con
 fcgi-socket
    Path to FCGI unix socket. This path should be the same as specific in fcgi reverse proxy
 
+Need also fcgi feature enabled: `features`_
+   
 Native mode
 -----------
 Applies if clixon is configured with ``--with-restconf=native``. 
@@ -274,9 +274,25 @@ Starting
 ========
 You can start the RESTCONF daemon in several ways:
 
-  1. `systemd` as described in :ref:`Install section<clixon_install>`
+  1. `systemd` , externally started
   2. `internally` using the `process-control` RPC (see below)
   3. `docker` mechanisms, see the docker container docs
+
+Start with Systemd
+------------------
+The Restconf service can be installed at, for example, /etc/systemd/system/example_restconf.service::
+   
+   [Unit]
+   Description=Starts and stops an example clixon restconf service on this system
+   Wants=example.service
+   After=example.service
+   [Service]
+   Type=simple
+   User=root
+   Restart=on-failure
+   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/example.xml
+   [Install]
+   WantedBy=multi-user.target
 
 Internal start
 --------------
@@ -351,7 +367,6 @@ extension
 auth
   See `auth callback`_
 
-
 Auth callback
 -------------
 The role of the authentication callback is, given a message (its headers) and authentication type, determine if the message passes authentication and return an associated user.
@@ -394,6 +409,29 @@ FCGI
 ====
 This section describes the RESTCONF FCGI mode using NGINX.
 
+You need to configure three things:
+
+  1. Restconf config in the Clixon config file
+  2. Reverse proxy configuration
+  3. Start the restconf daemon (see `starting`_)
+
+Restconf config
+---------------
+
+The restconf daemon can be started in several ways as described in Section `auth types`_. In all cases however, the configuration is simpler than in native mode. For example::
+
+   <clixon-config xmlns="http://clicon.org/config">
+      ...
+      <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
+      <restconf>
+         <enable>true</enable>
+         <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
+         <auth-type>none</auth-type>
+      </restconf>
+   </clixon-config>
+
+Reverse proxy config
+--------------------     
 If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical configuration is as follows::
 
   server {
@@ -404,7 +442,8 @@ If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical
     }
   }
 
-where ``fastcgi_pass`` setting must match ``CLICON_RESTCONF_PATH``.
+where ``fastcgi_pass`` setting should match  by ``fcgi-socket`` in ``clixon-config/restconf``.
+
 
 RESTCONF streams
 ================
