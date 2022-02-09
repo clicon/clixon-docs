@@ -119,7 +119,7 @@ Clixon also provides a Netconf interface. The following example starts a netconf
 
 Restconf
 ========
-By default, Clixon uses `Native http`: web-server using `libevhtp <https://github.com/clicon/clixon-libevhtp.git>`_ (http/1) and nghttp2 (http/2). The web server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
+By default, Clixon uses `Native http`: supporting http/1 and http/2 (libnghttp2). The http server is integrated with the clixon restconf daemon and needs no extra installations, apart from ensuring you have server and client certs for https.
 
 As an alternative, you can use the `FCGI` solution, where instead a reverse proxy such as `Nginx <https://nginx.org>`_  uses an internal FCGI socket communication to communicate with Clixon.  A reverse proxy, such as NGINX, needs to be configured. For more info about the fcgi solution, see :ref:`Restconf section<clixon_restconf>`.
 

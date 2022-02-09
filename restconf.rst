@@ -39,9 +39,9 @@ Installation
 ============
 The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
 
-  --disable-evhtp         Disable native http/1.1 using libevhtp (ie http/2 only)
+  --disable-http1         Disable native http/1.1 (ie http/2 only)
   --disable-nghttp2       Disable native http/2 using libnghttp2 (ie http/1 only)
-  --with-restconf=native  RESTCONF using native http with libevhtp. (DEFAULT)
+  --with-restconf=native  RESTCONF using native http. (DEFAULT)
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
   --without-restconf      No RESTCONF
 

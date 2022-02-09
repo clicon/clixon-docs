@@ -50,13 +50,11 @@ The RESTCONF implementation supports two HTTP configurations:
 
 Clixon native HTTP server
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Native http server requires libevent, openssl 1.1 and libevhtp
+Native http server requires openssl 1.1
 
-Install libevent and TLS::
+Install TLS::
 
-  sudo apt-get install libevent-dev libssl-dev
-
-The Libevhtp install is slightly modified for Clixon and needs to be built from source: `libevhtp`_.
+  sudo apt-get install libssl-dev
 
 Thereafter configure using default options::
 
@@ -84,7 +82,7 @@ Download clixon source code::
   
 Configure Clixon using one of the following RESTCONF configurations::
 
-  configure --with-restconf=native # clixon native HTTP server using libevhtp (default)
+  configure --with-restconf=native # clixon native HTTP server
   configure --with-restconf=fcgi   # FastCGI support for reverse proxy, the default
                                    # when no '--with-restconf' option is specified
   configure --without-restconf     # Do not build restconf
@@ -231,21 +229,6 @@ See `Clixon cross-compiler for Openwrt <https://github.com/clicon/clixon-openwrt
 Prereqs from source
 ===================
 
-Libevhtp
---------
-For RESTCONF using native http build evhtp from source as follows::
-
-  sudo git clone https://github.com/clicon/clixon-libevhtp.git
-  cd libevhtp
-  ./configure --libdir=/usr/lib
-  make
-  sudo make install
-
-Note that evhtp requires openssl 1.1 API.
-
-Note that you will likely need to add ``/usr/local/lib/libevhtp`` to your ``ld.so.conf`` configuration
-
-
 FCGI
 ----
 For RESTCONF using fcgi build fcgi from source as follows::
@@ -275,10 +258,10 @@ These include (standard options are omitted)
   --enable-debug          Build with debug symbols, default: no
   --enable-yang-patch     Enable RFC 8072 YANG patch (plain patch is always enabled)
   --enable-publish        Enable publish of notification streams using SSE and curl
-  --disable-evhtp         Disable native http/1.1 using libevhtp (ie http/2 only)
+  --disable-http1         Disable native http/1.1 (ie http/2 only)
   --disable-nghttp2       Disable native http/2 using libnghttp2 (ie http/1 only)
   --with-cligen=dir       Use CLIGEN here
-  --with-restconf=native  RESTCONF using native http with libevhtp. (DEFAULT)
+  --with-restconf=native  RESTCONF using native http. (DEFAULT)
   --with-restconf=fcgi    RESTCONF using fcgi/ reverse proxy.
   --without-restconf      No RESTCONF
   --with-configfile=FILE  Set default path to config file
