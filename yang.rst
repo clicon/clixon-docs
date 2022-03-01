@@ -60,7 +60,7 @@ and::
 The validity of the trees is controlled by the `require-instance property <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ . According to this semantics:
 
  - if require-instance is false (or not present) both trees above are valid,
- - if require-instance is true, theupper tree is invalid and the lower is valid
+ - if require-instance is true, the upper tree is invalid and the lower is valid
 
 In most models defined by openconfig and ietf, require-instance is typically false.
 

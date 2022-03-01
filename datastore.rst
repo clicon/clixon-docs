@@ -108,9 +108,12 @@ Datastore caching
 Clixon datastore cache behaviour is controlled by the `CLICON_DATASTORE_CACHE` and can have the following values:
 
 `nocache`
-   No cache, always read and write directly with datastore file.
+   No cache, always read and write directly with datastore file. 
 `cache`
    Use in-memory write-through cache. Make copies of the XML when accessing internally by callbacks and plugins. This is the default.
 `cache-zerocopy`
    Use in-memory write-through cache and do not copy when doing callbacks.  This is the fastest but opens up for callbacks changing the cache. That is, plugin callbacks may not edit the XML in any way.
+
+.. note::
+        Netconf locks are not supported for nocache mode
 

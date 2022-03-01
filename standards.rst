@@ -110,6 +110,8 @@ Capability is preferred over default subtrees. This has two reasons:
 1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retrieved.
 2. Subtree filtering does not support namespaces yet.
 
+Clixon supports netconf locks in default settings but *not* if ``CLICON_DATASTORE_CACHE`` is ``nocache`` mode.
+   
 Default values
 --------------
 Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retrieval. This means that get-config will report all default values, not only those explicitly set. 

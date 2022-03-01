@@ -539,7 +539,9 @@ The following autocli extensions are defined:
    Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node. 
 ``hide-show``
    Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
-   
+``strict-expand``
+   Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.
+
 Edit modes
 ----------
 The autocli supports *automatic edit modes* where by entering a ``<cr>``, you enter an edit mode. An edit mode is created for every YANG container or list.
