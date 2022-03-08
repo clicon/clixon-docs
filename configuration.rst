@@ -154,6 +154,7 @@ Standard YANG files
 The main examples and tests require IETF RFC standard YANGs. If you
 want to run the main example or run tests, you need to make them locally
 available by checking out ``https://github.com/YangModels/yang`` which has subdir ``standard``.
+By default this directory is ``/usr/local/share/yang``
 You can change this location by::
 
     ./configure --with-yang-standard-dir=DIR

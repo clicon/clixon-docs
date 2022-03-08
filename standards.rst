@@ -19,7 +19,7 @@ The YANG standards that Clixon follows include:
 
 * `YANG 1.0 RFC 6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_
 * `YANG 1.1 RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_
-* `YANG module library RFC 7895 <http://www.rfc-editor.org/rfc/rfc7895.txt>`_
+* `YANG library RFC 8525 <http://www.rfc-editor.org/rfc/rfc8525.txt>`_ (partly)
 
 Clixon deviates from the YANG standard as follows (reference to RFC7950 sections in parenthesis):
 
@@ -53,7 +53,7 @@ See also support of standard XPath functions `XML and XPath`_
 * if-feature-expr() is restricted to single layer expressions with and/or (7.20.2):
    - ``x and y`` and ``x or y`` *is* supported
    - ``x or (not y and z)`` is *not* supported 
-
+     
 Regular expressions
 -------------------
 Clixon supports two regular expression engines:

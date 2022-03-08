@@ -71,13 +71,14 @@ Note that the format settings applies to all datastores.
 
 Module library support
 ======================
-Clixon can store Yang module-state information according to `RFC 7895: YANG module library <http://www.rfc-editor.org/rfc/rfc7895.txt>`_ in the
+Clixon can store Yang module-state information according to `RFC 8525: YANG library <http://www.rfc-editor.org/rfc/rfc8525.txt>`_ in the
 datastores. With module state, you know which Yang version the XML belongs to, which is useful when upgrading, see :ref:`upgrade <clixon_upgrade>`.
 
 
 To enable yang module-state in the datastores add the following entry in the Clixon configuration:
 ::
 
+   <CLICON_YANG_LIBRARY>true</CLICON_YANG_LIBRARY> # (default true)
    <CLICON_XMLDB_MODSTATE>true</CLICON_XMLDB_MODSTATE>
 
 If the datastore does not contain module-state, general-purpose upgrade is the only upgrade mechanism available.
@@ -88,14 +89,17 @@ Example of a (simplified) datastore with Yang module-state:
 ::
    
    <config>
-     <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
-       <module-set-id>42</module-set-id>
-       <module>
-         <name>A</name>
-         <revision>2019-01-01</revision>
-         <namespace>urn:example:a</namespace>
-       </module>
-     </modules-state>
+     <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+       <content-id>42</content-id>
+       <module-set>
+         <name>default</name>
+         <module>
+           <name>A</name>
+           <revision>2019-01-01</revision>
+           <namespace>urn:example:a</namespace>
+         </module>
+       </module-set>
+     </yang-library>
      <a1 xmlns="urn:example:a">some text</a1>
    </config>
 

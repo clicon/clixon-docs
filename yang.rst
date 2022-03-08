@@ -7,7 +7,8 @@
 YANG
 ****
 
-This chapter describes aspects of he YANG implementation in Clixon. Regarding standard compliance, see :ref:`Standards<clixon_standards>`.
+This chapter describes some aspects of he YANG implementation in Clixon. Regarding standard compliance, see :ref:`Standards<clixon_standards>`.
+
 
 Leafrefs
 ========
@@ -59,11 +60,72 @@ and::
   
 The validity of the trees is controlled by the `require-instance property <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ . According to this semantics:
 
- - if require-instance is false (or not present) both trees above are valid,
- - if require-instance is true, the upper tree is invalid and the lower is valid
+ - If require-instance is false, both trees above are valid,
+ - If require-instance is true(or not present), the upper tree is invalid and the lower is valid
 
 In most models defined by openconfig and ietf, require-instance is typically false.
 
+YANG Library
+============
+
+Clixon partially supports `YANG library RFC 8525 <http://www.rfc-editor.org/rfc/rfc8525.txt>`_ that provides information about YANG modules and datastores, 
+
+The following configure options are associated to the YANG library
+
+CLICON_YANG_LIBRARY
+  Enable YANG library support as state data according to RFC8525. Default: ``true``
+
+CLICON_MODULE_SET_ID
+  Contains a server-specific identifier representing the current set of modules and submodules.
+
+CLICON_MODULE_LIBRARY_RFC7895
+  Enable RFC 7895 YANG Module library support as state data, instead of RFC8525. Default: ``false``
+
+CLICON_XMLDB_MODSTATE
+  Tag datastores with RFC 8525 YANG Module Library info. See :ref:`datastore <clixon_datastore>` for details on how to tag datastores with Module-set info.
+
+The module-set of RFC8525 can be retrieved using NETCONF get or RESTCONF GET as operational data. The fields that are supported are the following:
+
+ - Content-id of the whole module-set
+ - Name of each module
+ - Namespace
+ - Revision
+ - Feature
+ - Submodules 
+
+The following fields are not supported   
+
+ - import-only-module
+ - deviation
+ - schema
+ - datastore
+
+Example
+-------
+
+An example of a NETCONF ``get`` reply with module-state data of the main example is the following::
+
+  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="42">
+    <data>
+      <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+        <module-set>
+          <name>default</name>
+  	  <module>
+            <name>clixon-autocli</name>
+  	    <revision>2022-02-11</revision>
+  	    <namespace>http://clicon.org/autocli</namespace>
+  	  </module>
+  	  <module>
+  	    <name>clixon-example</name>
+  	    <revision>2020-12-01</revision>
+  	    <namespace>urn:example:clixon</namespace>
+  	  </module>
+          ...
+        </module-set>
+      </yang-library>
+    </data>
+  </rpc-reply>
+  
 Extensions
 ==========
 Clixon implements YANG extensions.  There are several uses, but one is
