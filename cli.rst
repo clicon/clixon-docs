@@ -13,15 +13,15 @@ CLI
 Overview
 ========
 
-The Clixon CLI provides a frontend interactive command-line interface
-to a user. Each user instantiates a new process which communicates
-with NETCONF with the backend daemon over an IPC socket.
+The Clixon CLI provides an interactive command-line interface
+to a user. Each usage instantiates a new process which communicates
+via NETCONF with the backend daemon over an IPC socket.
 
 The Clixon CLI uses `CLIgen <https://www.cligen.se>`__, an interactive
 interpreter of commands. Syntax is given as *cli-specifications* which
-specifying callbacks defined in plugins.
+specify callbacks defined in plugins.
 
-For details on CLIgen syntax, etc, please consult the `CLIgen tutorial <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_.
+For details on CLIgen syntax and behavior, please consult the `CLIgen tutorial <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_.
 
 Clixon comes with a generated CLI, the `autocli`_, where all
 configuration-related syntax is generated from YANG. 
@@ -624,6 +624,59 @@ Advanced
 ========
 This section describes some advanced options in the Clixon CLI not described elsewhere.
 
+Backend socket
+--------------
+
+By default, the CLI uses a UNIX socket as an IPC to communicate with
+the backend.  It is possible to use an IP socket but with a restricted functionality, see :ref:`backend section<clixon_backend>`.
+
+Start session
+^^^^^^^^^^^^^
+
+The session creation is "lazy" in the sense that a NETCONF session is
+only established when needed. After the session has been
+established, it is maintained (cached) by the CLI client to keep track
+of candidate edits and locks, as described in 7.5 of `RFC 6241 <https://www.rfc-editor.org/rfc/rfc6241.html/>`_.
+
+If there is no backend running at the time of session establishment, a warning is printed::
+  
+  cli /> show config
+  Mar 18 11:53:43: clicon_rpc_connect_unix: 541: Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
+  Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
+  cli /> 
+
+If at a later time, the backend is started, the session is established normally
+
+Close session
+^^^^^^^^^^^^^
+After a session is established and the *backend* exits, crashes or restarts, any
+state associated with the session will be lost, including:
+
+* explicit locks
+* edits in candidate-db
+  
+If the backend exits during an existing session, it will close with the same error message as above::
+
+  cli /> show config
+  Mar 18 11:53:43: clicon_rpc_connect_unix: 541: Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
+  Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
+  cli /> 
+
+If the backend restarts, a new session is created with a warning::
+
+  cli /> show configuration
+  Mar 18 11:57:55: The backend was probably restarted and the client has reconnected to the backend. Any locks or candidate edits are lost.
+  cli />
+
+Alternative
+^^^^^^^^^^^
+It is possible to change the default behavior by undefining the compile-option: `#undef PROTO_RESTART_RECONNECT`. If so, the CLI is exited when the existing session is closed in anyway::
+
+  cli /> show configuration
+  Mar 18 12:02:57: clicon_rpc_msg: 210: Protocol error: Unexpected close of CLICON_SOCK. Clixon backend daemon may have crashed.: Cannot send after transport endpoint shutdown
+  Protocol error: Unexpected close of CLICON_SOCK. Clixon backend daemon may have crashed.: Cannot send after transport endpoint shutdown
+  bash# 
+  
 Sub-tree operator
 -----------------
 Sub-trees are defined using the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes::

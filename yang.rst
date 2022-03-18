@@ -192,3 +192,46 @@ A more advanced usage is possible via an extension callback
 (``ca_callback``) which is defined for backend, cli, netconf and
 restconf plugins. This allows for advanced YANG transformations. Please
 consult the main example to see how this could be done.
+
+Unique
+======
+
+The YANG unique statement is described in Section 7.8.3 of `RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.html/>`_. However, the RFC is somewhat vague in the descriptions of its arguments.
+
+Clixon therefore supports two simultaneous distinct cases: multiple direct children and single descendants
+
+Multiple direct children
+------------------------
+This is examplified in the RFC, such as::
+
+     list server {
+       key "name";
+       unique "ip port";
+       leaf ip...
+       leaf port...
+
+where ``ip`` and ``port`` are direct children of ``server`` and the uniquess applies to their combination in all list instances.
+
+Single descendants
+------------------
+
+The RFC says::
+  schema node identifiers, which MUST be given in the descendant form
+
+This does not exclude more elaborate schema nodes than direct children
+but are not explicitly allowed.
+
+Therefore, Clixon also supports a single advanced schema node id. Such a schema node id
+may define a set of leafs. The uniqueness is then validated
+against all instances, such as for example::
+
+     list server {
+       key "name";
+       unique c/inner/value;
+       container c {
+          list inner {
+	     leaf value...
+
+However, only a *single* such argument is allowed. The reason is that
+such a schema node may potentially refer to a set of instances (not
+just one) and the semantics of a combination of multiple such ids is unclear.
