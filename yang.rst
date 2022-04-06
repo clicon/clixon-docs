@@ -7,7 +7,7 @@
 YANG
 ****
 
-This chapter describes some aspects of he YANG implementation in Clixon. Regarding standard compliance, see :ref:`Standards<clixon_standards>`.
+This chapter describes some aspects of the YANG implementation in Clixon. Regarding standard compliance, see :ref:`Standards<clixon_standards>`.
 
 
 Leafrefs
@@ -215,7 +215,7 @@ where ``ip`` and ``port`` are direct children of ``server`` and the uniquess app
 Single descendants
 ------------------
 
-The RFC says::
+The RFC says:
   schema node identifiers, which MUST be given in the descendant form
 
 This does not exclude more elaborate schema nodes than direct children
@@ -235,3 +235,47 @@ against all instances, such as for example::
 However, only a *single* such argument is allowed. The reason is that
 such a schema node may potentially refer to a set of instances (not
 just one) and the semantics of a combination of multiple such ids is unclear.
+
+If-feature and anydata
+======================
+
+The YANG if-feature statement is described in Section 7.20.2 of `RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.html/>`_.  The RFC states that:
+
+   Definitions tagged with "if-feature" are ignored when the server does not support that feature.
+
+This is implemented by doing the following to disabled YANG nodes:
+
+(1) Configuration data nodes are replaced locally to a single ANYDATA data. This means that XML derived from disabled features are accepted but no validation is possible.
+(2) Other YANG nodes, such as RPCs or state data are removed.
+
+Example, assume the following YANG::
+
+  container c{
+     if-feature A;
+     leaf b {
+        type string;
+     }
+  }
+  rpc r {
+     	input {
+	    leaf x {
+	        if-feature A;
+		type string;
+	    }
+	}
+  }
+
+If feature ``A`` is NOT enabled, the YANG is transformed to::
+
+  anydata c{
+  }
+  rpc r {
+     	input {
+	}
+  }
+  
+The following config option is related:
+
+CLICON_YANG_UNKNOWN_ANYDATA
+   Treat unknown XML/JSON nodes as anydata when loading from startup db.
+  
