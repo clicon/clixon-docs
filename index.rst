@@ -32,3 +32,4 @@ mechanism.
    pagination
    upgrade
    misc
+   snmp
