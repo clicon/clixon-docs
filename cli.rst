@@ -96,7 +96,7 @@ The `clixon_cli` client has the following command-line options:
   -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -G              Print auo-cli CLI syntax generated from YANG
   -L              Debug print dynamic CLI syntax including completions and expansions
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Stderr is default. 
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Stderr is default. 
   -y <file>       Load yang spec file (override yang main modul)e
   -c <file>       Specify cli spec file
   -U <user>       Over-ride unix user with a pseudo user for NACM.

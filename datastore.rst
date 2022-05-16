@@ -6,17 +6,10 @@
 *********
 Datastore
 *********
-::
 
-                        +-----------+
-                        |  backend  |
-                        +-----------+
-                              ^
-                              |
-         Datastores:          v	                
-         +-----------+  +-----------+  +-----------+
-         | candidate |  |  running  |  |  startup  |
-         +-----------+  +-----------+  +-----------+
+
+ .. image:: datastore1.jpg
+   :width: 70%
 
 Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCONF Configuration Protocol <http://rfc-editor.org/rfc/rfc6241.txt>`_):
 

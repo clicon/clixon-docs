@@ -30,7 +30,7 @@ The backend have the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
   -d <dir>        Specify backend plugin directory
   -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -b <dir>        Specify datastore directory

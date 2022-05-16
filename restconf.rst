@@ -56,7 +56,7 @@ The restconf daemon have the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
   -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -y <file>       Load yang spec file (override yang main module)
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6
@@ -90,6 +90,8 @@ CLICON_BACKEND_RESTCONF_PROCESS
    Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore. 
 CLICON_ANONYMOUS_USER
    If RESTCONF authentication auth-type=none then use this user
+CLICON_RESTCONF_API_ROOT
+   RESTCONF API root path as defined in RFC 8040, default is `/restconf`
 
 More more documentation of the options, see the source YANG file.
    
@@ -442,6 +444,54 @@ If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical
 
 where ``fastcgi_pass`` setting should match  by ``fcgi-socket`` in ``clixon-config/restconf``.
 
+
+HTTP data
+=========
+
+As part of the native restconf implementation, Clixon provides a limited http-data (web) server.
+
+Configuration options
+---------------------
+The following configuration options can be defined in the clixon configuration file:
+
+CLICON_HTTP_DATA_ROOT
+   Location in file system where http-data files are searched. Soft links, '..', '~' etc are not followed. Default is ``/var/www``.
+CLICON_HTTP_DATA_PATH
+   Prefix to match with URI to match for http-data. This path will be appended to ``CLICON_HTTP_DATA_ROOT`` to find a matching file. Default is ``/``. Note that the restconf match prefix is ``/restconf``.
+
+You also need to define ``<CLICON_FEATURE>clixon-restconf:http-data</CLICON_FEATURE>`` to enable the functionality.
+
+Example
+^^^^^^^
+The following is an example of a config file for setting up an http-data service at ``/var/www/data``::
+
+  <clixon-config xmlns="http://clicon.org/config">
+    <CLICON_FEATURE>clixon-restconf:http-data</CLICON_FEATURE>
+    <CLICON_HTTP_DATA_ROOT>/var/www</CLICON_HTTP_DATA_ROOT>
+    <CLICON_HTTP_DATA_PATH>/data</CLICON_HTTP_DATA_PATH>
+    ...
+
+An example curl call could be::
+
+    curl -X GET -H 'Accept: text/html' http://localhost/data/index.html
+
+Provided there is a valid html file at ``/var/www/data/index.hmtl``.
+    
+Features and limitation
+-----------------------
+
+The http server is very limited in functionality:
+
+  * No dynamic (backend scripts) supported, only static pages loaded from files.
+  * Operations limited to GET, HEAD, and OPTIONS
+  * Query parameters are not supported
+  * Indata is not supported
+  * Supported media is: html, css, js, fonts, and some images. ALll other media is `octet-stream`
+
+All features of the native restconf implementation are available for the http-data as well. This includes http/1 and http/2 and TLS using openssl.
+
+There is support for URI path internal redirect to a file called
+`index.html`. This can be changed by compile-time option ``HTTP_DATA_INTERNAL_REDIRECT``.
 
 RESTCONF streams
 ================

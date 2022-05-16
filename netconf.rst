@@ -12,18 +12,19 @@ Overview
 Netconf is an external client interface (cli and restconf are
 other external interfaces). Netconf is also used in the internal IPC.
 
-::
-
-                   +---------------------------------------+
-                   |  +------------+  IPC  +------------+  |
-                   |  |  netconf   | ----- |  backend   |  |
-      User <-----> |  |------------|       |------------|  |
-                   |  | nc plugins |       | be plugins |  |
-                   |  +------------+       +------------+  |
-                   +---------------------------------------+
+ .. image:: netconf1.jpg
+   :width: 100%
 
 Netconf is defined in RFC 6241 (see :ref:`Standards section <clixon_standards>`) and
 implemented by the `clixon_netconf` client.
+
+Any number of netconf clients can be created, each creating a new
+session to the backend. The netconf client communicates to the outside
+world via `stdio`. Usually one sets up an SSH sub-system to
+communicate from external nodes.
+
+Note that Netconf supports chunked framing defined in RFC 6241 from
+Clixon 5.7, but examples may not be updated.
 
 Command-line options
 --------------------
@@ -34,8 +35,9 @@ The `clixon_netconf` client has the following command-line options:
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
-  -q              Quiet mode, do not send hello message
-  -H              Do not expect hello message from server.
+  -q              Quiet mode, server does not send hello message on startup
+  -0              Set netconf base capability to 0, server does not expect hello, force EOM framing
+  -1              Set netconf base capability to 1, server does not expect hello, force chunked framing
   -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
   -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)
   -d <dir>        Specify netconf plugin directory
@@ -86,7 +88,6 @@ and then invoke it from a client using::
 
 NACM
 ====
-
 Clixon implements the `Network Configuration Access Control Model
 <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM / RFC8341).
 NACM rpc and datanode access validation is supported, not outgoing notifications.
@@ -202,7 +203,7 @@ Overview of a callhome architecture with a device (where clixon resides) and a c
           | 3)                                   ^  |
           v                                   1b)|  v 
   +-----------------+   4) ssh session   +---------------------+   5) stdio
-  |     sshd -i     | <----------------> | 1a)   ssh           |  <------  <rpc>...</rpc>]]>]]>"
+  |     sshd -i     | <----------------> | 1a)   ssh           |  <------  <rpc>...</rpc>"
   +-----------------+                    |---------------------+   
           | stdio                      
   +-----------------+
