@@ -55,6 +55,16 @@ store MIBs to be used:
    #mibs :
    mibdirs /usr/share/snmp/mibs:/usr/share/snmp/mibs/iana:/usr/share/snmp/mibs/ietf
 
+We also want to tell snmpd to not load any of the modules we are implementing
+using Clixon. For example, if we are using Clixon to implement IF-MIB and the
+system MIB we want to tell snmpd to not load them and let us take care of that.
+
+This can be done using the "-I" flag and prepend a "-" before each of the objects:
+
+::
+   
+   -I -ifTable -I -system_mib -I -sysORTable
+
 Note: Clixon will not take care of starting snmpd, the system must at
 all times make sure that snmpd is running and can communicate with
 Clixon SNMP and the user.
