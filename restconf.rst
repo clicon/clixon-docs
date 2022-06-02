@@ -154,7 +154,6 @@ In the latter case, the restconf daemon reads its config from the running datast
 .. note::
       If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config must be in the regular datastore.
 
-     
 Features
 --------
 The Restconf config has two features:
@@ -448,18 +447,24 @@ where ``fastcgi_pass`` setting should match  by ``fcgi-socket`` in ``clixon-conf
 HTTP data
 =========
 
-As part of the native restconf implementation, Clixon provides a limited http-data (web) server.
+As an extension to the native restconf implementation, Clixon provides a
+limited http-data server for displaying web pages. To use the http-data feature, you need
+to configure clixon with ``--with-restconf=native`` and also enable
+the ``http-data`` feature as described below.
+
+.. note::
+      The http data feature is limited and can only be used for very simple web content
 
 Configuration options
 ---------------------
+First, you also need to define ``<CLICON_FEATURE>clixon-restconf:http-data</CLICON_FEATURE>`` to enable http-data.
+
 The following configuration options can be defined in the clixon configuration file:
 
 CLICON_HTTP_DATA_ROOT
-   Location in file system where http-data files are searched. Soft links, '..', '~' etc are not followed. Default is ``/var/www``.
+   Directory in the local file system where http-data files are searched for. Soft links, ``..``, ``~`` etc are not followed. Default is ``/var/www``.
 CLICON_HTTP_DATA_PATH
    Prefix to match with URI to match for http-data. This path will be appended to ``CLICON_HTTP_DATA_ROOT`` to find a matching file. Default is ``/``. Note that the restconf match prefix is ``/restconf``.
-
-You also need to define ``<CLICON_FEATURE>clixon-restconf:http-data</CLICON_FEATURE>`` to enable the functionality.
 
 Example
 ^^^^^^^
@@ -473,22 +478,22 @@ The following is an example of a config file for setting up an http-data service
 
 An example curl call could be::
 
-    curl -X GET -H 'Accept: text/html' http://localhost/data/index.html
+    curl -X GET -H 'Accept: text/html' http://localhost/data/
 
-Provided there is a valid html file at ``/var/www/data/index.hmtl``.
+The call will retrieve the file at ``/var/www/data/index.hmtl``.
     
 Features and limitation
 -----------------------
 
 The http server is very limited in functionality:
 
-  * No dynamic (backend scripts) supported, only static pages loaded from files.
-  * Operations limited to GET, HEAD, and OPTIONS
+  * No dynamic pages, ie backend scripts, only static pages are supported.
+  * Operations are limited to GET, HEAD, and OPTIONS
   * Query parameters are not supported
   * Indata is not supported
-  * Supported media is: html, css, js, fonts, and some images. ALll other media is `octet-stream`
+  * Supported media is: html, css, js, fonts, and some images. All other content is default `octet-stream`
 
-All features of the native restconf implementation are available for the http-data as well. This includes http/1 and http/2 and TLS using openssl.
+All applicable features of the native restconf implementation are available for the http-data as well. This includes http/1 and http/2 and TLS using openssl.
 
 There is support for URI path internal redirect to a file called
 `index.html`. This can be changed by compile-time option ``HTTP_DATA_INTERNAL_REDIRECT``.
