@@ -778,37 +778,6 @@ where ``CX_ELMNT`` selects element children (no attributes or body text).
 
 However, it is recommended to use the `Searching in XML`_ for more efficient
 searching.
-
-Translation API
----------------
-The internal `cxobj` tree representation can be printed or translated to various formats using the following internal C API:
-
-* XML external representation: `clixon_xml2file()` and `clixon_xml2cbuf()` to file and memory respectively.
-* JSON: `clixon_json2file()` and `clixon_json2cbuf()`
-* CLI: `clixon_cli2file()`
-* TEXT: `clixon_txt2file()`
-
-These functions are available as cli callbacks using several CLI show commands, including `cli_show_config`, `cli_pagination`, `cli_show_auto`.
-
-The arguments of these functions are similar with some local variance. For example::
-
-   int
-   clixon_xml2file(FILE             *f, 
-                   cxobj            *xn, 
-		   int               level, 
-		   int               pretty,
-		   clicon_output_cb *fn,
-		   int               skiptop)
-
-where:
-
-* `f` is the output stream (such as `stdout`)
-* `xn` is the top-level XML node
-* `level` is indentation level to start with, normally `0`
-* `pretty` makes the output indented and use newlines
-* `fn` is the output function to use. `NULL` means `fprintf`, `cligen_output` is used for scrolling in CLI
-* `skiproot` only prints the children by skipping the top-level XML node `xn`
-
 		   
 Character encoding
 ==================

@@ -42,8 +42,8 @@ starts the backend only. Typically this is `root`, but if the backend is started
 Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon may use a datastore cache, see `Datastore caching`_.
 
    
-Datastore format
-================
+Datastore and file formats
+==========================
 By default, the datastore files use pretty-printed XML, with the top-symbol `config`. The following is an example of a valid datastore:
 ::
 
@@ -56,11 +56,96 @@ By default, the datastore files use pretty-printed XML, with the top-symbol `con
 The format of the datastores can be changed using the following options:
    
 `CLICON_XMLDB_FORMAT`
-   Datastore format. `xml` is the only fully supported alternative. `json` and `tree` are experimental (the latter is a random-access binary format).
+   Datastore format. `xml` is the primary alternative. `json` is also available, while `text` and `cli` are available as file formats but not specifically for the datastore.
 `CLICON_XMLDB_PRETTY`
    XMLDB datastore pretty print. The default value is `true`, which inserts spaces and line-feeds making the XML/JSON human readable. If false, the XML/JSON is more compact.
 
 Note that the format settings applies to all datastores.
+
+Other formats
+-------------
+While only XML and JSON are currently supported as datastore formats, Clixon supports `CLI` and `TEXT` formats for printing, and saving and loading files.
+
+The main example contains example code showing how to load and save a config using other formats.
+
+Example of showing a config as XML, JSON, TEXT and CLI::
+  
+   cli> show configuration xml 
+   <table xmlns="urn:example:clixon">
+      <parameter>
+         <name>a</name>
+         <value>17</value>
+      </parameter>
+      <parameter>
+         <name>b</name>
+         <value>99</value>
+      </parameter>
+   </table>
+   cli> show configuration json
+   {
+     "clixon-example:table": {
+       "parameter": [
+         {
+           "name": "a",
+           "value": "17"
+         },
+         {
+           "name": "b",
+           "value": "99"
+         }
+       ]
+     }
+   }
+   cli> show configuration text
+   clixon-example:table {
+       parameter a {
+           value 17;
+       }
+       parameter b {
+           value 99;
+       }
+   }
+   cli> show configuration cli 
+   set table parameter a 
+   set table parameter a value 17
+   set table parameter b 
+   set table parameter b value 99
+
+Save and load a file using TEXT::
+
+   cli> save foo.txt text
+   cli> load foo.txt replace text 
+
+Internal C API
+^^^^^^^^^^^^^^
+CLI show and save commands uses an internal API for print, save and load of the formats. Such CLI functions include: `cli_show_config`, `cli_pagination`, `load_config_file`, `save_config_file`.
+
+The following internal C API is available for output:
+
+* XML: ``clixon_xml2file()`` and ``clixon_xml2cbuf()`` to file and memory respectively.
+* JSON: ``clixon_json2file()`` and ``clixon_json2cbuf()``
+* CLI: ``clixon_cli2file()``
+* TEXT: ``clixon_txt2file()``
+
+The arguments of these functions are similar with some local variance. For example::
+
+   int
+   clixon_xml2file(FILE             *f, 
+                   cxobj            *xn, 
+		   int               level, 
+		   int               pretty,
+		   clicon_output_cb *fn,
+		   int               skiptop)
+
+where:
+
+* `f` is the output stream (such as `stdout`)
+* `xn` is the top-level XML node
+* `level` is indentation level to start with, normally `0`
+* `pretty` makes the output indented and use newlines
+* `fn` is the output function to use. `NULL` means `fprintf`, `cligen_output` is used for scrolling in CLI
+* `skiproot` only prints the children by skipping the top-level XML node `xn`
+
 
 Module library support
 ======================
@@ -114,3 +199,96 @@ Clixon datastore cache behaviour is controlled by the `CLICON_DATASTORE_CACHE` a
 .. note::
         Netconf locks are not supported for nocache mode
 
+File formats
+============
+
+The four file formats of a configuration are:
+
+* XML
+* JSON
+* CLI, as loadable CLI commands. This only applies to the autocli
+* TEXT, a compact user-friendly format
+
+Of these formats, only XML and JSON can currently be used as datastore formats, as described in the :ref:`datastore section <clixon_datastore>`.
+
+However, all formats can be used to to print, save and load a configuration file.
+
+The main example contains example code showing how to load and save a config using different formats.
+
+Example of showing a config as XML, JSON, TEXT and CLI::
+  
+   cli> show configuration xml 
+   <table xmlns="urn:example:clixon">
+      <parameter>
+         <name>a</name>
+         <value>17</value>
+      </parameter>
+      <parameter>
+         <name>b</name>
+         <value>99</value>
+      </parameter>
+   </table>
+   cli> show configuration json
+   {
+     "clixon-example:table": {
+       "parameter": [
+         {
+           "name": "a",
+           "value": "17"
+         },
+         {
+           "name": "b",
+           "value": "99"
+         }
+       ]
+     }
+   }
+   cli> show configuration text
+   clixon-example:table {
+       parameter a {
+           value 17;
+       }
+       parameter b {
+           value 99;
+       }
+   }
+   cli> show configuration cli 
+   set table parameter a 
+   set table parameter a value 17
+   set table parameter b 
+   set table parameter b value 99
+
+It is also possible to save and load a file using one of the formats::
+
+   cli> save foo.txt text
+   cli> load foo.txt replace text 
+
+C API
+-----
+The internal `cxobj` tree representation can be printed or translated to various formats using the following internal C API:
+
+* XML external representation: `clixon_xml2file()` and `clixon_xml2cbuf()` to file and memory respectively.
+* JSON: `clixon_json2file()` and `clixon_json2cbuf()`
+* CLI: `clixon_cli2file()`
+* TEXT: `clixon_txt2file()`
+
+These functions are available as cli callbacks using several CLI show commands, including `cli_show_config`, `cli_pagination`, `cli_show_auto`.
+
+The arguments of these functions are similar with some local variance. For example::
+
+   int
+   clixon_xml2file(FILE             *f, 
+                   cxobj            *xn, 
+		   int               level, 
+		   int               pretty,
+		   clicon_output_cb *fn,
+		   int               skiptop)
+
+where:
+
+* `f` is the output stream (such as `stdout`)
+* `xn` is the top-level XML node
+* `level` is indentation level to start with, normally `0`
+* `pretty` makes the output indented and use newlines
+* `fn` is the output function to use. `NULL` means `fprintf`, `cligen_output` is used for scrolling in CLI
+* `skiproot` only prints the children by skipping the top-level XML node `xn`
