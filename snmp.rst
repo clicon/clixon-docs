@@ -30,6 +30,9 @@ Configuration
 
 Net-SNMP
 --------
+Note: The lowest known version of Net-SNMP known to be working with Clixon is
+5.9.
+
 To set up the communication between Clixon SNMP and Net-SNMP snmpd we
 must instruct snmpd to use a Unix socket or TCP socket for the
 communication. Net-SNMP uses the AgentX protocol (described in
@@ -117,6 +120,9 @@ in "snmpd.conf" above.
 
 MIB registration
 ================
+
+Note: smidump 0.5 is the lowest known version of smidump which can be used to produce proper YANG 
+specifications.
 
 Clixon will register MIBs using YANG specifications. To achive this
 the MIB must first be converted to YANG format using for example the
