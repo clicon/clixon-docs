@@ -48,8 +48,7 @@ Plugin integration
 This describes how to integrate a base system with Clixon using plugins.
 
 The Clixon architecture consists of a backend daemon with
-configuration datastores and a set of internal clients: cli, restconf
-and netconf.
+configuration datastores and a set of internal clients: cli, restconf, netconf and snmp.
 
 The clients provide frontend interfaces to users of the system, such
 as a Network Management System (NMS) or an interactive human user. The

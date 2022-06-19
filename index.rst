@@ -25,6 +25,7 @@ mechanism.
    cli
    netconf
    restconf
+   snmp
    yang
    usecases
    client
@@ -32,4 +33,4 @@ mechanism.
    pagination
    upgrade
    misc
-   snmp
+

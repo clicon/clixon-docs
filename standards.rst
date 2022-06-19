@@ -150,6 +150,10 @@ In the native mode, Clixon also supports:
 * Transport Layer Security (TLS) implemented by libopenssl,
 * ALPN as defined in RFC 7301 for http/1, http/2 protocol selection by libopenssl
 
+SNMP
+====
+The Clixon-SNMP frontend implements the MIB-YANG mapping as defined in RFC 6643.
+
 XML and XPath
 =============
 Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
