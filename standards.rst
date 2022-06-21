@@ -25,7 +25,6 @@ Clixon deviates from the YANG standard as follows (reference to RFC7950 sections
 
 Not implemented:
 
-* action (7.15)
 * augment in a uses sub-clause (7.17) (module-level augment is implemented)
 * instance-identifier type (9.13)
 * status (7.21.2)

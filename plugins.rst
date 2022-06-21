@@ -87,6 +87,7 @@ Registered callbacks
 A second group of callbacks use register functions. This is a more detailed mechanism than the fixed callbacks described previously, but are only defined to a limited sets of functions:
 
 * ``rpc_callback_register()`` - for user-defined RPC callbacks. Applicable for NETCONF, RESTCONF and backend.
+* ``action_callback_register()`` - for user-defined Action callbacks. Applicable for backend.
 * ``upgrade_callback_register()`` - for upgrading, see :ref:`Upgrade section <clixon_upgrade>`. Applicable only for backend.
 * ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`Pagination section<clixon_pagination>`. Applicable only for backend.
 
@@ -160,6 +161,25 @@ Result netconf session::
   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="42">
      <y xmlns="urn:example:clixon">52</y>
   </rpc-reply>]]>]]>
+
+Example: Action callback
+------------------------
+
+This example follows RFC 7950 7.15.3.
+
+An action is associated with a YANG node and can therefore not be
+registered at init, instead the start callback can be used, for
+example.
+
+Register Action in example_reset()::
+
+   int
+   example_start(clicon_handle h)
+   {
+      ...
+      if (action_callback_register(h, ya, example_action_reset, NULL) < 0)
+ 	goto done;
+
 
 Plugin callback guidelines
 ==========================

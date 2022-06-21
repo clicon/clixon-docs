@@ -171,9 +171,9 @@ Registered callbacks
 The callback also supports three forms of registered callbacks:
 
 * ``rpc_callback_register()`` - for user-defined RPC callbacks, see :ref:`Plugin section <clixon_plugins>`.
+* ``action_callback_register()`` - for user-defined Action callbacks.
 * ``upgrade_callback_register()`` - for upgrading, see :ref:`Upgrade section <clixon_upgrade>`.
 * ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`Pagination section<clixon_pagination>`.
-
   
 Transactions
 ============
