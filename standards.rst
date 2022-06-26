@@ -49,10 +49,6 @@ Clixon supports the following extended XPath functions (10):
 
 See also support of standard XPath functions `XML and XPath`_
      
-* if-feature-expr() is restricted to single layer expressions with and/or (7.20.2):
-   - ``x and y`` and ``x or y`` *is* supported
-   - ``x or (not y and z)`` is *not* supported 
-     
 Regular expressions
 -------------------
 Clixon supports two regular expression engines:
