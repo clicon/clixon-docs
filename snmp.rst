@@ -167,3 +167,12 @@ be added via the CLIXON frontend.
 As an implementation detail, Clixon uses the `table` abstraction in
 the netsnmp agent library, not `table-data` or `table-instance`. 
 
+RowStatus
+---------
+
+Clixon supports SMIv2 RowStatus for table handling. Where RowStatus is
+used, the status of the row will be returned and set to either active,
+notInService or notReady.
+
+When writing the status of the row can be set to either createAndGo,
+createAndWait or destroy.
