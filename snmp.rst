@@ -15,18 +15,18 @@ Architecture
 .. image:: snmp.jpg
    :width: 100%
 
-The SNMP frontend acts as an intermediate between the Net-SNMP
-daemon (snmpd) and the Clixon backend. It communicates over the AgentX
+The SNMP frontend acts as an intermediate daemon between the Net-SNMP
+daemon (snmpd) and the Clixon backend. Clixon-snmp communicates over the AgentX
 protocol to snmpd typically via a UNIX socket, and over the internal IPC protocol to the Clixon
 backend.
 
-Clixon-snmp implements RFC 6643 `Translation of Structure of Management
-Information Version 2 (SMIv2) MIB Modules to YANG Modules`. The RFCdescribes how a MIB
-is translated to a YANG file using extensions defining a mapping
-to object IDs and types in the MIB.
+Clixon-snmp implements RFC 6643 `Translation of Structure of
+Management Information Version 2 (SMIv2) MIB Modules to YANG
+Modules`. The RFC defines how a MIB is translated to YANG using
+extensions that define a mapping between YANG statements and SMI object IDs and types in the MIB.
 
 In principle, it is also possible to construct a MIB from YANG using
-the same method, although this is more limited and may involve some manual work.
+the same method, although this is more limited and may involve manual work.
 
 A user can then communicate with snmpd using any of the SNMP
 v2/v3 tools, such as `snmpget`, `snmpwalk` and others.
@@ -53,14 +53,14 @@ Clixon (see below). An example `snmpd.conf` is as follows::
    agentxperms  777 777
 
 It is necessary to ensure snmpd does `not` to load modules
-implemented by Clixon. For example, if Clixon implements IF-MIB and
+implemented by Clixon. For example, if Clixon implements the IF-MIB and
 system MIBs, snmpd should not load those modules. This can be done
 using the "-I" flag and prepending a "-" before each module::
    
    -I -ifTable -I -system_mib -I -sysORTable
 
 Further, Clixon itself does not start netsnmp itself, you need to ensure that
-netsnmp is running when clixon_snmp is restarted. Likewise, if snmpd
+netsnmp is running when clixon_snmp is started. Likewise, if snmpd
 is restarted, clixon_snmp must also be restarted.
 
 .. note::
@@ -96,7 +96,7 @@ clixon_snmp configuration
 There are two SNMP related options in the Clixon configuration:
 
 CLICON_SNMP_AGENT_SOCK
-   String description of AgentX socket that clixon_snmp listens to.
+   String description of the AgentX socket that clixon_snmp listens to.
 
 CLICON_SNMP_MIB
    Names of MIBs that are used by clixon_snmp. 
@@ -104,40 +104,41 @@ CLICON_SNMP_MIB
 Example::
 
    <CLICON_SNMP_AGENT_SOCK>unix:/var/run/snmp.sock</CLICON_SNMP_AGENT_SOCK>
-   <CLICON_SNMP_MIB>NET-SNMP-EXAMPLES-MIB</CLICON_SNMP_MIB>
+   <CLICON_SNMP_MIB>IF-MIB</CLICON_SNMP_MIB>
 
 Note that the socket ``/var/run/snmp.sock`` is the same as configured
 in "snmpd.conf" above.
 
 MIB mapping
 ===========
-Clixon registers MIBs with netsnmp by using YANG specifications. To achieve this
+Clixon registers MIBs with netsnmp by using YANG specifications. To achieve this,
 the MIB is first converted (according to RFC6643) to YANG format.
 
 Generating YANG
 ---------------
-MIB to YANG conversion can be done using the ``smidump`` tool. Manual
+MIB to YANG conversion can be done using the ``smidump`` tool, version 0.5 or later. Manual
 mapping is also possible.  In Debian smidump is available in the
-package "smitools".
+package "smitools". You may also find existing repos with converted MIBs.
 
-To convert a MIB to YANG format smidump is invoked with the "-f
-yang" flag and point it to a MIB. MIBs will usually be in the directory "/usr/share/snmp/mibs/"::
+To convert a MIB to YANG, invoke ``smidump`` with the "-f yang" flag
+and point it to a MIB. MIBs will usually be in the directory
+"/usr/share/snmp/mibs/"::
 
-   $ smidump -f yang /usr/share/snmp/mibs/NET-SNMP-EXAMPLES-MIB.txt > NET-SNMP-EXAMPLES.yang
+   $ smidump -f yang /usr/share/snmp/mibs/IF-MIB.txt > IF-MIB.yang
 
 .. note::
    smidump 0.5 or later must be used
    
-Once a MIB is converted to YANG, two things are done:
+Once a MIB is converted to YANG, two things should be done:
 
-1) The YANG is registered as an SNMP module using the `CLICON_SNMP_MIB` configuration option
-2) The YANG file must be found via the regular Clixon YANG finding mechanism, as described in :ref:`Finding YANG files <clixon_configuration>`
+1) The YANG is registered as an SNMP module using the ``CLICON_SNMP_MIB`` configuration option
+2) The YANG file must be placed so that it can be found using the regular Clixon YANG finding mechanism, as described in :ref:`Finding YANG files <clixon_configuration>`
 
 Config vs state
 ---------------
-By default, all RFC6643 mappings are `config false`, ie, no configuration data.
+By default, all RFC6643 mappings are ``config false``, ie, no configuration data.
 
-To make a YANG `config true`, a deviation statement is made as the following example illustrates::
+To change to configuration data, a deviation statement is made as the following example illustrates::
 
     deviation "/clixon-types:CLIXON-TYPES-MIB" {
      deviate replace {
@@ -160,23 +161,20 @@ SNMP API, or via any of the other CLIXON frontends.
 
 Table indexes can be integers and non-integers.  Multiple table indexes are supported.
 
-There is one restriction for writing table (dynamic) data: New columns
-or rows cannot be entered via the SNMP API. However, rows/tables can
-be added via the CLIXON frontend.
-
 As an implementation detail, Clixon uses the `table` abstraction in
 the netsnmp agent library, not `table-data` or `table-instance`. 
 
 RowStatus
 ---------
 Clixon supports SMIv2 RowStatus for table handling. Where RowStatus is
-used, the status of the row is returned and set to either active,
-notInService or notReady.
+used, the status of the row is returned and set to either `active`,
+`notInService` or `notReady`.
 
-When writing the status of the row can be set to either createAndGo,
-createAndWait, active or destroy.
+When writing the status of the row can be set to either `createAndGo`,
+`createAndWait`, `active` or `destroy`.
 
-Rowstatus and createAndWait mode uses and internal cache which is held
-in memory by the clixon snmp agent. This internal cache written to
-Clixon when setting a row to `active`. When the clixon snmp agent is
-restarted, the cache is cleared.
+The `rowstatus` firled itself and all row values in `createAndWait`
+mode uses an internal cache which is held in memory by the clixon snmp
+agent. This internal cache is flushed to Clixon when setting a row to
+`active`, like a "pre-commit phase". When `clixon_snmp` is restarted,
+the cache is cleared.
