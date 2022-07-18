@@ -169,10 +169,14 @@ the netsnmp agent library, not `table-data` or `table-instance`.
 
 RowStatus
 ---------
-
 Clixon supports SMIv2 RowStatus for table handling. Where RowStatus is
-used, the status of the row will be returned and set to either active,
+used, the status of the row is returned and set to either active,
 notInService or notReady.
 
 When writing the status of the row can be set to either createAndGo,
-createAndWait or destroy.
+createAndWait, active or destroy.
+
+Rowstatus and createAndWait mode uses and internal cache which is held
+in memory by the clixon snmp agent. This internal cache written to
+Clixon when setting a row to `active`. When the clixon snmp agent is
+restarted, the cache is cleared.

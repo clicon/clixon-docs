@@ -178,6 +178,7 @@ The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 sta
 * false()
 * name()
 * node()
+* boolean()
 * not()
 * position()
 * text()
@@ -185,7 +186,6 @@ The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 sta
 
 The following standard XPath functions are *not* supported:
 
-* boolean
 * ceiling
 * comment
 * concat

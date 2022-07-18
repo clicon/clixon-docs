@@ -294,6 +294,9 @@ The "td" parameter can be accessed with the following functions:
 ``size_t  transaction_clen(transaction_data td)``
   Get length of changed xml vector
 
+Flags
+^^^^^
+
 A programmer can also use XML flags that are set in "src" and "target" XML trees to identify what has changed. The following flags are used to makr the trees:
 
 XML_FLAG_DEL
@@ -313,6 +316,14 @@ For example, assume the tree (A B) is replaced with (B C), then the two trees ar
              /|               |\
    DELETE   A B               B C ADD
 
+You can use functions, such as ``xpath_vec_flag()`` to query for changed nodes::
+
+   if (xpath_vec_flag(xcur, nsc, "//symbol/foo", XML_FLAG_ADD, &vec, &veclen) < 0) 
+      err;
+   for (i=0; i<veclen; i++){
+      xn = vec[i];
+         ...
+   }
   
 Privileges
 ==========
