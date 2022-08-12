@@ -16,9 +16,14 @@ Overview
 ========
 The pagination solution is based on the following drafts:
 
-- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-00>`_
-- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-nc-02>`_
-- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-rc-02>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-00.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-00.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-00.html>`_
+
+The drafts define two YANGs:
+
+- ietf-list-pagination@2022-07-24.yang
+- ietf-list-pagination-nc@2022-07-24.yang
   
 The pagination in Clixon is currently restricted to the `offset` and `limit` attributes. For example, the following requests a list of 120 items in chunks of 20::
 

@@ -64,7 +64,7 @@ Note that the format settings applies to all datastores.
 
 Other formats
 -------------
-While only XML and JSON are currently supported as datastore formats, Clixon supports `CLI` and `TEXT` formats for printing, and saving and loading files.
+While only XML and JSON are currently supported as datastore formats, Clixon also supports `CLI` and `TEXT` formats for printing, and saving and loading files.
 
 The main example contains example code showing how to load and save a config using other formats.
 
@@ -135,7 +135,8 @@ The arguments of these functions are similar with some local variance. For examp
 		   int               level, 
 		   int               pretty,
 		   clicon_output_cb *fn,
-		   int               skiptop)
+		   int               skiptop,
+		   int               autocliext)
 
 where:
 
@@ -145,6 +146,7 @@ where:
 * `pretty` makes the output indented and use newlines
 * `fn` is the output function to use. `NULL` means `fprintf`, `cligen_output` is used for scrolling in CLI
 * `skiproot` only prints the children by skipping the top-level XML node `xn`
+* `autocliext` Set if you want to activate autocli extensions (eg `hide` extensions)
 
 
 Module library support

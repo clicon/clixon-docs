@@ -463,11 +463,11 @@ Specific fields for compress are:
 
 `yang-keyword`
    If present identifes a YANG keyword which the rule applies to.
-   Example: 'container'
+   Example: ``container``
 
 `schema-nodeid`
    A single <id> identifying a YANG schema-node identifier as defined in RFC 7950 Sec 6.5.
-   Example: '`config'`
+   Example: ``config``
 
 `yang-keyword-child`
    The YANG statement has a single child, and the yang type of the child is the value of this option.
