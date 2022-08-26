@@ -15,12 +15,12 @@ representation. In the C API, this data structure is called ``cxobj``
 data. Typically, a cxobj is parsed from or printed to XML or JSON, but
 is really a generic representation of a tree.
 
-Clixon uses paths to navigate in XML trees.  Clixon uses the following three methods:
-
 Paths
 =====
+Clixon uses paths to navigate in XML trees.  Clixon uses the following three methods:
+
 * *XML Path Language* defined in `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_ as part of XML and used in  `NETCONF <http://www.rfc-editor.org/rfc/rfc6241.txt>`_.
-* *Instance-identifier*  defined in `RFC 7950: The YANG 1.1 Data Modeling Language <https://www.rfc-editor.org/rfc/rfc7950.txt>`_, a subset of XPath and used in `NACM <https://www.rfc-editor.org/rfc/rfc8341.txt>`_,.
+* *Instance-identifier*  defined in `RFC 7950: The YANG 1.1 Data Modeling Language <https://www.rfc-editor.org/rfc/rfc7950.txt>`_, a subset of XPath and used in `NACM <https://www.rfc-editor.org/rfc/rfc8341.txt>`_,
 * *Api-path* defined and used in `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_
 
 XPath

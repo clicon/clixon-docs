@@ -75,7 +75,7 @@ Clixon implements the following NETCONF RFC:s:
 * `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
-* `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. RESTCONF call home not implemented
+* `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
@@ -211,9 +211,9 @@ Pagination
 ==========
 The pagination solution is based on the following drafts:
 
-- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-00>`_
-- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-nc-02>`_
-- `<https://datatracker.ietf.org/doc/html/draft-wwlh-netconf-list-pagination-rc-02>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-00.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-00.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-00.html>`_
 
 See :ref:`Pagination section <clixon_pagination>` for more info.
 

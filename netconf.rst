@@ -186,10 +186,14 @@ session running as root can make recovery operations.
 
 Callhome
 ========
-With Clixon, you can make a solution following `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ over SSH as a utility using openssh.  
+With Clixon, you can make a solution following `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ over SSH as a utility using openssh.
 
 The solution is built "around" Clixon meaning that Clixon itself is
-used as-is.  Other solutions are possible as well, especially on the
+used as-is.  This may be referred to as "external" callhome since it
+is done using external tools, not clixon itself. In contrast, rstconf
+call-home is "internal", see callhome section in :ref:`Restconf section <clixon_restconf>`.
+
+Other solutions are possible as well, especially on the
 client side, and a full system integration requires a callhome
 framework to determine when and how callhomes are made as well as
 addressing the security implications addressed by RFC 8071.
@@ -242,7 +246,7 @@ The example is implemented as a regression test in ``test/test_netconf_ssh_callh
 The RFC lists several security issues that need to be addressed in a solution, including "pinning" of host keys etc.
 
 .. note::
-        Warning: there are security implications of using this example as noted in `RFC 8071: NETCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_
+        Warning: there are security implications of using this example as noted in `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_
 
 IPC
 ===

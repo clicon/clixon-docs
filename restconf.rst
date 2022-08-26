@@ -223,6 +223,7 @@ Configure a single HTTP on port 80 in the default config file::
         <enable>true</enable>
         <auth-type>user</auth-type>
         <socket>
+	   <description>HTTP listen</description>
            <namespace>default</namespace>
            <address>0.0.0.0</address>
            <port>80</port>
@@ -240,12 +241,14 @@ Configure two HTTPS listeners in two different namespaces::
       <server-key-path>/etc/ssl/private/clixon-server-key.pem</server-key-path>
       <server-ca-cert-path>/etc/ssl/certs/clixon-ca_crt.pem</server-ca-cert-path>
       <socket>
+	 <description>HTTPS listen</description>
          <namespace>default</namespace>
          <address>0.0.0.0</address>
          <port>443</port>
          <ssl>true</ssl>
       </socket>
       <socket>
+      	 <description>HTTPS listen on myns</description>
          <namespace>myns</namespace>
          <address>0.0.0.0</address>
          <port>443</port>
@@ -404,6 +407,8 @@ If there are multiple callbacks, the first result which is not "ignore" is retur
   
 The main example contains example code.
 
+
+
 FCGI
 ====
 This section describes the RESTCONF FCGI mode using NGINX.
@@ -444,6 +449,157 @@ If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical
 where ``fastcgi_pass`` setting should match  by ``fcgi-socket`` in ``clixon-config/restconf``.
 
 
+Callhome
+========
+Clixon supports RESTCONF callhome according to `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ using native RESTCONF and TLS and server/client certs.
+
+Overview
+--------
+::
+
+    device/server (n)                            client      (n)
+  +-----------------+    (1) connect     +---------------------+
+  |                 |  --------------->  |                     |
+  | clixon-restconf |     (2) TLS        |   callhome-client   |  
+  |                 | <---------------   |                     |
+  |                 |     (3) data       |                     |
+  |                 | <---------------   |                     |
+  +-----------------+                    +---------------------+
+          | (4) IPC
+          v                             
+  +-----------------+
+  | clixon-backend  |
+  +-----------------+                   
+
+The operation of RESTCONF callhome is as follows:
+  1. The RESTCONF server initiates a TCP connection to a client, either persistently or periodically
+  2. The client sets up a TLS connection to the server using the existing TCP session
+  3. The client sends data as HTTP requests over TLS to the server
+  4. The RESTCONF server receives data, authenticates the client-cert, transforms the request to NETCONF and sends it internally to the clicon backend.
+  5. Status replies are returned to the client
+
+.. note::
+   Clixon does not implement client-side call-home functionality, only server-side
+     
+Callback clients
+----------------
+A server may configure multiple HTTP callback clients, for fault-tolerance purposes, for example.
+
+A callback "controller" client typically serves multiple servers.
+
+Bootstrap controller
+^^^^^^^^^^^^^^^^^^^^
+A typical callback client scenario is a bootstrap controller. The HTTP requests
+by the client are stored waiting for an inital connect from a
+minimally deployed server. The controller may then store pre-configured
+configurations. In such a scenario, the server needs at least the
+following initial information:
+
+   1. A callback IP address
+   2. A server cert
+   3. A CA to validate the client cert OR a list of exactly matching client-certs
+
+Once the controller accepts a connection from a server, it may send
+RESTCONF requests over HTTP and fully configure the new server.
+
+Such a controller can also be used for more "intelligent"
+configuration as well, such as setting up tunnels or other
+configurations spanning multiple servers.
+
+The controller may also provide an interactive CLI or GUI for example once a connection is established.
+
+Description
+-----------
+The callhome function is "internal" in the sense that it is
+integrated in Clixon and uses the openssl lib and extends the regular
+"listen" RESTCONF functionality.
+
+The callhome mechanism is a server-side implementation. There is an
+example client-side implementation
+(`util/clixon_restconf_callhome_client.c`) which is not a part of the
+actual Clixon code. A user needs to write a client to use this
+functionality.
+
+The existing clixon-restconf YANG has been extended to support
+callhome. The ietf restconf server draft (`<https://datatracker.ietf.org/doc/html/draft-ietf-netconf-restconf-client-server-26>`_)
+which is used as a basis for the extensions. While not complying to the draft's
+structure, the YANG fields covering callhome are similar. Please see
+the draft for detailed description of scenarios and configuration
+fields.
+
+The callhome features include:
+
+* `Persistent` and `periodic` connection types, ie continuous callhome attempts, or at specific time intervals.
+* Periodic connections support `idle-timeout`, ie close the TCP connection if no traffic after timeout.
+* `Max-attempts` reconnect strategy, ie how many times to retry a connect attempt before timeout
+
+Setup
+-----
+A callhome session is setup by adding a ``call-home`` section to a native RESTCONF socket declaration. For example::
+
+     <restconf xmlns="https://clicon.org/restconf">
+      <enable>true</enable>
+      <auth-type>client-certificate</auth-type>
+      <server-cert-path>/etc/ssl/certs/clixon-server-crt.pem</server-cert-path>
+      <server-key-path>/etc/ssl/private/clixon-server-key.pem</server-key-path>
+      <server-ca-cert-path>/etc/ssl/certs/clixon-ca_crt.pem</server-ca-cert-path>
+      <socket>
+         <description>callhome session</description>
+         <namespace>default</namespace>
+         <address>12.13.14.15</address>
+         <port>4336</port>
+         <ssl>true</ssl>
+	 <call-home>                
+	   <!-- ... call-home section ... -->
+	 </call-home>
+      </socket>
+
+Some notes for callhome sockets:
+
+1. The ``address`` field denotes a remote client, not the server which is the case for "listen" sockets.
+2. The default ``port`` for RESTCONF callhome is `4336`
+3. A callhome socket must have ``ssl`` enabled
+4. Client certs must be used as ``auth-type``
+5. You can mix regular "listen" sockets with "callhome" sockets.
+6. You can have multiple (concurrent) callhome sockets.
+
+Persistent connection
+---------------------
+If the callhome session is persistent, the server tries to hold the connection open at all times. The default re-connect strategy is 1 second.
+
+Example socket configuration::
+
+   <call-home>
+      <connection-type>
+         <persistent/>
+      </connection-type>
+   </call-home>
+
+Periodic connection
+-------------------
+Periodic call-home sessions try to establish a callhome connections at regular intervals, such as once a minute, or once a day.
+
+Example periodic configuration::
+
+   <call-home>
+      <connection-type>
+         <periodic>
+  	    <period>3600</period>
+	    <idle-timeout>60</idle-timeout>
+	  </periodic>
+      </connection-type>
+      <reconnect-strategy>
+         <max-attempts>3</max-attempts>
+      </reconnect-strategy>
+   </call-home>
+
+Notes:
+
+  1. The `period` is in seconds, while the draft uses minutes. The example therefore shows a period of one hour.
+  2. The `idle-timeout` field means that the TCP session is closed by the server if no data is sent in 1 minute.
+  3. The `max-attempts` setting means that every start of period the server makes several attempts to reconnect. If all attempts fail, it waits another period before re-trying.
+  4. If the connection is active when the new period starts, no reconnect attempt is made.
+
 HTTP data
 =========
 
@@ -464,7 +620,7 @@ The following configuration options can be defined in the clixon configuration f
 CLICON_HTTP_DATA_ROOT
    Directory in the local file system where http-data files are searched for. Soft links, ``..``, ``~`` etc are not followed. Default is ``/var/www``.
 CLICON_HTTP_DATA_PATH
-   Prefix to match with URI to match for http-data. This path will be appended to ``CLICON_HTTP_DATA_ROOT`` to find a matching file. Default is ``/``. Note that the restconf match prefix is ``/restconf``.
+   Prefix to match with URI to match for http-data. This path is appended to ``CLICON_HTTP_DATA_ROOT`` to find a matching file. Default is ``/``. Note that the restconf match prefix is ``/restconf``.
 
 Example
 ^^^^^^^
