@@ -178,37 +178,116 @@ The callback also supports three forms of registered callbacks:
 Transactions
 ============
 Clixon follows NETCONF in its validate and commit semantics.
-Using the CLI or another frontend, you edit the `candidate` configuration, which is first
-`validated` for consistency and then `committed` to the `running`
-configuration.
+Using the CLI or another frontend, you edit the `candidate` configuration,
+which is first `validated` for consistency and then `committed` to the
+`running` configuration.
 
-A clixon developer writes commit functions to incrementally upgrade a
-system state based on configuration changes. Writing commit callbacks
-is the core functionality of a clixon system.
+A clixon developer writes commit functions to incrementally update a
+system state based on configuration changes. Writing transsaction callbacks
+is a core function of the clixon system.
 
-The netconf validation and commit operation is implemented in
-Clixon by a transaction mechanism, which ensures that user-written
-plugin callbacks are invoked atomically and revert on error. The transaction callbacks are the following:
+The NETCONF validation and commit operation is implemented in clixon by a
+transaction mechanism, which ensures that user-written plugin callbacks
+are invoked atomically and revert on error.
+
+.. note::
+        Clixon currently runs in a single thread and all transactions run
+	from `begin,` to `end` without interruption. However, it is strongly
+	recommended that the callbaks be thread-safe for future compatibility.
+
+.. warning::
+        Clixon can only guarantee a consistent system state if you follow
+	the guidelines below. Behavior that is not documented here is not
+	guaranteed and subject to change without notice.
+
+The phases of a transaction are:
 
 begin
-   Transaction start
+   The begin callback indicates that a transaction is starting, but that the system level
+   validation has not begun yet. Not much has happened at this point, and you should not
+   rely on the transaction data or the XML ADD/DEL/CHANGE flags.
+
+   The intent of this callback is to notify the plugin that a transaction is beginning,
+   and that it should allocate any resources necessary to handle the coming transaction.
+
 validate
-   Transaction validation
+   The validate callback is triggered by a client requesting a validation of the
+   current change set. Before this callback, clixon has completed the system level
+   YANG validation. All transaction data is valid at this point (including XML flags).
+   In this callback, the plugin further validates the transaction data and returns a
+   success/failure indication. It must not change the state of the system in any way.
+   Successful completion should guarantee that the commit will be without error. See
+   the commit information below on why it is important to try. If a failure status
+   is returned to clixon then the transaction is cancelled, and the transaction
+   abort callback will be called from clixon.
+
+   You should place as much of the validation in the YANG model specification as
+   possible. This does two things; it allows the user of the YANG model to
+   understand the constraints clearly, and it is more efficient when the YANG
+   validation catches problems before a transaction cycle happens.
+
 complete
-   Transaction validation complete
+   This callback is used to indicate to the plugin that the validation was
+   successful and indicates that the commit is coming next. The transaction data
+   will be valid when this callback is called. The complete callback must not
+   change the state of the system.
+
+   The usefulness of this callback is debatable, and it is possible that this
+   callback will be removed in a future version.
+
 commit
-   Transaction commit
+   This callback is called when the client requests a commit. The transaction data
+   is valid, and both the system and plugin validations of the transaction data
+   has completed without error.
+
+   The callback should perform the actions required to change the system state
+   as indicated by the transaction target database.
+
+   Ideally all possible errors should be detected in the validate callback,
+   but this clearly is a dream. A commit failure is a major event and leaves
+   the system in an inconsistent state. In the event of an error, the callback
+   must return an error status. Clixon will initiate its error processing to
+   roll back the system to its state prior to the beginning of the transaction.
+
 commit_done
-   Transaction when commit done. After this, the source db is copied to target and default values removed.
+   Transaction when commit done. After this, the source db is copied to target
+   and default values removed.
+
 end
-   Transaction completed. 
+   The end callback is called when a transaction has successfully completed.
+
+   You should not depend upon transaction data being valid at this point and no
+   changes to the system state may occur (changes at this point prevent the
+   possibility of error handling).
+
+   Any resources allocated in the begin callback should be released at this point.
+   When the callback returns, the transaction is complete.
+
 revert
-   Transaction revert
+   When the revert callback is called the plugin must revert the system to the
+   state prior (atomicity) to the beginning of the transaction. The transaction
+   data is valid and is the same as in the commit callback. The code in the revert
+   callback must assure that the system state matches the source database before
+   returning.
+
+   A revert callback will be followed by an abort callback.
+
 abort
-   Transaction aborted
+   If a validate or commit operation fails, the terminal action is to call the
+   abort callback rather than the end callback. The common purpose of this
+   callback is to release any resources allocated in the begin callback.
+
+   If an abort callback occurs after a commit, then the revert callback
+   will be called prior to the abort. The plugin developer may do the actual
+   reversion of the commit in the revert or abort callback, or split the
+   duties as desired, but upon completion of the abort callback, it must be
+   guaranteed that the system state will be as before the begin callback.
+
+Transaction Examples
+--------------------
 
 In a system with two plugins, for example, a transaction sequence looks like the following::
-   
+
   Backend   Plugin1    Plugin2
   |          |          |
   +--------->+--------->+ begin
@@ -239,6 +318,7 @@ the transaction is aborted and the commit reverted:
   +--------->+          + revert
   |          |          |
   +--------->+--------->+ abort
+
 
 Callbacks
 ---------
