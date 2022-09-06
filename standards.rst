@@ -77,6 +77,7 @@ Clixon implements the following NETCONF RFC:s:
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
 * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
+* `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_ 
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
 
@@ -84,6 +85,7 @@ The following RFC6241 capabilities/features are hardcoded in Clixon:
 * :validate (RFC6241 8.6)
 * :xpath (RFC6241 8.9)
 * :notification (RFC5277)
+* :with-defaults (RFC6243)
 
 The following features are optional and can be enabled by setting CLICON_FEATURE:
 
@@ -107,11 +109,16 @@ Capability is preferred over default subtrees. This has two reasons:
 
 Clixon supports netconf locks in default settings but *not* if ``CLICON_DATASTORE_CACHE`` is ``nocache`` mode.
    
-Default values
---------------
-Clixon only stores explicit set default values in datastores, while unset values are populated in memory on retrieval. This means that get-config will report all default values, not only those explicitly set. 
+Default handling
+----------------
+Clixon treats default data according to what is defined as explicit basic mode in `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_, i.e. the server consider any data node that is not explicitly set data to be default data.
 
-`RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_ is not implemented. Among the modes described in the RFC, Clixon implements "report-all" with-respect to ``get`` and ``get-config`` operations, but "explicit" with respect to how configurations are saved in datastores.
+The `:with-defaults` capability indicates that clixon default behaviour is explicit and also indicates that additional retrieval modes supported by the server are:.
+
+* explicit
+* trim
+* report-all
+* report-all-tagged
 
 RESTCONF
 ========
@@ -121,13 +128,13 @@ The following features of RFC8040 are supported:
 
 * OPTIONS, HEAD, GET, POST, PUT, DELETE, PATCH
 * Stream notifications (Sec 6)
-* Query parameters: `insert`, `point`, `content`, `depth`, `start-time` and `stop-time`.
+* Query parameters: `insert`, `point`, `content`, `depth`, `start-time`, `stop-time` and `with-defaults`.
 * Monitoring (Sec 9)
 
 The following features are *not* implemented:
 
 * ETag/Last-Modified
-* Query parameters: `fields`, `filter`, `with-defaults`
+* Query parameters: `fields` and `filter`
 
 RESTCONF event notification as described in RFC7950 section 6 is supported as follows:
 
