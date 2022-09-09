@@ -252,7 +252,50 @@ The callback is called with the following parameters::
 
 which means that `cvv` contains dynamic values set by the user, and `argv` contains static values set by the clispec designer.
 
+Show commands
+-------------
+Clixon includes show commands for showing datastore and state content.An application may use these functions as basis for more specialized show functions. Some show functions are:
 
+- ``cli_auto_show()`` - Multi-purpose show function for manual CLI show commands
+- ``cli_show_config()`` - Use ``cli_auto_show`` instead
+- ``cli_show_auto()`` - Used in conjunction with the autocli with expansion
+- ``cli_pagination()`` - Show paginated data of a large list
+
+.. note::
+        CLI library functions are subject to change in new releases
+
+
+cli_auto_show
+^^^^^^^^^^^^^
+The ``cli_auto_show()`` function is a versatile show function to display many variants of datastore and state data. A typical use in a cli spec is as follows::
+
+    configuration("Show configuration"),
+       cli_auto_show("datamodel", "candidate", "text", true, false, "report-all-tagged");
+
+The main example has many other usages.
+       
+The callback has the following parameters:
+
+ * `treename` : typically `datamodel`, see Section `tree expansion`_.
+ * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
+ * `format` : Show format, one of `text`, `xml`, `json`, `cli`, or `netconf` (see :ref:`datastore formats <clixon_datastore>`)
+ * `pretty` : If `true`, make output pretty-printed
+ * `state`  : If `true`, include non-config data in output
+ * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`
+ * `prefix`  : Opional prefix to print before cli syntax output, only valid for CLI format.
+
+Note that there are also two extra propriatary modes serving as examples:
+
+ * `report-all-tagged-default`, which gets the config as `report-all-tagged` but strips the tags/attributes (same as `report-all`).
+ * `report-all-tagged-strip`, which also gets the config as `report-all-tagged` but strips the nodes associated with the default tags (same as `trim`).
+
+cli_show_auto
+^^^^^^^^^^^^^
+A typical use of ``cli_show_auto()`` together with the autocli for auto-generated configuration is as follows::
+
+      show("Show expand") @datamodelshow, cli_show_auto("candidate", "xml");  
+
+	
 Autocli
 =======
 The Clixon CLI contains parts that are *generated* from a YANG
@@ -495,7 +538,6 @@ defined:
 * ``@datamodelstate`` - A tree for showing state as well as configuration
 
 Note to use ``@datamodelstate`` config option ``treeref-state-default`` must be set.
-  
   
 YANG Extensions
 ---------------
