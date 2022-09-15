@@ -256,46 +256,79 @@ Show commands
 -------------
 Clixon includes show commands for showing datastore and state content.An application may use these functions as basis for more specialized show functions. Some show functions are:
 
-- ``cli_auto_show()`` - Multi-purpose show function for manual CLI show commands
-- ``cli_show_config()`` - Use ``cli_auto_show`` instead
-- ``cli_show_auto()`` - Used in conjunction with the autocli with expansion
+- ``cli_show_config()`` - Multi-purpose show function for manual CLI show commands
+- ``cli_show_auto()`` - Used in conjunction with the autocli with expansion trees
+- ``cli_show_auto_mode()`` - Used in conjunction with the autocli with edit-modes
 - ``cli_pagination()`` - Show paginated data of a large list
 
 .. note::
         CLI library functions are subject to change in new releases
 
+cli_show_config
+^^^^^^^^^^^^^^^
+The ``cli_show_config`` is a basic function to display datastore and state data. A typical use in a cli spec is as follows::
 
-cli_auto_show
-^^^^^^^^^^^^^
-The ``cli_auto_show()`` function is a versatile show function to display many variants of datastore and state data. A typical use in a cli spec is as follows::
+    show("Show configuration"), cli_show_config("candidate", "text");
 
-    configuration("Show configuration"),
-       cli_auto_show("datamodel", "candidate", "text", true, false, "report-all-tagged");
+Using this command in the CLI could provicde the following output::
+  
+    cli> show
+    <table xmlns="urn:example:clixon">
+       <parameter>
+          <name>a</name>
+          <value>x</value>
+       </parameter>
+    </table>
+  
+The callback has the following parameters, only the first is mandatory:
 
-The main example has many other usages.
-       
-The callback has the following parameters:
-
- * `treename` : typically `datamodel`, see Section `tree expansion`_.
  * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
  * `format` : Show format, one of `text`, `xml`, `json`, `cli`, or `netconf` (see :ref:`datastore formats <clixon_datastore>`)
  * `pretty` : If `true`, make output pretty-printed
  * `state`  : If `true`, include non-config data in output
- * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`
+ * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. See also extended values below
  * `prefix`  : Opional prefix to print before cli syntax output, only valid for CLI format.
 
 Note that there are also two extra propriatary modes serving as examples:
 
+ * `NULL`, default with-default value, usually `report-all`
  * `report-all-tagged-default`, which gets the config as `report-all-tagged` but strips the tags/attributes (same as `report-all`).
  * `report-all-tagged-strip`, which also gets the config as `report-all-tagged` but strips the nodes associated with the default tags (same as `trim`).
 
 cli_show_auto
 ^^^^^^^^^^^^^
-A typical use of ``cli_show_auto()`` together with the autocli for auto-generated configuration is as follows::
+The ``cli_show_auto()`` callback is used together with the autocli to show sub-parts of a configured tree using expansion. A typical definition is as follows::
 
       show("Show expand") @datamodelshow, cli_show_auto("candidate", "xml");  
 
-	
+That is, it must always be used together with a tree-reference as described in Section `autocli`_.
+
+An example CLI usage is::
+
+    cli> show table parameter a
+    <parameter>
+       <name>a</name>
+       <value>x</value>
+    </parameter>
+
+The arguments are similar to `cli_show_config` with the difference that the `xpath` is implicitly defined by the 
+      
+cli_show_auto_mode
+^^^^^^^^^^^^^^^^^^
+The ``cli_show_auto_mode()`` callback also used together with the autocli but instead of exapansion uses the edit-modes (see Section `edit modes`_).
+A typical definition is::
+
+      show, cli_show_auto_mode("candidate");
+
+An example usage using edit-modes is::
+
+      cli> edit table
+      cli> show config
+     <parameter>
+        <name>a</name>
+        <value>x</value>
+     </parameter>  
+
 Autocli
 =======
 The Clixon CLI contains parts that are *generated* from a YANG
