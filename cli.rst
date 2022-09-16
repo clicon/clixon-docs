@@ -323,7 +323,7 @@ A typical definition is::
 An example usage using edit-modes is::
 
       cli> edit table
-      cli> show config
+      cli> show
      <parameter>
         <name>a</name>
         <value>x</value>

@@ -68,6 +68,20 @@ You then need to set the following configure option:
 
   <CLICON_YANG_REGEXP>libxml2</CLICON_YANG_REGEXP>
 
+Metadata
+--------
+Clixon implements `Defining and Using Metadata with YANG RFC 7952 <http://www.rfc-editor.org/rfc/rfc7952.txt>`_ for XML and JSON.
+
+This means that Yang-derived meta-data defined with::
+
+    md:annotation <name>
+
+is defined for attributes so that they can be mapped from XML to JSON, for example.
+
+Assigned meta-data are hardcoded. The following attributes are defined:
+
+* ietf-netconf-with-defaults:default from RFC 6243 / RFC 8040
+  
 NETCONF
 =======
 Clixon implements the following NETCONF RFC:s:
