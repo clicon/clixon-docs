@@ -50,7 +50,7 @@ The RESTCONF implementation supports two HTTP configurations:
 
 Clixon native HTTP server
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Native http server requires openssl 1.1
+Native http server requires openssl 1.1 or later.
 
 Install TLS::
 
