@@ -277,3 +277,33 @@ There are also some variables that can be set, such as::
   ./configure CFLAGS="-O1 -Wall" INSTALLFLAGS="" # Use other CFLAGS
 
 Note, you need to reconfigure and recompile from scratch if you want to build static libs
+
+macOS
+=====
+
+Clixon can be built on macOS, however not all tests will pass at this
+moment and there might be pieces which will not run properly.
+
+A few packages must be installed using for example HomeBrew::
+
+  brew install openssl nghttp2
+
+
+Since we install a few libraries from HomeBrew we might want to set C
+and library paths::
+
+    $ export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/opt/openssl/lib
+    $ export C_INCLUDE_PATH=/opt/homebrew/opt/openssl/include/
+
+
+Then Cligen and Clixon can be built as normal. Since Clixon will
+install things in "/usr/local/sbin/" you might want to add this to
+PATH. Either temporarily using::
+
+  export PATH=$PATH:/usr/local/sbin/
+
+
+Or permanently by adding the above to .bash_profile or similar.
+
+Since macOS don't use systemd or similar you'll have to start and stop
+clixon_backend etc manually.
