@@ -20,8 +20,13 @@ Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCON
 `Startup`
    The configuration datastore holding the configuration loaded by the device when it boots. Only present on devices that separate the startup configuration datastore from the running configuration datastore.
 
-Note that there may appear other datastores, Clixon is not limited to the three datastores above. For example, a `tmp` datastore appears in several cases as an intermediate datastore.
-	 
+There are also other datastores, Clixon is not limited to the three datastores above. For example:
+
+`tmp`
+   The tmp datastore appears in several cases as an intermediate datastore.
+`Rollback`
+   If the confirmed-commit feature is enabled, the rollback datastore holds the running datastore as it existed before the confirm commit. If a cancel or timeout occurs, the rollback datastore is used to revert to.
+
 Datastore files
 ===============
 The mandatory `CLICON_XMLDB_DIR` option determines where the

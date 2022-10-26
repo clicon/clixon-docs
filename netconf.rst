@@ -184,6 +184,16 @@ the recovery user as `root`, in which case only a netconf or cli
 session running as root can make recovery operations.
 
 
+Confirm-commit
+==============
+Confirm as defined in RFC 6241 Sec 8.4 is enabled by::
+
+    <CLICON_FEATURE>ietf-netconf:confirmed-commit</CLICON_FEATURE>
+
+Confirmed-commit adds the ``<cancel-commit>`` operation and more parameters to ``<commit>``. 
+
+The "rollback" datastore is added and is used as a temporary revert datastore.
+
 Callhome
 ========
 With Clixon, you can make a solution following `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_ over SSH as a utility using openssh.
