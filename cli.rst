@@ -253,7 +253,7 @@ The callback is called with the following parameters::
 which means that `cvv` contains dynamic values set by the user, and `argv` contains static values set by the clispec designer.
 
 Show commands
--------------
+=============
 Clixon includes show commands for showing datastore and state content.An application may use these functions as basis for more specialized show functions. Some show functions are:
 
 - ``cli_show_config()`` - Multi-purpose show function for manual CLI show commands
@@ -261,11 +261,13 @@ Clixon includes show commands for showing datastore and state content.An applica
 - ``cli_show_auto_mode()`` - Used in conjunction with the autocli with edit-modes
 - ``cli_pagination()`` - Show paginated data of a large list
 
+The CLI show functions are utility functions in the sense that they are not part of the core functionality and a user or product may want to specialize them.
+  
 .. note::
         CLI library functions are subject to change in new releases
 
 cli_show_config
-^^^^^^^^^^^^^^^
+---------------
 The ``cli_show_config`` is a basic function to display datastore and state data. A typical use in a cli spec is as follows::
 
     show("Show configuration"), cli_show_config("candidate", "text");
@@ -296,7 +298,7 @@ Note that there are also two extra propriatary modes serving as examples:
  * `report-all-tagged-strip`, which also gets the config as `report-all-tagged` but strips the nodes associated with the default tags (same as `trim`).
 
 cli_show_auto
-^^^^^^^^^^^^^
+-------------
 The ``cli_show_auto()`` callback is used together with the autocli to show sub-parts of a configured tree using expansion. A typical definition is as follows::
 
       show("Show expand") @datamodelshow, cli_show_auto("candidate", "xml");  
@@ -314,7 +316,7 @@ An example CLI usage is::
 The arguments are similar to `cli_show_config` with the difference that the `xpath` is implicitly defined by the 
       
 cli_show_auto_mode
-^^^^^^^^^^^^^^^^^^
+------------------
 The ``cli_show_auto_mode()`` callback also used together with the autocli but instead of exapansion uses the edit-modes (see Section `edit modes`_).
 A typical definition is::
 
