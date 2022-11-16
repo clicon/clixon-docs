@@ -286,16 +286,12 @@ The callback has the following parameters, only the first is mandatory:
 
  * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
  * `format` : Show format, one of `text`, `xml`, `json`, `cli`, or `netconf` (see :ref:`datastore formats <clixon_datastore>`)
+ * `xpath`  : Static xpath (only present in this API function)
+ * `namespace` : Default namespace for xpath (only present in this API function)
  * `pretty` : If `true`, make output pretty-printed
  * `state`  : If `true`, include non-config data in output
  * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. See also extended values below
- * `prefix`  : Opional prefix to print before cli syntax output, only valid for CLI format.
-
-Note that there are also two extra propriatary modes serving as examples:
-
- * `NULL`, default with-default value, usually `report-all`
- * `report-all-tagged-default`, which gets the config as `report-all-tagged` but strips the tags/attributes (same as `report-all`).
- * `report-all-tagged-strip`, which also gets the config as `report-all-tagged` but strips the nodes associated with the default tags (same as `trim`).
+ * `prepend` : Opional prefix to prepend before cli syntax output, only valid for CLI format.
 
 cli_show_auto
 -------------
@@ -313,7 +309,14 @@ An example CLI usage is::
        <value>x</value>
     </parameter>
 
-The arguments are similar to `cli_show_config` with the difference that the `xpath` is implicitly defined by the 
+The arguments are similar to `cli_show_config` with the difference that the `xpath` is implicitly defined by the current position of the tree reference::
+  
+ * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
+ * `format` : Show format, one of `text`, `xml`, `json`, `cli`, or `netconf` (see :ref:`datastore formats <clixon_datastore>`)
+ * `pretty` : If `true`, make output pretty-printed
+ * `state`  : If `true`, include non-config data in output
+ * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. See also extended values below
+ * `prepend`  : Opional prefix to print before cli syntax output, only valid for CLI format.
       
 cli_show_auto_mode
 ------------------
@@ -330,6 +333,24 @@ An example usage using edit-modes is::
         <name>a</name>
         <value>x</value>
      </parameter>  
+
+Same parameters as ``cli_show_auto``
+
+Common show parameters
+----------------------
+
+with-default parameter
+^^^^^^^^^^^^^^^^^^^^^^
+All show commands have an optional `with-default` retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. There are also extra propriatary modes of `default` serving as examples:
+
+ * `NULL`, default with-default value, usually `report-all`
+ * `report-all-tagged-default`, which gets the config as `report-all-tagged` but strips the tags/attributes (same as `report-all`).
+ * `report-all-tagged-strip`, which also gets the config as `report-all-tagged` but strips the nodes associated with the default tags (same as `trim`).
+
+pretty parameter
+^^^^^^^^^^^^^^^^
+All show commands have a pretty-print parameter. If `true` the putput is pretty-printed.
+Indentation level is controlled by the ``PRETTYPRINT_INDENT`` compile-time option
 
 Autocli
 =======

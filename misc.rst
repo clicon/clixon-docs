@@ -45,10 +45,44 @@ where:
 * `errno`  if given, usually errors as given by ``errno.h``
 * `format` A variable arg string describing the error.
 
+CLI Errors
+----------
+There are several types of error messages in the CLI. The first class is "syntax" errors with things like::
+
+  cli> command
+  CLI syntax error: "foo": Unknown command
+  cli>
+
+These are errors immediately detected by the CLIgen parser and are
+internally generated in CLIgen. Errors include command, syntax and type
+checking. They are shown on stderr, the CLI continues, without
+logging.
+
+A second type of errors are "semantic" errors detected when processing
+CLI callbacks. These errors are more heavyweight than syntax errors
+and are declared in code using standard clixon `Error call`_.  They
+are logged and can be directed to syslog, and are by default printed
+on stderr.  The CLI continues after the error message is printed.
+Typical places are user callbacks, backend rpc errors, validation,
+etc, either system-defined or user-defined callbacks.
+They are on the form::
+
+  cli> command
+  Nov 15 15:42:56: acl_get_list: 334: Yang error: no ACLs defined
+  CLI command error
+  cli>
+
+A third class of CLI errors are similar to the previous class but quits the CLI::
+
+  cli> command
+  Nov 15 15:42:56: acl_get_list: 334: Yang error: no ACLs defined  
+  sh#
+
+These errors are typically due to system functions fatally failing.
+  
 Specialized error handling
 --------------------------
 An application can specialize error handling for a specific category by using `clixon_err_cat_reg()` and a log callback. Example::
-
 
    /* Clixon error category log callback 
     * @param[in]    handle  Application-specific handle

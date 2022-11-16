@@ -268,8 +268,8 @@ These include (standard options are omitted)
   --with-libxml2          Use gnome/libxml2 regex engine
   --without-sigaction     Disable sigaction logic (some platforms do not support SA_RESTART mode)
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
-  --with-yang-standard-dir=DIR  Location of standard IETF/IEEE YANG specs for tests and example (default: $prefix/share/yang/standard)
-
+  --with-yang-standard-dir=DIR  Location of standard IETF/IEEE YANG specs for tests and example
+                                (default: $prefix/share/yang/standard). You can retrieve the standard files at https://github.com/YangModels/yang
 
 There are also some variables that can be set, such as::
 
