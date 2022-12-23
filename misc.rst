@@ -78,7 +78,7 @@ A third class of CLI errors are similar to the previous class but quits the CLI:
   Nov 15 15:42:56: acl_get_list: 334: Yang error: no ACLs defined  
   sh#
 
-These errors are typically due to system functions fatally failing.
+These errors are typically due to system functions failing in a fatal way.
   
 Specialized error handling
 --------------------------

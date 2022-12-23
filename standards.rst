@@ -87,6 +87,7 @@ NETCONF
 Clixon implements the following NETCONF RFC:s:
 
 * `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
+* `RFC 6022: YANG Module for NETCONF Monitoring <http://www.rfc-editor.org/rfc/rfc6022.txt>`_. Not implemented: sessions, statistics.
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
 * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.

@@ -641,7 +641,7 @@ An example call is as follows:
        err;
     /* Loop over found children*/
     for (i = 0; i < clixon_xvec_len(xv); i++) {
-	x = clixon_xpath_i(xvec, i);
+	x = clixon_xvec_i(xvec, i);
         ...
     }
     if (xv)
