@@ -258,9 +258,9 @@ The RFC lists several security issues that need to be addressed in a solution, i
 .. note::
         Warning: there are security implications of using this example as noted in `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_
 
-IPC
-===
-Clixon uses NETCONF in the IPC protocol between its clients
+Internal NETCONF
+================
+Clixon uses NETCONF in the internal IPC protocol between its clients
 (cli/netconf/restconf) and the backend. This *internal* Netconf (IPC)
 is slightly different from regular Netconf:
 
@@ -280,30 +280,59 @@ A fixed header using session id and message length before the netconf message::
      char        op_body[0]; /* rest of message, actual data */
   };
 
+The ``session-id`` is a number determined by the server. In the first
+hello, the client can assign zero, and assign the correct session-id in subsequent messages.
+The server hello contains the assigned session-id.
 
 Extensions
 ----------
-The internal IPC protocol have a couple of extensions to the Netconf protocol as follows:
+
+The internal IPC protocol have a couple of attributes that are extensions to the Netconf protocol.
+These attributes are all in the ``clixon-lib`` namespace (``http://clicon.org/lib``)
 
 * *content* - for ``get`` command with values "config", "nonconfig" or "all", to indicate which parts of state and config are requested. This option is taken from RESTCONF. Example::
 
-    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get content="nonconfig"/></rpc>
+    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+       <get cl:content="nonconfig" xmlns:cl="http://clicon.org/lib"/>
+    </rpc>
     
 * *depth* - for ``get`` and ``get-config`` how deep a tree is requested. Also from RESTCONF. Example::
 
-    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><get depth="2"/></rpc>
+    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+       <get cl:depth="2" xmlns:cl="http://clicon.org/lib"/>
+    </rpc>
     
 * *username* - for top-level ``rpc`` command. Indicates which user the client represents ("pseudo-user"). This is either the actual user logged in as the client (eg "peer-user") or can represent another user. The credentials mode determines the trust-level of the pseudo-username. Example::
 
-    <rpc username="root"><close-session/></rpc>
+    <rpc username="root" xmlns:cl="http://clicon.org/lib" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+       <close-session/>
+    </rpc>
     
 * *autocommit* - for ``edit-config``. If true, perform a ``commit`` operation immediately after an edit. If this fails, make a ``discard`` operation. Example::
 
-    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><edit-config autocommit="true"><target><candidate/></target><config>...</config></edit-config></rpc>
+    <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+       <edit-config cl:autocommit="true" xmlns:cl="http://clicon.org/lib">
+          <target><candidate/></target>
+          <config>...</config>
+       </edit-config>
+    </rpc>
     
 * *copystartup* - for ``edit-config`` combined with autocommit. If true, copy the running db to the startup db after a commit. The combination with autocommit is the default for RESTCONF operations. Example::
 
-     <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><edit-config autocommit="true" copystartup="true"><target><candidate/></target><config>...</config></edit-config></rpc>
+     <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <edit-config cl:autocommit="true" cl:copystartup="true" xmlns:cl="http://clicon.org/lib">
+           <target><candidate/></target>
+           <config>...</config>
+        </edit-config>
+     </rpc>
+
+* *transport* - for ``hello`` from RFC 6022. Example::
+
+     <hello cl:transport="netconf" xmlns:cl="http://clicon.org/lib" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" >
+
+* *source-host* - for ``hello`` from RFC 6022. Example::
+
+     <hello cl:source-host="10.10.0.42" xmlns:cl="http://clicon.org/lib" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" >
 
 * *objectcreate* and *objectexisted* - in the data field of ``edit-config`` XML data tree. In the request set objectcreate to false/true whether an object should be created if it does not exist or not. If such a request exists, then the ok reply should contain "objectexists" to indicate whether the object existed or not (eg prior to the operation). The reason for this protocol is to implement some RESTCONF PATCH and PUT functionalities. Example::
 
@@ -318,6 +347,7 @@ The internal IPC protocol have a couple of extensions to the Netconf protocol as
          <ok objectexisted="true"/>
       </rpc-reply>]]>]]>
 
+      
 The reason for introducing the objectcreate/objectexisted attributes are as follows:
       * RFC 8040 4.5 PUT: if the PUT request creates a new resource, a "201 Created" status-line is returned.  If an existing resource is modified, a "204 No Content" status-line is returned.
       * RFC 8040 4.6 PATCH: If the target resource instance does not exist, the server MUST NOT create it.
