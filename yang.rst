@@ -179,11 +179,12 @@ actions. For example, assume an XML interface object ``x`` retrieve
 the annotation argument::
 
      char      *value = NULL;
+     int        exist = 0;
      yang_stmt *y = xml_spec(x);
 
-     if (yang_extension_value(y, "mymode", "urn:example:lib", &value) < 0)
+     if (yang_extension_value(y, "mymode", "urn:example:lib", &exist, &value) < 0)
         err;
-     if (value != NULL){
+     if (exist){
         // use extension value
         if (strcmp(value, "my-interface") == 0)
 	   ...

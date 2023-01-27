@@ -44,7 +44,7 @@ Net-SNMP
 
 To set up AgentX communication between ``clixon_snmp`` and ``snmpd`` a
 Unix or TCP socket is configured. This socket is also configured in
-Clixon (see below). An example `snmpd.conf` is as follows::
+Clixon (see below). An example `/etc/snmp/snmpd.conf` is as follows::
 
    master       agentx
    agentaddress 127.0.0.1,[::1]

@@ -9,8 +9,82 @@ Misc
 
 These are sections that do not fit into the rest of the document.
 
-Error and logs
-==============
+Debugging
+=========
+
+Debug flags
+-----------
+Each clixon application has a ``-D <level>`` command-line option to enable debug flags when starting a program. The following flags are defined:
+- ``CLIXON_DBG_DEFAULT`` (= 1) Default logs
+- ``CLIXON_DBG_MSG``     (= 2) In/out messages and datastore reads
+- ``CLIXON_DBG_DETAIL``  (= 4) Detailed logs
+- ``CLIXON_DBG_EXTRA``   (= 8) Extra Detailed logs
+
+You can combine flags, so that, for example ``-D 5`` means default + detailed, but no packet debugs.
+
+You can direct the debug logs using the ``-l <option>`` as follows:
+- (s)yslog,
+- std(e)rr,
+- std(o)ut
+- (n)one
+- (f)ile, followed by a filename
+
+Example::
+
+  clixon_backend -D 1 -f/tmp/log.txt
+
+Change debug
+------------
+
+You can also change debug level in run-time in different ways.
+For example, using netconf to change debug level in backend::
+
+   echo "<rpc username=\"root\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><debug xmlns=\"http://clicon.org/lib\"><level>1</level></debug></rpc>]]>]]>" | clixon_netconf -q0
+
+In this example, netconf is run using EOM encoding and does not require hello:s.   
+
+Using curl to change debug in backend via the restconf daemon::
+
+   curl -Ssik -X POST -H "Content-Type: application/yang-data+json" http://localhost/restconf/operations/clixon-lib:debug -d '{"clixon-lib:input":{"level":1}}'
+
+Debugger
+--------
+
+Enable debugging when configuring (compile-time)::
+
+   ./configure --enable-debug
+
+which includes symbol table info so that you can make breakpoints on functions(output is omitted)::
+
+   > sudo gdb clixon_backend 
+   (gdb) run -FD 1 -l e
+   Starting program: /usr/local/sbin/clixon_backend -FD 1 -l e
+   (gdb) b main
+   Breakpoint 1 at 0x55555555bcea: file backend_main.c, line 492.
+   (gdb) where
+   #0  main (argc=5, argv=0x7fffffffe4e8) at backend_main.c:492
+
+In the example, the backend runs in the foreground(`-F`), runs with debug level `1` and directs the debug messages to stderr.
+
+Valgrind and callgrind
+----------------------
+
+Examples of using valgrind for memeory checks::
+  
+  valgrind --leak-check=full --show-leak-kinds=all clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
+
+Example of using callgrind for profiling::  
+
+  LD_BIND_NOW=y valgrind --tool=callgrind clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
+  sudo kcachegrind
+
+Or massif for memory usage::
+  
+  valgrind --tool=massif clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
+  massif-visualizer
+
+Error reporting
+===============
 
 Initialization
 --------------
@@ -102,8 +176,6 @@ An application can specialize error handling for a specific category by using `c
      clixon_err_cat_reg(OE_SSL, h, openssl_cat_log_cb);
 
 In this example, "Myerror" will appear in the log string.
-  
-
 
 High availability
 =================

@@ -381,7 +381,7 @@ The following is an example of how to bind yang to an XML tree ``xt``:
    cxobj *xt;
    cxobj *xerr = NULL;
    /* create xt as example above */
-   if ((ret = xml_bind_yang(xt, YB_MODULE, yspec, NULL)) < 0)
+   if ((ret = xml_bind_yang(h, xt, YB_MODULE, yspec, NULL)) < 0)
       goto done;   /* fatal error */
    if (ret == 0)
       goto noyang; /* yang binding error */
