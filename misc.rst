@@ -15,6 +15,7 @@ Debugging
 Debug flags
 -----------
 Each clixon application has a ``-D <level>`` command-line option to enable debug flags when starting a program. The following flags are defined:
+
 - ``CLIXON_DBG_DEFAULT`` (= 1) Default logs
 - ``CLIXON_DBG_MSG``     (= 2) In/out messages and datastore reads
 - ``CLIXON_DBG_DETAIL``  (= 4) Detailed logs
@@ -23,15 +24,16 @@ Each clixon application has a ``-D <level>`` command-line option to enable debug
 You can combine flags, so that, for example ``-D 5`` means default + detailed, but no packet debugs.
 
 You can direct the debug logs using the ``-l <option>`` as follows:
-- (s)yslog,
-- std(e)rr,
-- std(o)ut
-- (n)one
-- (f)ile, followed by a filename
+
+- s : syslog
+- e : stderr
+- o : stdout
+- n : none
+- f : file, followed by a filename, eg `-f/tmp/foo`
 
 Example::
 
-  clixon_backend -D 1 -f/tmp/log.txt
+  clixon_backend -D 5 -f/tmp/log.txt
 
 Change debug
 ------------
