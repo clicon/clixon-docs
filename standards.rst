@@ -15,7 +15,7 @@ data. The YANG spec is also used to generate an interactive CLI,
 NETCONF and RESTCONF clients, as well as the format of the XML
 datastore.
 
-The YANG standards that Clixon follows include:
+The YANG standards that Clixon follows include (see also `netconf`_):
 
 * `YANG 1.0 RFC 6020 <https://www.rfc-editor.org/rfc/rfc6020.txt>`_
 * `YANG 1.1 RFC 7950 <https://www.rfc-editor.org/rfc/rfc7950.txt>`_
@@ -82,6 +82,12 @@ Assigned meta-data are hardcoded. The following attributes are defined:
 
 * ietf-netconf-with-defaults:default from RFC 6243 / RFC 8040
   
+Schema mount
+------------
+
+Yang schema mount support is experimental as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .  Configure with `--enable-yang-schema-mount`
+
+
 NETCONF
 =======
 Clixon implements the following NETCONF RFC:s:
@@ -90,9 +96,9 @@ Clixon implements the following NETCONF RFC:s:
 * `RFC 6022: YANG Module for NETCONF Monitoring <http://www.rfc-editor.org/rfc/rfc6022.txt>`_. All implemented except: statistics.
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
-* `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
+* `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_ * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
-* `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_ 
+
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
 
