@@ -164,8 +164,15 @@ Extra XML
 =========
 If the Yang validation succeeds and the startup configuration has been committed to the running database, a user may add "extra" XML.
 
-There are two ways to add extra XML to running database after start. Note that this XML is "merged" into running, not "committed".
+There are two ways to add extra XML to running database after
+start. Note that this XML is "merged" into running, not "committed".
 
+The extra-xml feature is not available if startup mode is `none`. It
+will also not occur in failsafe mode.
+
+
+Via file
+--------
 The first way is via a file. Assume you want to add this xml:
 ::
 
@@ -178,12 +185,38 @@ You add this via the -c option:
    
    clixon_backend ... -c extra.xml
 
+Reset callback
+--------------
 The second way is by programming the plugin_reset() in the backend
-plugin. The example code contains an example on how to do this (see
-plugin_reset() in example_backend.c).
+plugin. The following code illustrates how to do this (see also example_reset() in example_backend.c)::
 
-The extra-xml feature is not available if startup mode is `none`. It
-will also not occur in failsafe mode.
+   int
+   example_reset(clicon_handle h,
+                 const char   *db)
+   {
+      cxobj *xt = NULL;
+      yang_stmt *yspec;
+
+      yspec = clicon_dbspec_yang(h);      
+      /* Parse extra XML */
+      if (clixon_xml_parse_string("<x xmlns=\"urn:example:clixon\">extra</x>"
+                                YB_MODULE, yspec, &xt, NULL) < 0)
+         err;
+      xml_name_set(xt, "config");
+      /* Write to db */
+      if (xmldb_put(h, (char*)db, OP_MERGE, xt, NULL, NULL) < 0)
+         err;
+   }
+   static clixon_plugin_api api = {
+       ...
+       .ca_reset=example_reset,
+       ...
+   }       
+
+The ``example_reset`` function is registered in the plugin init code and is then called with an empty database (db). The code writes the extra XML into db (``xmldbput``).
+
+After exit of the callback, the system thereafter merges the temprary
+db into the running datastore in the same way as via file, ie not via a commit.
 
 Failsafe mode
 =============
