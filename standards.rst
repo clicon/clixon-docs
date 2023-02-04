@@ -93,7 +93,7 @@ NETCONF
 Clixon implements the following NETCONF RFC:s:
 
 * `RFC 5277: NETCONF Event Notifications <http://www.rfc-editor.org/rfc/rfc5277.txt>`_
-* `RFC 6022: YANG Module for NETCONF Monitoring <http://www.rfc-editor.org/rfc/rfc6022.txt>`_. All implemented except: statistics.
+* `RFC 6022: YANG Module for NETCONF Monitoring <http://www.rfc-editor.org/rfc/rfc6022.txt>`_.
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
 * `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_ * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
@@ -135,8 +135,12 @@ RFC 6022
 ^^^^^^^^
 Clixon extends the RFC 6022 session parameter ``transport`` with "cli", "restconf", "netconf" and "snmp".  In particular, the ``clixon_netconf`` application uses stdio to get input and print output and is used in a "piping" fashion, for example directly in a terminal shell or as a part of a SSH sub-system, and therefore has no direct knowledge of whether the NETCONF transport is over SSH or not.
 
-Further, the ``source-host`` parameter is set only in certain
-circumstances when the source host is in fact known. This includes native RSTCONF for example.
+The ``source-host`` parameter is set only in certain
+circumstances when the source host is in fact known. This includes native RESTCONF for example.
+
+Further, ``hello`` counters are backend based, ie the internal
+protocol, which means hellos from RESTCONF, SNMP and CLI clients are
+included and that eventual dropped hello messages from external NETCONF sessions are not.
 
 Default handling
 ----------------

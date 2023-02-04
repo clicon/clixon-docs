@@ -213,10 +213,11 @@ plugin. The following code illustrates how to do this (see also example_reset() 
        ...
    }       
 
-The ``example_reset`` function is registered in the plugin init code and is then called with an empty database (db). The code writes the extra XML into db (``xmldbput``).
+The ``example_reset`` function is registered in the plugin init code and is then called with an empty temp database (db). The code writes the extra XML into db (``xmldb_put``).
 
-After exit of the callback, the system thereafter merges the temprary
-db into the running datastore in the same way as via file, ie not via a commit.
+After exit of the callback, the system merges the temporary db into
+the running datastore in the same way as via file, ie not via a
+commit.
 
 Failsafe mode
 =============
