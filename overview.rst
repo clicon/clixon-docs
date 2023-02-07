@@ -108,7 +108,7 @@ Get the Clixon source code from `Github <http://github.com/clicon/clixon>`_::
 
 Support
 ========
-For support issues use the `Clixon slack channel <https://clixondev.slack.com>`_. Use the invite link on Clixon home-page or ask for access.
+Clixon interaction is best done posting issues, pull requests, or joining the Matrix clixon forum https://matrix.to/#/#clixonforum:matrix.org.
 
 Bug reports
 ===========
