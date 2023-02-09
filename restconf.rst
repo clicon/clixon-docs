@@ -129,7 +129,7 @@ Config file
 The restconf config can also be defined locally within the clixon config file, such as::
 
   <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
-  <CLICON_BACKEND_RESTCONF_PROCESS>false/CLICON_BACKEND_RESTCONF_PROCESS>
+  <CLICON_BACKEND_RESTCONF_PROCESS>false</CLICON_BACKEND_RESTCONF_PROCESS>
   <restconf>
       <enable>true</enable>
       <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
@@ -140,7 +140,7 @@ Datastore
 Alternatively if ``CLICON_BACKEND_RESTCONF_PROCESS`` is set, the restconf configuration is::
 
   <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
-  <CLICON_BACKEND_RESTCONF_PROCESS>false/CLICON_BACKEND_RESTCONF_PROCESS>
+  <CLICON_BACKEND_RESTCONF_PROCESS>false</CLICON_BACKEND_RESTCONF_PROCESS>
 
 And the detailed restconf is defined in the regular running datastore by adding something like::
 
