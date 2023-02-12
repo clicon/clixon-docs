@@ -78,9 +78,6 @@ CLICON_YANG_LIBRARY
 CLICON_MODULE_SET_ID
   Contains a server-specific identifier representing the current set of modules and submodules.
 
-CLICON_MODULE_LIBRARY_RFC7895
-  Enable RFC 7895 YANG Module library support as state data, instead of RFC8525. Default: ``false``
-
 CLICON_XMLDB_MODSTATE
   Tag datastores with RFC 8525 YANG Module Library info. See :ref:`datastore <clixon_datastore>` for details on how to tag datastores with Module-set info.
 

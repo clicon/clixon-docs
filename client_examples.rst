@@ -77,7 +77,6 @@ We will also modify Clixons configuration, in our case
     <CLICON_STARTUP_MODE>init</CLICON_STARTUP_MODE>
     <CLICON_NACM_MODE>disabled</CLICON_NACM_MODE>
     <CLICON_STREAM_DISCOVERY_RFC5277>true</CLICON_STREAM_DISCOVERY_RFC5277>
-    <CLICON_MODULE_LIBRARY_RFC7895>false</CLICON_MODULE_LIBRARY_RFC7895>
   </clixon-config>
 
 After this is done, we can restart Clixons backend and the new model

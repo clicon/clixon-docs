@@ -35,7 +35,6 @@ The following is the configuration file of a simple example::
      <CLICON_BACKEND_PIDFILE>/usr/local/var/hello.pidfile</CLICON_BACKEND_PIDFILE>
      <CLICON_XMLDB_DIR>/usr/local/var/hello</CLICON_XMLDB_DIR>
      <CLICON_STARTUP_MODE>init</CLICON_STARTUP_MODE>
-     <CLICON_MODULE_LIBRARY_RFC7895>false</CLICON_MODULE_LIBRARY_RFC7895>
      <restconf>
         <enable>true</enable>
      </restconf>
