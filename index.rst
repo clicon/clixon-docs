@@ -33,4 +33,4 @@ mechanism.
    pagination
    upgrade
    misc
-
+   controller_cli
