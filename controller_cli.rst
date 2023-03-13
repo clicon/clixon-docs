@@ -12,39 +12,82 @@ Overview
 
 This section desribes the CLI commands which should be implemed for the Clixon Controller.
 
+Edit
+----
+
+Configuration is typically changed by adding or removing services.
+
+  ::
+
+    # set services test foo
+    # set services test device_a bar
+    # set services test device_b baz
+
+    # set services moo foo
+    # set services moo device_a bar
+    # set services moo device_b baz
+
+
 Commit
 ------
 
-The Clixon controller CLI must support a number of different
-scenarios:
+Once the configuration is modified the Clixon controller CLI must
+support a number of different scenarios:
 
-* Normal commit. Plain and simple commit.
+* Local commit. Only run service-scripts for the changed services.
 
   ::
-     
+
+    # show compare
     # commit
-    
+    # show compare devices
+
 * Commit witout running service scripts. Just add the service
   configuration, don't touch device configurations which is added by the
   service scripts. This is the equivalent to no-networking.
 
   ::
-     
-    # set services test foo
-    # set services test device_a bar
-    # set services test device_b baz
+
     # commit no-scripts
-    
-  
+
+
 * Commit a single service. Only touch the configuration for a single
   service.
 
   ::
-     
-    # set services test foo
-    # set services test device_a bar
-    # set services test device_b baz
+
     # commit services test foo
+
+
+Re-apply
+--------
+
+Add the configuration to the local configuration tree again. This will
+run any service-scripts again and generate the necessary configuration.
+
+  ::
+
+     # re-apply
+
+It should also be possible re-apply the configuration for a single service:
+
+  ::
+
+     # re-apply service test
+
+
+Rollback
+--------
+
+If one for some reason want to abandon recently made changes the
+rollback command can be used. Rollback will discard any recently made
+changes and make sure the local configuration is identical to the last
+syncronised configuration.
+
+  ::
+
+     # rollback
+
 
 Sync push
 ---------
@@ -54,6 +97,10 @@ Sync push
   ::
 
      > sync push devices foo*
+     Error: Sync to device foo1 failed: Bla bla bla
+     Error: Sync to device foo9 failed: Bla bla bla
+
+     > sync push devicegroup foo
      Error: Sync to device foo1 failed: Bla bla bla
      Error: Sync to device foo9 failed: Bla bla bla
 
@@ -68,7 +115,8 @@ Sync push
      Diff:
      -      description "Clixon example container";
      +      description "Foo bar baz";
-     
+
+
 Sync pull
 ---------
 
@@ -83,9 +131,9 @@ Sync pull
 * Sync pull compare. It is also possible to compare the local
   configuration with the configuration on the devices without
   replacing the local configuration:
-   
+
 ::
-   
+
    > sync pull devices foo* compare
    foo1:
    -      description "Clixon example container";
@@ -109,7 +157,7 @@ Sync pull
   configurations and one want to replace the local configuration.
 
   This can done either for a subset of devices or for all devices.
-  
+
 ::
 
    > sync pull merge
