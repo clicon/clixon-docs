@@ -35,6 +35,8 @@ different variants of native Clixon restconf involving HTTP/1 vs
 HTTP/2, TLS vs plain HTTP, client cert vs basic authentication and
 external vs internal daemon start.
 
+Further, ALPN is used to select http/1 or http/2 in HTTPS.
+
 Installation
 ============
 The RESTCONF daemon can be configured for compile-time (by autotools) as follows:
@@ -92,6 +94,8 @@ CLICON_ANONYMOUS_USER
    If RESTCONF authentication auth-type=none then use this user
 CLICON_RESTCONF_API_ROOT
    RESTCONF API root path as defined in RFC 8040, default is `/restconf`
+CLICON_NOALPN_DEFAULT
+   Fallback if no ALPN for https. valid values are "http/1.1" and "http/2"
 
 More more documentation of the options, see the source YANG file.
    

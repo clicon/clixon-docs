@@ -84,9 +84,9 @@ Assigned meta-data are hardcoded. The following attributes are defined:
   
 Schema mount
 ------------
+Yang schema mount support is experimental as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .
 
-Yang schema mount support is experimental as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .  Configure with `--enable-yang-schema-mount`
-
+Enable by enable the `CLICON_YANG_SCHEMA_MOUNT` configuration option.
 
 NETCONF
 =======
@@ -132,7 +132,7 @@ Capability is preferred over default subtrees. This has two reasons:
 Clixon supports netconf locks in default settings but *not* if ``CLICON_DATASTORE_CACHE`` is ``nocache`` mode.
 
 RFC 6022
-^^^^^^^^
+--------
 Clixon extends the RFC 6022 session parameter ``transport`` with "cli", "restconf", "netconf" and "snmp".  In particular, the ``clixon_netconf`` application uses stdio to get input and print output and is used in a "piping" fashion, for example directly in a terminal shell or as a part of a SSH sub-system, and therefore has no direct knowledge of whether the NETCONF transport is over SSH or not.
 
 The ``source-host`` parameter is set only in certain

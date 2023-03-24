@@ -17,6 +17,8 @@ Normally, all Clixon processes (backend, cli, netconf, restconf) use
 the same configuration, although some options are not valid for all
 processes. You can however have different configuration files for different clients by using the ``-f`` option.
 
+Loading an obsolete config option will result in an error.
+
 Please consult the `clixon-config YANG spec <https://github.com/clicon/clixon/blob/master/yang/clixon/clixon-config@2021-11-11.yang>`_ directly if you want detailed description of config options.
 
 Example
