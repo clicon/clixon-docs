@@ -113,6 +113,24 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
 Devices
 -------
 
+Devices contain information about how to access the device (meta-data) as well as a copy of the synced device configuration.
+
+Device meta-data
+^^^^^^^^^^^^^^^^
+Devices contain information about how to access the device (meta-data) as well as a copy of the synced device configuration::
+
+   device clixon-example1 {
+      description "Clixon example container";
+      enabled true;
+      conn-type NETCONF_SSH;
+      user admin;
+      addr 172.17.0.3;
+      yang-config VALIDATE;
+      config {
+         # copy of remote device config
+      }
+   }
+
 Device naming
 ^^^^^^^^^^^^^
 A device has a name which can be used to select it::
@@ -129,14 +147,20 @@ Further, device-groups can be configured and accessed as a single entity::
   
 In the forthcoming sections, selecting `<devices>` means any of the methods described here.
 
-Device configuration
-^^^^^^^^^^^^^^^^^^^^
+Device config
+^^^^^^^^^^^^^
 The controller manipulates device configuration, according to YANG models downloaded from the device at start time. A very simple device configuration data example is::
 
   interfaces {
     interface eth0;
     interface enp0s3;
   }
+
+(Re)connecting
+^^^^^^^^^^^^^^
+The "connection" command can be used to close, open or reconnect devices::
+
+   cli> connection <devices> reconnect
 
 Syncing from devices
 --------------------
@@ -185,7 +209,7 @@ Editing can be made by modifying services::
 
     cli# set services test 2 eth* 1500
 
-Editing changes the controller candidate, changes can be viewed::
+Editing changes the controller candidate, changes can be viewed with::
 
    cli# show compare 
         services {
@@ -199,11 +223,11 @@ Device configurations can also be directly edited::
 
    cli# set devices device example1 config interfaces interface eth0 mtu 1500
        
-Validates and commits
----------------------
+Commits
+-------
 
 commit dry-run
-^^^^^^^^^^
+^^^^^^^^^^^^^^
 Assuming a service has changed as shown in the previous secion, the
 `commit dry-run` command shows the result of running the service
 scripts modifying the device configs, but with no commits actually done::
@@ -238,13 +262,13 @@ scripts modifying the device configs, but with no commits actually done::
            }
         }
 
-Commit
-^^^^^^
+Commit push
+^^^^^^^^^^^
 The changes can now be pushed and committed to the devices::
 
    cli# commit push  
 
-If the commit fails for any reason, the error is printed and the changes are discarded::
+If the commit fails for any reason, the error is printed and the changes remain as prior to the commit call::
    
    cli# commit push
    Failed: device example1 validation failed
@@ -259,50 +283,30 @@ One can also choose to not push the changes to the remote devices::
 
    cli# commit local
 
-One can also chose to validate the configuration on the remote devices::
+To validate the configuration on the remote devices, use the following command::
 
    cli# validate push
 
-Compare
--------
-There are several compare commands related to device configuration to
-check differences in device config state between the remote (actual)
-device, and the controller's device config. This can be used to
-determine if the device configs are out-of-sync.
+If you want to rollback the current edits, use discard::
 
-There are three basic device configs used in these comparisons:
+   cli# discard
 
-- `Running`: The local controller device config. This is updated by a `sync pull`, commit, or rollback.
-- `Synced`: The cached device config retrieved in the most recent `sync pull` command. A successful `sync push` also updates this config.
-- `Remote`: The actual configuration of the remote device. If this is different from `Synced`, the device is `out-of-sync` and is always checked when doing `sync push`.
+Compare and check
+-----------------
+The "show compare" command shows the difference between candidate and running, ie not committed changes.
+A variant is the following that compares with the actual remote config::
 
-Operations that affect the device configs::
+   cli> show compare devices <devices>
 
-  Remote      -- sync pull -->       Running/Synced
-  Running     -- sync push -->       Synced/Remote
-  Running     -- commit/rollback --> Running
+This is acheived by making a "transient" sync pull that does not replace the local device config.
 
-Note that there is also local `show compare` command in
-configure mode showing the differences between the local controller
-candidate and local running which is only useful in editing (eg services).
+Further, the following command checks whether devices are is out-of-sync::
 
-show compare <devices> running synced
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Show comparison between `Running` and `Synced`. It shows any differences made to the device config by the controller, either due to manual edits, or by triggering services scripts.
+   cli> check devices <devices>
+   Failed: device example2 is out-of-sync
 
-show compare <devices> synced remote
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Show comparison between the most recent sync of a device with the
-actual remote config. If there is a diff, it has been made by a third
-part, and the device is `out-of-sync`.
-
-You can also use: `check <devices> synced remote` to get a yes/no answer on whether the device is out of sync.
-
-
-show compare <devices> running remote
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Show comparison between running device config on the controller and remote
-device configuration. This is only different from running-synced of a remote party has changed the config on the remote device.
+Out-of-sync means that a change in the remote device config has been made, such as a manual edit, since the last "sync pull".
+You can resolve an out-of-sync state with the "sync pull" command.
 
 Sync push
 ---------
@@ -312,13 +316,12 @@ made (eg `commit local`) which needs an explicit push. Or if a new device has be
 
      cli> sync push <devices>
 
-* Validate. Push the configuration to the devices and validate it::
+Push the configuration to the devices, validate it and then revert::
 
      cli> sync push <devices> validate 
 
 YANG
 ====
-
 The clixon-controller YANG has the following structure::
 
    module: clixon-controller
