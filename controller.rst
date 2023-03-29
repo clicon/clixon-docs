@@ -133,9 +133,9 @@ Device configuration
 ^^^^^^^^^^^^^^^^^^^^
 The controller manipulates device configuration, according to YANG models downloaded from the device at start time. A very simple device configuration data example is::
 
-  table {
-    parameter a;
-    parameter b;
+  interfaces {
+    interface eth0;
+    interface enp0s3;
   }
 
 Syncing from devices
@@ -164,112 +164,104 @@ Network services are used to generate device configs.
 
 An example service could be::
 
-  cli> set service test 1 add 1.1.1.1;
+  cli> set service test 1 e* 1400;
 
-which adds `1.1.1.1` to all parameters in the device config::
+which adds MTU `1400` to all interfaces in the device config::
 
-  table {
-    parameter a{
-      value 1.1.1.1;
+  interfaces {
+    interface eth0{
+      mtu 1400;
     }
-    parameter b{
-      value 1.1.1.1;
+    interface enp0s3{
+      mtu 1400;
     }
   }
 
 Service scripts are written in Python using the PyAPI, and are triggered by commit commands.
 
-Re-apply
-^^^^^^^^
-There are scenarios where one needs to apply services manually. This will
-run any service-scripts again and generate the necessary configuration::
-
-     cli> services reapply
-
-It is also be possible re-apply the configuration for a single service::
-
-     cli> re-apply service test
-
 Editing
 -------
 Editing can be made by modifying services::
 
-    cli# set services test 1 add 1.1.1.1
+    cli# set services test 2 eth* 1500
 
 Editing changes the controller candidate, changes can be viewed::
 
    cli# show compare 
         services {
-   +       test 1 {
-   +          add 1.1.1.1;
+   +       test 2 {
+   +          name eth*;
+   +          mtu 1500;
    +       }
         }
 
 Device configurations can also be directly edited::  
 
-   cli# set devices device example1 root table parameter a value 2.2.2.2
+   cli# set devices device example1 config interfaces interface eth0 mtu 1500
        
 Validates and commits
 ---------------------
 
-commit try
+commit dry-run
 ^^^^^^^^^^
 Assuming a service has changed as shown in the previous secion, the
-`commit try` command shows the result of running the service
+`commit dry-run` command shows the result of running the service
 scripts modifying the device configs, but with no commits actually done::
 
-   cli# commit try
+   cli# commit dry-run
         services {
-   +       test 1 {
-   +          add 1.1.1.1;
+   +       test 2 {
+   +          name eth*;
+   +          add 1500;
    +       }
         }
         devices {
            device example1 {
-              root {
-                 table {
-                    parameter a{
-   +                   value 1.1.1.1;
-                    }
-                    parameter b{
-   +                   value 1.1.1.1;
+              config {
+                 interfaces {
+                    interface eth0 {
+   -                   mtu 1400;
+   +                   mtu 1500;
                     }
                  }
               }
            }
-
-Validate
-^^^^^^^^
-If the changes look OK, the changes can be validated locally on the controller::
-
-   cli# validate local
-
-The changes can also be pushed and validated on the devices (and then discarded)::
-
-   cli# validate push
+           device example33 {
+              config {
+                 interfaces {
+                    interface eth3 {
+   -                   mtu 1400;
+   +                   mtu 1500;
+                    }
+                 }
+              }
+           }
+        }
 
 Commit
 ^^^^^^
-If the changes are validated, the changes can be actually pushed and committed::
+The changes can now be pushed and committed to the devices::
 
    cli# commit push  
 
-If the commit fails for any reason, the error is printed and the changes are discarded. 
+If the commit fails for any reason, the error is printed and the changes are discarded::
    
    cli# commit push
    Failed: device example1 validation failed
-
-   cli# commit push
    Failed: device example2 out-of-sync
 
 A non-recoverable error that requires manual intervention is shown as::
 
    cli# commit push
-   Non-revoverable error: device example2: commit error
+   Non-recoverable error: device example2: remote peer disconnected
    
 One can also choose to not push the changes to the remote devices::
 
    cli# commit local
+
+One can also chose to validate the configuration on the remote devices::
+
+   cli# validate push
 
 Compare
 -------
@@ -312,13 +304,6 @@ show compare <devices> running remote
 Show comparison between running device config on the controller and remote
 device configuration. This is only different from running-synced of a remote party has changed the config on the remote device.
 
-Rollback
---------
-Rollback discards any recently madechanges and make sure the local configuration is identical to the last
-syncronised configuration::
-
-     cli# rollback
-
 Sync push
 ---------
 There are also explicit sync commands that are implictly made in
@@ -327,7 +312,7 @@ made (eg `commit local`) which needs an explicit push. Or if a new device has be
 
      cli> sync push <devices>
 
-* Validate. Push the configuration to the devices and validate it.
+* Validate. Push the configuration to the devices and validate it::
 
      cli> sync push <devices> validate 
 
