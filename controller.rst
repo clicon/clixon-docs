@@ -104,7 +104,7 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
     show                  Show a particular state of the system
     sync                  Read the config of one or several devices.
   cli> configure 
-  cli[/]# ?
+  cli[/]# set ?
     devices               Device configurations
     generic               Generic controller settings
     services              Placeholder for services                                                       
