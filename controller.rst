@@ -13,10 +13,10 @@ Controller
 This section describes the clixon network controller, an extension of
 Clixon to manage devices using NETCONF.
 
-The aim of the clixon network controller is to provide a simple
+The goal of the clixon network controller is to provide a simple
 network controller for NETCONF devices (not only Clixon).
 
-Further, the controller has the following features:
+Further, the controller has the following aims:
 
 - Network services, with a Python API
 - Multiple devices, with different YANG schemas
