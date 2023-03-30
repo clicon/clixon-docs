@@ -7,6 +7,9 @@
 Controller
 **********
 
+.. note::
+          The controller is experimental and many features described here are not yet implemented
+
 This section describes the clixon network controller, an extension of
 Clixon to manage devices using NETCONF.
 
@@ -226,13 +229,13 @@ Device configurations can also be directly edited::
 Commits
 -------
 
-commit dry-run
-^^^^^^^^^^^^^^
+commit diff
+^^^^^^^^^^^
 Assuming a service has changed as shown in the previous secion, the
-`commit dry-run` command shows the result of running the service
+`commit diff` command shows the result of running the service
 scripts modifying the device configs, but with no commits actually done::
 
-   cli# commit dry-run
+   cli# commit diff
         services {
    +       test 2 {
    +          name eth*;
