@@ -351,7 +351,7 @@ The clixon-controller YANG has the following structure::
      |     +--ro conn-state-timestamp yang:date-and-time
      |     +--ro sync-timestamp       yang:date-and-time
      |     +--ro logmsg               string
-     |     +--rw root
+     |     +--rw config
      +--ro transactions
          +--ro transaction* [tid]
            +--ro tid                  uint64
@@ -477,13 +477,13 @@ tree using `edit-config`. For example, using the main clixon example::
         <devices xmlns="http://clicon.org/controller">
           <device>
             <name>clixon-example1</name>
-            <root>
+            <config>
               <table xmlns="urn:example:clixon" nc:operation="merge" xmlns:cl="http://clicon.org/lib">>
                 <parameter cl:creator="SA">
                   <name>ABx</name>
                 </parameter>
               </table>
-            </root>
+            </config>
           </device>
         </devices>
       </config>
