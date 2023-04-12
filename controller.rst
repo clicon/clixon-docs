@@ -24,7 +24,6 @@ Further, the controller has the following aims:
 - RFC 8528 yang schema mount allows multiple yang schemas (per device)
 - Scaling up to 100 devices.
 
-
 Architecture
 ============
 
@@ -42,9 +41,10 @@ The northbound APIs are YANG-derived Restconf, Autocli, Netconf, and
 Snmp.  The controller CLI has two modes: operation and configure, with
 an autocli configure mode derived from YANG.
 
-A PyAPI module is used to implement user-specific network services
-which interpret services configuration into device configuration,
-which are pushed to the actual devices using a transaction mechanism.
+A PyAPI module accesses configuration data via an `actions API`. The
+PyAPI module reads services configuration and writes device data. The
+backend then pushes changes to the actual devices using a transaction
+mechanism.
 
 Transactions
 ------------
@@ -286,6 +286,10 @@ One can also choose to not push the changes to the remote devices::
 
    cli# commit local
 
+A variant of local is to run without triggering scripts::
+
+   cli# commit local no-services
+   
 To validate the configuration on the remote devices, use the following command::
 
    cli# validate push
@@ -329,7 +333,6 @@ The clixon-controller YANG has the following structure::
 
    module: clixon-controller
      +--rw services
-     |   +--rw service* [name]
      +--rw generic
      |   +--rw device-timeout         uint32
      +--rw devices
@@ -358,11 +361,13 @@ The clixon-controller YANG has the following structure::
 
      rpcs:
          +--sync-pull
-         +--sync-push
-         +--services-apply
+         +--controller-commit
          +--connection-change
          +--get-device-config
          +--transaction-error
+         +--transaction-actions-done
+         +--transaction-actions-done
+         +--datastore-diff
   
 In short, the configuration part of the YANG is separated into
 `services` and `devices`.
@@ -375,3 +380,153 @@ the controller.  A user adds services definitions using YANG `augment`. For exam
         list myservice {
             ...
             
+Actions API
+===========
+The controller provides a YANG-defined protocol for external action handlers called Actions API.
+In the controller, the PyAPI is such an action handler. 
+
+The backend implements a tagging mechanism to keep track of what parts
+of the configuration tree were created by which services.  In this
+way, reference counts are maintained so that objects can be removed in
+a correct way if multiple services create the same object.
+
+There are some restrictions on the current actions API:
+
+* Only a single action handler is supported,
+* The action handler must handle all defined services.
+* Shared objects must be "top-level", there can be no nesting of shared objects.
+
+Overview
+--------
+The following diagram shows an overview of the action handler operation::
+
+     Backend                           Action handler
+        |                                  |
+        + <--- <create-subscription> ---   +
+        |                                  |
+        +  --- <services-commit> --->      +
+        |                                  |
+        + <---   <edit-config>   ---       +
+        |            ...                   |
+        + <---   <edit-config>   ---       +
+        |                                  |
+        + <---  <trans-actions-done> ---   +
+        |                                  |
+        |          (wait)                  |
+        +  --- <services-commit> --->      +
+        |            ...                   |           
+           
+where each message will be described in the following text.
+        
+Registration
+------------
+An action handler registers subscriptions of service commits by using RFC 5277
+notification streams::
+
+    <create-subscription>
+       <stream>service-commit</stream>
+    </create-subscription>
+
+Notification
+------------
+Thereafter, controller notifications of type `service-commit` are sent
+from the backend to the action handler every time a
+`controller-commit` RPC is initiated with an `action` component. This
+is typically done when CLI commands `commit push`, `commit diff` and
+others are made.
+
+An example of such a `service-commit` notification is as follows::
+
+    <services-commit>
+       <tid>42</tid>
+       <source>candidate</source>
+       <target>actions</target>
+       <service>SA</service>
+       <service>SB</service>
+    </services-commit>
+
+In the example above, the transaction-id is `42` and two services have
+changed: SA and SB. If there is a service SC, it is therefore
+unchanged and no processing of that service is necessary. The
+notification also specifies that the services definitions can be read
+from `candidate` and any changes should be written to the `actions`
+datastore. The `actions` datastore is a new datastore specific to the
+controller.
+
+Modifications
+-------------
+If some services are explicitly are omitted it means that those
+services are not changed and need not be processed.
+
+A special case is if `no` service entries are present. If so, it means
+all services in the configuration should be re-applied.
+
+Note that the action handler needs to make a `get-config` to read the
+service definition.  Further, there is no information about what
+changes to the services have been made. The idea is that the action
+handler reapplies a changed service and the backend sorts out any
+deletions using the tagging mechanism.
+
+Based on the service configurations, the action handler makes edits
+into the target datastore.  Typically, modifications are made in the device configuration
+tree using `edit-config`. For example, using the main clixon example::
+
+    <edit-config>
+      <target><actions xmlns="http://clicon.org/controller"/></target>
+      <config>
+        <devices xmlns="http://clicon.org/controller">
+          <device>
+            <name>clixon-example1</name>
+            <root>
+              <table xmlns="urn:example:clixon" nc:operation="merge" xmlns:cl="http://clicon.org/lib">>
+                <parameter cl:creator="SA">
+                  <name>ABx</name>
+                </parameter>
+              </table>
+            </root>
+          </device>
+        </devices>
+      </config>
+    </edit-config>
+
+In this example, the action handler adds the `ABx` parameter to the `clixon-example1` device.
+
+Note that the data is tagged with a `creator` object with the name of
+the service being applied (``cl:creator="SA"``). This tag is necessary
+for the delete/shared object algorithm to work.
+
+Ending
+------
+When all modifications are done, the action handler issues a `transaction-actions-done` message to the backend::
+
+    <transaction-actions-done xmlns="http://clicon.org/controller">
+      <tid>42</tid>
+      <service>SA</service>
+      <service>SB</service>
+    </transaction-actions-done>
+
+Where the `service` fields lists all services that have been
+handled. There may be no "globs" or empty service fields in the
+`transactions-done-message`. 
+
+After the `done` message has been sent, no further edits are made by
+the action handler, it waits for the next notification.
+
+The backend, in turn, pushes the edits to the devices, or just shows
+the diff, or validates, depending on the original request parameters.
+
+Error
+-----
+The action handler can also issue an error to abort the transaction. For example::
+  
+    <transaction-error>
+      <tid>42</tid>
+      <origin>pyapi</origin>
+      <reason>No connection to external server</reason>
+    </transaction-error>
+
+In this case, the backend terminates the transaction and signals an error to the originator, such as a CLI user.
+    
+Another source of error is if the backend does not receive a `done`
+message. In this case it will eventually timeout and also signal an error.
+
