@@ -34,3 +34,4 @@ mechanism.
    pagination
    upgrade
    misc
+   pyapi

@@ -68,7 +68,7 @@ In the clixon controller the `sync push` of the device config works by a transac
 5. Commit: If validation succeeds, the new config is committed on all devices
 6. Discard: If validation is not successful, or only a `sync push validate` was requested, the config is reverted on all remote devices.
         
-Use the show transaction command to get more info why a transaction failed::
+Use the show transaction command to get more info why the most recent transaction failed::
 
    cli> show transaction
      <transaction>
@@ -85,7 +85,7 @@ There are two error levels:
 
 - FAILED: validation error or other recoverable error
 - ERROR: uneciverable error where manual resolving is necessary
-  
+
 CLI
 ===
 This section desribes the CLI commands of the Clixon controller. A simple example is used to illustrate concepts.
@@ -115,7 +115,6 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
 
 Devices
 -------
-
 Devices contain information about how to access the device (meta-data) as well as a copy of the synced device configuration.
 
 Device meta-data
@@ -134,6 +133,7 @@ Devices contain information about how to access the device (meta-data) as well a
       }
    }
 
+  
 Device naming
 ^^^^^^^^^^^^^
 A device has a name which can be used to select it::
@@ -144,7 +144,7 @@ Wild-cards (globbing) can be used to select multiple devices::
 
   device example*
 
-Further, device-groups can be configured and accessed as a single entity::
+Further, device-groups can be configured and accessed as a single entity(NB: device-groups are currently not implemented)::
   
   device-group all-examples
   
@@ -159,6 +159,26 @@ The controller manipulates device configuration, according to YANG models downlo
     interface enp0s3;
   }
 
+Device state
+^^^^^^^^^^^^
+Examine device connection state using the show command::
+
+  cli> show devices
+  Name                    State      Time                   Logmsg                        
+  =======================================================================================
+  example1                OPEN       2023-04-14T07:02:07    
+  example2                CLOSED     2023-04-14T07:08:06    Remote socket endpoint closed
+
+There is also a detailed variant of the command with more information in XML::
+
+  olof@zoomie> show devices detail 
+  <devices xmlns="http://clicon.org/controller">
+    <device>
+      <name>example1</name>
+      <description>Example container</description>
+      <enabled>true</enabled>
+      ...
+  
 (Re)connecting
 ^^^^^^^^^^^^^^
 The "connection" command can be used to close, open or reconnect devices::
@@ -191,7 +211,7 @@ Network services are used to generate device configs.
 
 An example service could be::
 
-  cli> set service test 1 e* 1400;
+  cli> set service test 1 e* 1400
 
 which adds MTU `1400` to all interfaces in the device config::
 
@@ -205,6 +225,10 @@ which adds MTU `1400` to all interfaces in the device config::
   }
 
 Service scripts are written in Python using the PyAPI, and are triggered by commit commands.
+
+You can also trigger service scripts as follows::
+
+  cli> services reapply
 
 Editing
 -------
@@ -271,6 +295,8 @@ The changes can now be pushed and committed to the devices::
 
    cli# commit push  
 
+If there are no services, changes will be pushed and committed without invoking any service handlers.
+
 If the commit fails for any reason, the error is printed and the changes remain as prior to the commit call::
    
    cli# commit push
@@ -286,10 +312,6 @@ One can also choose to not push the changes to the remote devices::
 
    cli# commit local
 
-A variant of local is to run without triggering scripts::
-
-   cli# commit local no-services
-   
 To validate the configuration on the remote devices, use the following command::
 
    cli# validate push
@@ -303,13 +325,13 @@ Compare and check
 The "show compare" command shows the difference between candidate and running, ie not committed changes.
 A variant is the following that compares with the actual remote config::
 
-   cli> show compare devices <devices>
+   cli> show compare device <devices>
 
 This is acheived by making a "transient" sync pull that does not replace the local device config.
 
 Further, the following command checks whether devices are is out-of-sync::
 
-   cli> check devices <devices>
+   cli> check <devices>
    Failed: device example2 is out-of-sync
 
 Out-of-sync means that a change in the remote device config has been made, such as a manual edit, since the last "sync pull".
@@ -317,7 +339,7 @@ You can resolve an out-of-sync state with the "sync pull" command.
 
 Sync push
 ---------
-There are also explicit sync commands that are implictly made in
+There are also explicit sync commands that are implicitly made in
 `commit push`. Explicit pushes may be necessary if local commits are
 made (eg `commit local`) which needs an explicit push. Or if a new device has been off-line::
 
