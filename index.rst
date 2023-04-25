@@ -35,3 +35,4 @@ mechanism.
    upgrade
    misc
    pyapi
+   services
