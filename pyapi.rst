@@ -419,3 +419,22 @@ it. Let's start over with a new example:
 
 As seen above we have an XML string with a list of tags which we
 iterate over.
+
+Adding objects
+^^^^^^^^^^^^^^
+
+We can also add objects to the tree:
+
+.. code:: python
+
+  >>> root.dumps()
+  '<xml foo="bar" baz="baz"><tags><foo-bar>foo</foo-bar></tags></xml>'
+  >>> new_tag = Element("new-tag")
+  >>> new_tag.create("new-tag")
+  >>> root.xml.tags.add(new_tag)
+  >>> root.dumps()
+  '<xml foo="bar" baz="baz"><tags><foo-bar>foo</foo-bar><new-tag><new-tag/></new-tag></tags></xml>'
+  >>>
+
+The method add() will add the object to the tree and. The object must
+be an Element object.
