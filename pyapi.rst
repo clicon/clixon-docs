@@ -392,8 +392,8 @@ CDATA can be altered:
 Iterate objects
 ^^^^^^^^^^^^^^^
 
-We can also iterate over objects if we have a tag with multiple tags
-below it. Let's start over with a new example:
+We can also iterate over objects if we have a tag with tags below
+it. Let's start over with a new example:
 
 .. code:: python
 
@@ -409,6 +409,13 @@ below it. Let's start over with a new example:
   bar
   baz
   >>>
+  >>> xmlstr = "<xml><tags><tag>foo</tag></tags></xml>"
+  >>> root = parse_string(xmlstr)
+  >>>
+  >>> for tag in root.xml.tags.tag:
+  ...     print(tag)
+  ...
+  foo
 
 As seen above we have an XML string with a list of tags which we
 iterate over.
