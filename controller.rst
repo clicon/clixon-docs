@@ -53,20 +53,20 @@ Transactions
 
 A typical controller session works as follows:
 
-1. A `sync pull` retrieves the configurations from the devices into the devices section of the controller config.
-2. The user edits a service defintion and commits
-3. The commit triggers the PyAPI services code, which rewrites the device config
+1. A `pull` retrieves the configurations from the devices into the devices section of the controller config.
+2. The user edits a service definition and commits
+3. The commit triggers PyAPI services code, which rewrites the device config
 4. The updated device config is validated by the controller
 5. The updated device config is pushed to the devices, and if successful committed by the controller
 
-In the clixon controller the `sync push` of the device config works by a transaction mechanism involving the controller and a set of remote devices:
+In the clixon controller the `push` of the device config works by a transaction mechanism involving the controller and a set of remote devices:
 
 1. Check: The remote device is checked for updates, if it is out of sync, the transaction is aborted
 2. Edit: The new config is pushed to the remote devices
 3. Validate: The new config is validated on the remote devices
 4. Wait: wait for all validations to succeed
 5. Commit: If validation succeeds, the new config is committed on all devices
-6. Discard: If validation is not successful, or only a `sync push validate` was requested, the config is reverted on all remote devices.
+6. Discard: If validation is not successful, or only a `push validate` was requested, the config is reverted on all remote devices.
         
 Use the show transaction command to get more info why the most recent transaction failed::
 
@@ -75,7 +75,7 @@ Use the show transaction command to get more info why the most recent transactio
         <tid>2</tid>
         <state>DONE</state>
         <result>FAILED</result>
-        <description>sync pull</description>
+        <description>pull</description>
         <origin>example1</origin>
         <reason>validation failed</reason>
         <timestamp>2023-03-27T18:41:59.031690Z</timestamp>
@@ -99,13 +99,15 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
     configure             Change to configure mode
     connection            Reconnect one or several devices in closed state
     debug                 Debugging parts of the system
-    exit                  Quit  
+    exit                  Quit
+    pull                  sync config from one or multiple devices
+    push                  sync config to one or multiple devices
     quit                  Quit
     save                  Save running configuration to XML file
     services              Services operation
     shell                 System command
-    show                  Show a particular state of the system
-    sync                  Read the config of one or several devices.
+    show                  Show a particular state of the system   
+
   cli> configure 
   cli[/]# set ?
     devices               Device configurations
@@ -115,11 +117,11 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
 
 Devices
 -------
-Devices contain information about how to access the device (meta-data) as well as a copy of the synced device configuration.
+Devices contain information about how to access the device (meta-data) as well as a copy of the remote device configuration.
 
 Device meta-data
 ^^^^^^^^^^^^^^^^
-Devices contain information about how to access the device (meta-data) as well as a copy of the synced device configuration::
+Devices contain information about how to access the device (meta-data) as well as a copy of the remote device configuration::
 
    device clixon-example1 {
       description "Clixon example container";
@@ -138,15 +140,15 @@ Device naming
 ^^^^^^^^^^^^^
 A device has a name which can be used to select it::
 
-  device example1
+   device example1
 
 Wild-cards (globbing) can be used to select multiple devices::
 
-  device example*
+   device example*
 
 Further, device-groups can be configured and accessed as a single entity(NB: device-groups are currently not implemented)::
   
-  device-group all-examples
+   device-group all-examples
   
 In the forthcoming sections, selecting `<devices>` means any of the methods described here.
 
@@ -154,30 +156,30 @@ Device config
 ^^^^^^^^^^^^^
 The controller manipulates device configuration, according to YANG models downloaded from the device at start time. A very simple device configuration data example is::
 
-  interfaces {
-    interface eth0;
-    interface enp0s3;
-  }
+   interfaces {
+     interface eth0;
+     interface enp0s3;
+   }
 
 Device state
 ^^^^^^^^^^^^
 Examine device connection state using the show command::
 
-  cli> show devices
-  Name                    State      Time                   Logmsg                        
-  =======================================================================================
-  example1                OPEN       2023-04-14T07:02:07    
-  example2                CLOSED     2023-04-14T07:08:06    Remote socket endpoint closed
+   cli> show devices
+   Name                    State      Time                   Logmsg                        
+   =======================================================================================
+   example1                OPEN       2023-04-14T07:02:07    
+   example2                CLOSED     2023-04-14T07:08:06    Remote socket endpoint closed
 
 There is also a detailed variant of the command with more information in XML::
 
-  olof@zoomie> show devices detail 
-  <devices xmlns="http://clicon.org/controller">
-    <device>
-      <name>example1</name>
-      <description>Example container</description>
-      <enabled>true</enabled>
-      ...
+   olof@zoomie> show devices detail 
+   <devices xmlns="http://clicon.org/controller">
+     <device>
+       <name>example1</name>
+       <description>Example container</description>
+       <enabled>true</enabled>
+       ...
   
 (Re)connecting
 ^^^^^^^^^^^^^^
@@ -187,20 +189,20 @@ The "connection" command can be used to close, open or reconnect devices::
 
 Syncing from devices
 --------------------
-sync pull
-^^^^^^^^^
-Sync pull fetches the configuration from remote devices and replaces any existing device config::
+pull
+^^^^
+Pull fetches the configuration from remote devices and replaces any existing device config::
 
-   cli> sync pull <devices>
+   cli> pull <devices>
 
 The synced configuration is saved in the controller and can be used for diffs etc.
 
 
-sync pull merge
-^^^^^^^^^^^^^^^
+pull merge
+^^^^^^^^^^
 ::
    
-   cli> sync pull <devices> merge
+   cli> pull <devices> merge
    
 This command fetches the remote device configuration and merges with the
 local device configuration. use this command with care.
@@ -228,7 +230,7 @@ Service scripts are written in Python using the PyAPI, and are triggered by comm
 
 You can also trigger service scripts as follows::
 
-  cli> services reapply
+  cli# services reapply
 
 Editing
 -------
@@ -327,27 +329,27 @@ A variant is the following that compares with the actual remote config::
 
    cli> show compare device <devices>
 
-This is acheived by making a "transient" sync pull that does not replace the local device config.
+This is acheived by making a "transient" pull that does not replace the local device config.
 
 Further, the following command checks whether devices are is out-of-sync::
 
    cli> check <devices>
    Failed: device example2 is out-of-sync
 
-Out-of-sync means that a change in the remote device config has been made, such as a manual edit, since the last "sync pull".
-You can resolve an out-of-sync state with the "sync pull" command.
+Out-of-sync means that a change in the remote device config has been made, such as a manual edit, since the last "pull".
+You can resolve an out-of-sync state with the "pull" command.
 
-Sync push
----------
+Push
+----
 There are also explicit sync commands that are implicitly made in
 `commit push`. Explicit pushes may be necessary if local commits are
 made (eg `commit local`) which needs an explicit push. Or if a new device has been off-line::
 
-     cli> sync push <devices>
+     cli> push <devices>
 
 Push the configuration to the devices, validate it and then revert::
 
-     cli> sync push <devices> validate 
+     cli> push <devices> validate 
 
 YANG
 ====
@@ -382,12 +384,11 @@ The clixon-controller YANG has the following structure::
        +---n controller-transaction
 
      rpcs:
-         +--sync-pull
+         +--config-pull
          +--controller-commit
          +--connection-change
          +--get-device-config
          +--transaction-error
-         +--transaction-actions-done
          +--transaction-actions-done
          +--datastore-diff
   
