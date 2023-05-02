@@ -57,6 +57,24 @@ Contents of the root parameter can be written in XML format by using the dumps()
   def setup(root, log):
       log.debug(root.dumps())
 
+Service attributes
+==================
+
+When creating new nodes related to services it is important to append the proper
+attributes to the new node. The Clixon backend will keep track of which nodes 
+belongs to which service using the attribute cl:creator where the value of 
+cl:create is the service name.
+
+Example:
+
+.. code:: python
+
+  from clixon.clixon import rpc
+
+  @rpc()
+  def setup(root, log):
+      device.config.configuration.system.create("test", cdata="foo", 
+      			attributes={"cl:creator": "test-service"})
 
 Python object tree
 ==================
