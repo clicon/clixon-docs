@@ -673,50 +673,6 @@ Then an example session for illustration is as follows, where first a small conf
   }
   user@host table> top
   user@host /> 
-   
-Upgrade from pre Clixon 5.5
----------------------------
-The new autocli configuration described here was introduced in Clixon
-5.5. In previous versions, the autocli was configured using
-regular config options.
-
-Note, tree references are backward compatible and need not be modified.
-
-Config file upgrade
-^^^^^^^^^^^^^^^^^^^
-Instructions to upgrade from pre-5.5 to the new configuration model:
-
-CLICON_CLI_GENMODEL
-    A ``false`` value is translated to ``<autocli><module-default>false<...>``.
-    A ``true`` value is implicit.
-
-CLICON_CLI_MODEL_TREENAME
-    This optoin is removed, but you can set compile-time constant ``AUTOCLI_TREENAME`` instead
-
-CLICON_CLI_AUTOCLI_EXCLUDE
-    This option needs to be rewritten using a combination of ``module-default=false`` and `module enable rules`_.
-
-CLICON_CLI_GENMODEL_TYPE
-    The "genmodel-type" settings are mainly translated to ``<autocli><list-keyword-default>x</list-keyword-default></autocli>`` where ``x`` is one of the following:
-
-    - ``NONE`` is translated to ``kw-none``
-    - ``VARS`` is translated to ``kw-nokey``
-    - ``ALL`` is translated to ``kw-all``
-    - ``HIDE``, ``OC_COMPRESS``  is translated to ``kw-nokey`` as well as described in `compress rules`_.
-
-CLICON_CLI_GENMODEL_COMPLETION
-    Use ``<autocli><completion-default>x<...>`` instead, where ``x`` is true or false.
-
-Extensions
-^^^^^^^^^^
-The hide extensions from `clixon-lib` are moved to new extensions in `clixon-autocli` as follows:
-
-hide
-  Use ``hide`` in autocli instead. 
-hide-database
-  Use ``hide-show`` in autocli instead.
-hide-database-auto-completion
-  Use both ``hide`` and ``hide-show`` in autocli instead.
 
 Advanced
 ========

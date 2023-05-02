@@ -182,7 +182,7 @@ In the native mode, Clixon also supports:
 
 * HTTP/1.1 as transport using a native implementation (RFC 7230),
 * HTTP/2 as transport implemented by libnghttp2 (RFC7540),
-* Transport Layer Security (TLS) implemented by libopenssl,
+* Transport Layer Security (TLS) implemented by libopenssl, versions 1.1.1 and 3.0
 * ALPN as defined in RFC 7301 for http/1, http/2 protocol selection by libopenssl
 
 SNMP
