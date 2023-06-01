@@ -51,23 +51,36 @@ Transactions
 .. image:: transaction.jpg
    :width: 100%
 
-A typical controller session works as follows:
+There are two types of transactions:
 
-1. A `pull` retrieves the configurations from the devices into the devices section of the controller config.
-2. The user edits a service definition and commits
-3. The commit triggers PyAPI services code, which rewrites the device config
+1. `Device connect`: where devices are connected via NETCONF over ssh, key exchange, YANG retrieval and config pull
+2. `Config push`: where a service is (optionally) edited, changed device config is pushed to remote devices via NETCONF.
+
+A `device connect` transaction works as follows (for each new enabled device):
+
+1. An SSH session is created to the IP address of the device
+2. An SSH login is made which requires:
+   a) The device to have enabled a NETCONF ssh sub-system
+   b) The public key of the controller to be installed on the device
+   c) The public key of the device to be in the `known_hosts` file of the controller
+3. A mutual NETCONF `<hello>` exchange
+4. Get all YANG schema identifiers from the device using the ietf-netconf-monitoring schema
+5. For each YANG schema identifier, make a `<get-schema>` RPC call (unless already retrieved).
+6. Get the full configuration of the device.
+
+A `config push` transaction works as follows:
+
+1. The user edits a service definition and commits
+2. The commit triggers PyAPI services code, which rewrites the device config
+3. Alternatively, the user edits the device configuration manually
 4. The updated device config is validated by the controller
-5. The updated device config is pushed to the devices, and if successful committed by the controller
+5. The remote device is checked for updates, if it is out of sync, the transaction is aborted
+6. The new config is pushed to the remote devices
+7. The new config is validated on the remote devices
+8. If validation succeeds on all remote devices, the new config is committed to all devices
+9. The new config is retreived from the device and is installed on the controller
+10. If validation is not successful, or only a `push validate` was requested, the config is reverted on all remote devices.
 
-In the clixon controller the `push` of the device config works by a transaction mechanism involving the controller and a set of remote devices:
-
-1. Check: The remote device is checked for updates, if it is out of sync, the transaction is aborted
-2. Edit: The new config is pushed to the remote devices
-3. Validate: The new config is validated on the remote devices
-4. Wait: wait for all validations to succeed
-5. Commit: If validation succeeds, the new config is committed on all devices
-6. Discard: If validation is not successful, or only a `push validate` was requested, the config is reverted on all remote devices.
-        
 Use the show transaction command to get more info why the most recent transaction failed::
 
    cli> show transaction
@@ -114,6 +127,7 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
     generic               Generic controller settings
     services              Placeholder for services                                                       
   cli[/]#
+
 
 Devices
 -------
@@ -183,9 +197,14 @@ There is also a detailed variant of the command with more information in XML::
   
 (Re)connecting
 ^^^^^^^^^^^^^^
-The "connection" command can be used to close, open or reconnect devices::
+When adding and enabling one a new device (or several), the user needs to explicitly connect::
+
+   cli> connection <devices> connect
+   
+The "connection" command can also be used to close, open or reconnect devices::
 
    cli> connection <devices> reconnect
+
 
 Syncing from devices
 --------------------
@@ -210,6 +229,24 @@ local device configuration. use this command with care.
 Services
 --------
 Network services are used to generate device configs.
+
+Daemon
+------
+To run services, the PyAPI service process must be enabled::
+
+  cli# set services enabled true
+  cli# commit local
+
+To view or change the status of the service daemon::
+
+  cli> service process ?
+    restart              
+    start                
+    status               
+    stop                 
+  
+Example
+-------
 
 An example service could be::
 
@@ -248,10 +285,32 @@ Editing changes the controller candidate, changes can be viewed with::
    +       }
         }
 
+Editing devices
+^^^^^^^^^^^^^^^
+
 Device configurations can also be directly edited::  
 
    cli# set devices device example1 config interfaces interface eth0 mtu 1500
        
+Show and editinf commands can be made on multiple devices at once using "glob" patterns::
+
+   cli> show config xml devices device example* config interfaces interface eth0
+   example1:
+   <interface>
+      <name>eth0</name>
+      <mtu>1500</mtu>
+   </interface>
+   example2:
+   <interface>
+      <name>eth0</name>
+      <mtu>1500</mtu>
+   </interface>
+
+Modifications using set, merge and delete can also be applied on multiple devices::
+
+   cli# set devices device example* config interfaces interface eth0 mtu 9600
+   cli#
+
 Commits
 -------
 

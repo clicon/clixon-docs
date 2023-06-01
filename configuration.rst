@@ -108,7 +108,6 @@ Clixon have three hardcoded features:
 - ietf-netconf:validate (RFC6241 8.6)
 - ietf-netconf:xpath (RFC6241 8.9)
 
-
 Finding YANG files
 ==================
 The example have two options for finding Yang files::
@@ -161,3 +160,38 @@ You can change this location by::
     ./configure --with-yang-standard-dir=DIR
 
 Note that you do not need this for the clixon runtime.
+
+Extending the configuration
+===========================
+
+You can extend the options with an application-specific YANG file where you augment the
+regular "clixon-config" as follows::
+
+  <clixon-config xmlns="http://clicon.org/config">
+    <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
+    <CLICON_CONFIG_EXTEND>clixon-myconfig</CLICON_CONFIG_EXTEND>
+    ...
+
+You then install your own "clixon-myconfig.yang" where you add your own config options. Example::
+
+  module clixon-myconfig {
+    yang-version 1.1;
+    namespace "http://example.org/myconfig";
+    ...
+    import clixon-config {
+        prefix "cc";
+    }
+    augment "/cc:clixon-config" {
+        description
+            "My extended options";
+        leaf MYOPT {
+            type string;
+        }
+
+You can now use your extended options in the regular config file, along with the basic ones::
+  
+  <clixon-config xmlns="http://clicon.org/config">
+    <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
+    <CLICON_CONFIG_EXTEND>clixon-myconfig</CLICON_CONFIG_EXTEND>
+    ...
+    <MYOPT xmlns="http://example.org/myconfig">/usr/local/share/myopt</MYOPT>
