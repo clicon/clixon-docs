@@ -188,10 +188,14 @@ You then install your own "clixon-myconfig.yang" where you add your own config o
             type string;
         }
 
-You can now use your extended options in the regular config file, along with the basic ones::
+You can now use your extended options in the regular config file, along with the basic ones, but with another namespace::
   
   <clixon-config xmlns="http://clicon.org/config">
     <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
     <CLICON_CONFIG_EXTEND>clixon-myconfig</CLICON_CONFIG_EXTEND>
     ...
     <MYOPT xmlns="http://example.org/myconfig">/usr/local/share/myopt</MYOPT>
+
+You can also use the regular C-API to access the values of the options, eg::
+
+  char *val = clicon_option_str(h, "MYOPT");

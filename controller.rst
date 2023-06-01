@@ -230,8 +230,8 @@ Services
 --------
 Network services are used to generate device configs.
 
-Daemon
-------
+Service process 
+^^^^^^^^^^^^^^^^
 To run services, the PyAPI service process must be enabled::
 
   cli# set services enabled true
@@ -246,8 +246,7 @@ To view or change the status of the service daemon::
     stop                 
   
 Example
--------
-
+^^^^^^^
 An example service could be::
 
   cli> set service test 1 e* 1400
@@ -287,7 +286,6 @@ Editing changes the controller candidate, changes can be viewed with::
 
 Editing devices
 ^^^^^^^^^^^^^^^
-
 Device configurations can also be directly edited::  
 
    cli# set devices device example1 config interfaces interface eth0 mtu 1500
