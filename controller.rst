@@ -165,11 +165,17 @@ The controller extends the clixon configuration file as follows:
 
 ``CLICON_SOCK_GROUP``   
    Set to user group, ususally `clicon`
+
+``CONTROLLER_PYAPI_MODULE_PATH``
+   Path to Python code for PyAPI
+   
+``CONTROLLER_PYAPI_MODULE_FILTER``
+
+``CONTROLLER_PYAPI_PIDFILE``
    
 Example
 -------
-
-This examplifies the configure options described above::
+The following configuration file examplifies the configure options described above::
 
   <clixon-config xmlns="http://clicon.org/config">
   <CLICON_CONFIGFILE>/usr/local/etc/controller.xml</CLICON_CONFIGFILE>
@@ -606,62 +612,103 @@ There are some restrictions on the current actions API:
 
 1. Only a single action handler is supported, which means that a single action handler handles all services.
 2. The algorithm is not hierarchical, that is, if there is a tag on a device object, tags on children are not considered
-3. No persistence, if the backend is restarted, tags are lost.
+3. No persistence: if the backend is restarted, tags are lost.
 
 
 Service instance
 ----------------
-A service extends the controller yang as described in the `YANG`_ section. For example, a service `testA` may augment the original as follows::
+A service extends the controller yang as described in the `YANG`_ section. For example, a service `ssh-users` may augment the original as follows::
 
    augment "/ctrl:services" {
-      list myservice {  // Must be list
-         key name;      // Must be single key
-         leaf name {
+      list ssh-users {   // YANG list
+         key group;      // Single key
+         leaf group {
             type string;
 	 }
-         leaf-list params{
-            type string;
+         list username {
+            key name;
+            leaf name{
+               type string;
+            }
+            leaf ssh-key {
+               type string;
+            }
          }
       }
    }
 
 The service must be on the following form:
 
-1. The top-level is a YANG list (eg `myservice` above)
-2. The list has a single key (eg `name` above)
+1. The top-level is a YANG list (eg `ssh-users` above)
+2. The list has a single key (eg `group` above)
 
-The rest of the augmented service can have any form (eg `leaf-list params` above).
+The rest of the augmented service can have any form (eg `list username` above).
    
 .. note::
         An augmented service must start with a YANG list with a single key
 
-An example service XML for `testA` is::
+An example service XML for `ssh-users` is::
 
    <services xmlns="http://clicon.org/controller">
-      <myservice xmlns="urn:example:test">
-        <name>A</name>
-        <params>x</params>
-        <params>y</params>
-      </myservice>
-      <myservice xmlns="urn:example:test">
-        <name>B</name>
-        <params>x</params>
-        <params>y</params>
-      </myservice>
+     <ssh-users xmlns="urn:example:test">
+        <group>ops</group>
+        <username>
+           <name>eric</name>
+           <ssh-key>ssh-rsa AAA...</ssh-key>
+        </username>
+        <username>
+           <name>alice</name>
+           <ssh-key>ssh-rsa AAA...</ssh-key>
+        </username>
+     </ssh-users>
+     <ssh-users xmlns="urn:example:test">
+        <group>devs</group>
+        <username>
+           <name>kim</name>
+           <ssh-key>ssh-rsa AAA...</ssh-key>
+        </username>
+        <username>
+           <name>alice</name>
+           <ssh-key>ssh-rsa AAA...</ssh-key>
+        </username>
+     </ssh-users>
    </services>
 
 The actions protocol defines a service instances as::
 
   <list>  |  <list>[<key>='<value>']
 
-From the example YANG above, examples of service instances of `myservice` are::
+From the example YANG above, examples of service instances of `ssh-users` are::
 
-  myservice
-  myservice[name='A']
-  myservice[name='B']
+  ssh-users
+  ssh-users[group='ops']
+  ssh-users[group='devs']
 
-where the first identifies all `myservice` instances and the other two
+where the first identifies all `ssh-users` instances and the other two
 identifies the specific instances given above
+
+Device config
+-------------
+The service definition is input to changing the device config, where the actual change is made by
+Python code in the PyAPI.
+
+A device configuration could be as follows (inspired by openconfig)::
+
+  container users {
+     description "Enclosing container list of local users";
+     list user {
+        key "username";
+        description "List of local users on the system";
+        leaf username {
+            type string;
+            description "Assigned username for this user";
+        }
+        leaf ssh-key {
+            type string;
+            description "SSH public key for the user (RSA or DSA)";
+        }
+     }
+  }
 
 Tags
 ----
@@ -669,41 +716,63 @@ An action handler tags device configuration objects it creates with the name of 
 using the `cl:creator` YANG extension.  This is used to track which instance created
 an object and acts as a reference count when removing objects.  An object may have several tags if it is created by more than one service instance.
 
-In the following example, three device objects are tagged with service instances, as follows:
+In the following example, three device objects are tagged with service instances in one device, as follows:
 
-
-.. table:: `Device config with service-instance tags`
+.. table:: `Device A with service-instance tags`
    :widths: auto
    :align: left
 
-   =============  ====================
+   =============  =======================
    Device object  Service-instance
-   =============  ====================
-   Ax             myservice[name='A']
-   Bx             myservice[name='B']
-   ABx            myservice[name='A'],
-                  myservice[name='B']
-   =============  ====================
+   =============  =======================
+   eric           ssh-users[group='ops']
+   alice          ssh-users[group='devs']
+   kim            ssh-users[group='ops'],
+                  ssh-users[group='devs']
+   =============  =======================
 
-where device objects `Ax` and `Bx` are created by service instance `A` (more precisely `myservice[name='A']`) and `B` respectively, and `ABx` are created by both.
+where device objects `eric` and `alice` are created by service instance `ops` (more precisely `ssh-users[group='ops']`) and `devs` respectively, and `kim` is created by both.
 
-Suppose that service instance `A` is deleted, then all device objects tagged with `A` are deleted:
+Suppose that service instance `ops` is deleted, then all device objects tagged with `ops` are deleted:
 
-.. table:: `Device config after removal of A`
+.. table:: `Device A after removal of ops`
    :widths: auto
    :align: left
             
-   =============  ====================
+   =============  =======================
    Device object  Service-instance
-   =============  ====================
-   Bx             myservice[name='B']
-   ABx            myservice[name='B']
-   =============  ====================
+   =============  =======================
+   alice          ssh-users[group='devs']
+   kim            ssh-users[group='devs']
+   =============  =======================
 
-Note that `ABx` still remains since it was created by both A and B.
-   
+Note that `kim` still remains since it was created by both ops and devs.
+
+Note also that this example only considers a single device `A`. In reality there are many more devices.
+
+Example python
+--------------
+An example PyAPI script takes the service ssh-users definition and creates users on the actual devices, for example::
+
+    for instance in root.services.users:
+        for user in instance.username:
+            username = ssh-users.name.cdata
+            ssh_key = ssh-users.ssh_key.cdata
+            for device in root.devices.device:
+                new_user = Element("user",
+                                   attributes={
+                                       "cl:creator": "users",
+                                       "nc:operation": "merge",
+                                       "xmlns:cl": "http://clicon.org/lib"})
+                new_user.create("name", cdata=username)
+                new_user.create("authentication")
+                new_user.authentication.create("ssh-rsa")
+                new_user.authentication.ssh_rsa.create("name", cdata=ssh_key)
+                device.config.configuration.system.login.add(new_user)
+
+
 Algorithm
-^^^^^^^^^
+---------
 The algorithm for managing device objects using tags is as follows. Consider a commit operation where some services have changed by adding, deleting or modifying service -instances:
 
   1. The controller makes a diff of the candidate and running datastore and identifies all changed services-instances
@@ -769,8 +838,8 @@ An example of a `service-commit` notification is the following::
        <tid>42</tid>
        <source>candidate</source>
        <target>actions</target>
-       <service>myservice[name='A']</service>
-       <service>myservice[name='B']</service>
+       <service>ssh-users[group='ops']</service>
+       <service>ssh-users[group='devs']</service>
     </services-commit>
 
 In the example above, the transaction-id is `42` and the services definitions are read from
@@ -784,28 +853,26 @@ A special case is if `no` service-instance entries are present. If so, it means
 
 Editing
 ^^^^^^^
-In the following example, the PyAPI adds an object in the device configuration tagged with the service instance `myservice[name='A']`::
+In the following example, the PyAPI adds an object in the device configuration tagged with the service instance `ssh-users[group='ops']`::
 
   <edit-config>
     <target><actions xmlns="http://clicon.org/controller"/></target>
     <config>
       <devices xmlns="http://clicon.org/controller">
         <device>
-          <name>clixon-example1</name>
+          <name>A</name>
           <config>
-            <table xmlns="urn:example:clixon" nc:operation="merge" xmlns:cl="http://clicon.org/lib">>
-              <parameter cl:creator="myservice[name='A']">
-                <name>Ax</name>
-              </parameter>
-            </table>
+            <users xmlns="urn:example:users" xmlns:cl="http://clicon.org/lib" nc:operation="merge">
+              <user cl:creator="ssh-users[group='ops']">
+                <username>alice</username>>
+                <ssh-key>ssh-rsa AAA...</ssh-key>
+              </user>
+          </users>
           </config>
         </device>
       </devices>
     </config>
   </edit-config>
-
-If some services are explicitly are omitted it means that those
-services are not changed and need not be processed.
 
 Note that the action handler needs to make a `get-config` to read the
 service definition.  Further, there is no information about what
@@ -841,4 +908,3 @@ In this case, the backend terminates the transaction and signals an error to the
     
 Another source of error is if the backend does not receive a `done`
 message. In this case it will eventually timeout and also signal an error.
-
