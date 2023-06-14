@@ -573,13 +573,13 @@ Compare and check
 The "show compare" command shows the difference between candidate and running, ie not committed changes.
 A variant is the following that compares with the actual remote config::
 
-   cli> show compare device <devices>
+   cli> show devices <devices> diff
 
 This is acheived by making a "transient" pull that does not replace the local device config.
 
 Further, the following command checks whether devices are is out-of-sync::
 
-   cli> check <devices>
+   cli> show devices <devices> check
    Failed: device example2 is out-of-sync
 
 Out-of-sync means that a change in the remote device config has been made, such as a manual edit, since the last "pull".
@@ -587,7 +587,6 @@ You can resolve an out-of-sync state with the "pull" command.
 
 Push
 ----
-
 There are also explicit sync commands that are implicitly made in
 `commit push`. Explicit pushes may be necessary if local commits are
 made (eg `commit local`) which needs an explicit push. Or if a new device has been off-line::
