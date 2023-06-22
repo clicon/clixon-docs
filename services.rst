@@ -8,8 +8,11 @@ Service development
 *******************
 
 Service modules contains the actual code and logic which is used when
-modifying the configuration three for services. When a module is
-launched by the Python server the server call the setup method.
+modifying the configuration three for services. 
+
+The Python server will look for modules in a directory ("/usr/local/clixcon/controller/modules" 
+unless anything else is defined) and when a module is launched by the Python 
+server the server call the setup method.
 
 A minimal service module may look like this:
 
@@ -17,28 +20,58 @@ A minimal service module may look like this:
 
   from clixon.clixon import rpc
 
+  SERVICE = "example"
 
   @rpc()
-  def setup(root, log):
+  def setup(root, log, **kwargs):
       log.info("I am a module")
 
+
+Module installation
+===================
+
+Clixon controller installs a utility named "clixon_controller_packages.sh"
+in "/usr/local/bin". This can be used to install packages.
+
+.. code:: bash
+
+  $ clixon_controller_packages.sh -h
+  Usage: /usr/local/bin/clixon_controller_packages.sh [OPTIONS]
+    -s Source path
+    -m Clixon controller modules install path
+    -y Clixon controller YANG install path
+    -r Use with care: Reset Clixon controller modules and YANG paths
+    -h help
+
+The script will make sure to copy Python code and module YANG files
+to the correct directories and take care of permissions etc.
+
+The normal use case is to run the "clixon_controller_packages.sh" without
+using the "-m" and "-y" arguments, the script will the install modules and YANG 
+in the default paths which is preferred.
 
 Modules basics
 ==============
 
-The setup method takes two parameter, root and log. Log is used for
-logging and is a reference to a Python logging object. The log
+The setup method take three parameters, root, log and kwargs. 
+
+* Root is the configuration three.
+* Log is used for logging and is a reference to a Python logging object. The log
 parameter can be used to print log messages. If the server is running
 in the foreground the log messages can be seen in the terminal,
 otherwise they will be written to syslog.
+* kwargs is a dict of optional arguments. kwargs can contain the argument
+"instance" which is the name of the current service instance that is being
+changed by the user.
 
 .. code:: python
 
   from clixon.clixon import rpc
 
+  SERVICE = "example"
 
   @rpc()
-  def setup(root, log):
+  def setup(root, log, **kwargs):
       log.info("Informative log")
       log.error("Error log")
       log.debug("Debug log")
@@ -52,9 +85,11 @@ Contents of the root parameter can be written in XML format by using the dumps()
 
   from clixon.clixon import rpc
 
+  SERVICE = "example"
+
 
   @rpc()
-  def setup(root, log):
+  def setup(root, log, **kwargs):
       log.debug(root.dumps())
 
 Service attributes
@@ -71,8 +106,11 @@ Example:
 
   from clixon.clixon import rpc
 
+  SERVICE = "example"
+
+
   @rpc()
-  def setup(root, log):
+  def setup(root, log, **kwargs):
       device.config.configuration.system.create("test", cdata="foo", 
       			attributes={"cl:creator": "test-service"})
 
@@ -113,8 +151,11 @@ Let's start with an example:
 
   from clixon.clixon import rpc
 
+
+  SERVICE = "example"
+
   @rpc()
-  def setup(root, log):
+  def setup(root, log, **kwargs):
       hostname = root.services.hostname.hostname
 
       for device in root.devices:
@@ -137,8 +178,11 @@ and create a new node named test:
 
   from clixon.clixon import rpc
 
+
+  SERVICE = "example"
+
   @rpc()
-  def setup(root, log):
+  def setup(root, log, **kwargs):
       device.config.configuration.system.create("test", cdata="foo")
 
 The code above would translate to an NETCONF/XML string which looks like this:
