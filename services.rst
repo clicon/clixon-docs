@@ -10,8 +10,7 @@ Service development
 Service modules contains the actual code and logic which is used when
 modifying the configuration three for services. 
 
-The Python server will look for modules in a directory ("/usr/local/clixcon/controller/modules" 
-unless anything else is defined) and when a module is launched by the Python 
+The Python server looks for modules in the directory ``/usr/local/clixcon/controller/modules`` unless anything else is defined) and when a module is launched by the Python 
 server the server call the setup method.
 
 A minimal service module may look like this:
@@ -44,26 +43,20 @@ in "/usr/local/bin". This can be used to install packages.
     -r Use with care: Reset Clixon controller modules and YANG paths
     -h help
 
-The script will make sure to copy Python code and module YANG files
+The script copies Python code and module YANG files
 to the correct directories and take care of permissions etc.
 
 The normal use case is to run the "clixon_controller_packages.sh" without
-using the "-m" and "-y" arguments, the script will the install modules and YANG 
+the ``-m`` and ``-y`` arguments, the script installs modules and YANG 
 in the default paths which is preferred.
 
 Modules basics
 ==============
-
 The setup method take three parameters, root, log and kwargs. 
 
-* Root is the configuration three.
-* Log is used for logging and is a reference to a Python logging object. The log
-parameter can be used to print log messages. If the server is running
-in the foreground the log messages can be seen in the terminal,
-otherwise they will be written to syslog.
-* kwargs is a dict of optional arguments. kwargs can contain the argument
-"instance" which is the name of the current service instance that is being
-changed by the user.
+* `Root` is the configuration three.
+* `Log` is used for logging and is a reference to a Python logging object. The log parameter can be used to print log messages. If the server is running in the foreground the log messages can be seen in the terminal, otherwise they will be written to syslog.
+* `kwargs` is a dict of optional arguments. kwargs can contain the argument "instance" which is the name of the current service instance that is being changed by the user.
 
 There is also a variable named "SERVICE" that should have the same name as the 
 service without revision.

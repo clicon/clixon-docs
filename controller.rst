@@ -8,10 +8,12 @@ Controller
 **********
 
 .. note::
-          The controller is experimental and many features described here are not yet implemented
+          The controller is still experimental
 
 This section describes the clixon network controller, an extension of
 Clixon to manage devices using NETCONF.
+
+For information on developing network services, see also :ref:`Service development <clixon_services>`
 
 Overview
 ========
@@ -147,7 +149,12 @@ Start the CLI and configure devices::
   set devices device clixon-example1 enable true
   set devices device clixon-example1 yang-config VALIDATE
   set devices device clixon-example1 root
-  commit
+  commit local
+
+Thereafter explicitly connect to the devices::
+
+  clixon_cli -f /usr/local/etc/controller.xml
+  connection open
 
 Configuration
 =============
@@ -188,106 +195,6 @@ The following configuration file examplifies the configure options described abo
   <CLICON_BACKEND_USER>clicon</CLICON_BACKEND_USER>
   <CLICON_SOCK_GROUP>clicon</CLICON_SOCK_GROUP>
 
-Transactions
-============
-.. image:: transaction.jpg
-   :width: 100%
-
-There are two types of transactions:
-
-1. `Device connect`: where devices are connected via NETCONF over ssh, key exchange, YANG retrieval and config pull
-2. `Config push`: where a service is (optionally) edited, changed device config is pushed to remote devices via NETCONF.
-
-A `device connect` transaction starts in state `CLOSED` and if succesful stops in `OPEN`. there are multiple intermediate steps as follows (for each device):
-
-1. An SSH session is created to the IP address of the device
-2. An SSH login is made which requires:
-
-   a) The device to have enabled a NETCONF ssh sub-system
-   b) The public key of the controller to be installed on the device
-   c) The public key of the device to be in the `known_hosts` file of the controller
-3. A mutual NETCONF `<hello>` exchange
-4. Get all YANG schema identifiers from the device using the ietf-netconf-monitoring schema.
-5. For each YANG schema identifier, make a `<get-schema>` RPC call (unless already retrieved).
-6. Get the full configuration of the device.
-
-While a `device connect` operates on individual devices, the `config push` transaction operates on all devices. It starts in `OPEN` for all devices and ends in `OPEN` for all devices involved in the transaction:
-
-1. The user edits a service definition and commits
-2. The commit triggers PyAPI services code, which rewrites the device config
-3. Alternatively, the user edits the device configuration manually
-4. The updated device config is validated by the controller
-5. The remote device is checked for updates, if it is out of sync, the transaction is aborted
-6. The new config is pushed to the remote devices
-7. The new config is validated on the remote devices
-8. If validation succeeds on all remote devices, the new config is committed to all devices
-9. The new config is retreived from the device and is installed on the controller
-10. If validation is not successful, or only a `push validate` was requested, the config is reverted on all remote devices.
-
-Use the show transaction command to get details about transactions::
-
-   cli> show transaction
-     <transaction>
-        <tid>2</tid>
-        <state>DONE</state>
-        <result>FAILED</result>
-        <description>pull</description>
-        <origin>example1</origin>
-        <reason>validation failed</reason>
-        <timestamp>2023-03-27T18:41:59.031690Z</timestamp>
-     </transaction>
-
-
-YANG
-====
-The clixon-controller YANG has the following structure::
-
-   module: clixon-controller
-     +--rw processes
-     |   +--rw services
-     |     +--rw enabled                boolean
-     +--rw services
-     |   +--rw properties
-     +--rw devices
-     |   +--rw device-timeout         uint32
-     |   +--rw device-group* [name]
-     |   | +--rw name                 string
-     |   +--rw device* [name]
-     |     +--rw name                 string
-     |     +--rw description?         string
-     |     +--rw enabled?             boolean
-     |     +--rw conn-type            connection-type
-     |     +--rw user?                string
-     |     +--rw addr?                string
-     |     +--rw yang-config?         yang-config
-     |     +--rw capabilities
-     |     | +--rw capability*        string
-     |     +--ro conn-state-timestamp yang:date-and-time
-     |     +--ro sync-timestamp       yang:date-and-time
-     |     +--ro logmsg               string
-     |     +--rw config
-     +--ro transactions
-         +--ro transaction* [tid]
-           +--ro tid                  uint64
-     notifications:
-       +---n services-commit
-       +---n controller-transaction
-     rpcs:
-         +--config-pull
-         +--controller-commit
-         +--connection-change
-         +--get-device-config
-         +--transaction-error
-         +--transaction-actions-done
-         +--datastore-diff
-  
-The services section contains user-defined services not provided by
-the controller.  A user adds services definitions using YANG `augment`. For example::
-
-    import clixon-controller { prefix ctrl; }
-    augment "/ctrl:services" {
-        list myservice {
-            ...
 
 CLI
 ===
@@ -300,11 +207,12 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
   > clixon_cli
   cli> ?
     configure             Change to configure mode
-    connection            Reconnect one or several devices in closed state
+    connection            Change connection state of one or several devices
     debug                 Debugging parts of the system
     exit                  Quit
-    pull                  sync config from one or multiple devices
-    push                  sync config to one or multiple devices
+    processes             Process maintenance 
+    pull                  Pull config from one or multiple devices
+    push                  Push config to one or multiple devices
     quit                  Quit
     save                  Save running configuration to XML file
     services              Services operation
@@ -313,18 +221,24 @@ The CLI has two modes: operational and configure. The top-levels are as follows:
 
   cli> configure 
   cli[/]# set ?
-    devices               Device configurations
+    devices               Device configuration
+    processes             Processes configuration
     services              Placeholder for services                                                       
   cli[/]#
 
 
 Devices
 -------
-Devices contain information about how to access the device (meta-data) as well as a copy of the remote device configuration.
+Device configuration is separated into two domains:
 
-Device meta-data
-^^^^^^^^^^^^^^^^
-Devices contain information about how to access the device (meta-data) as well as a copy of the remote device configuration::
+1) Local information about how to access the device (meta-data)
+2) Remote device configuration pulled from the device. 
+
+The user must be aware of this distinction when performing `commit` operations.
+
+Local device configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+The local device configuration contains information about how to access the device::
 
    device clixon-example1 {
       description "Clixon example container";
@@ -333,15 +247,35 @@ Devices contain information about how to access the device (meta-data) as well a
       user admin;
       addr 172.17.0.3;
       yang-config VALIDATE;
+   }
+
+A user makes a local commit and thereafter explicitly connects to a locally configured device::
+
+  # commit local
+  # exit
+  > connection open
+
+Remote device configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The remote device configuration is present under the `config` mount-point::
+
+   device clixon-example1 {
+      ... 
       config {
-         # copy of remote device config
+         interfaces {
+            interface eth0 {
+               mtu 1500;
+            }
+         }
       }
    }
 
-  
+The remote device configuration is bound to device-specific YANG models downloaded
+from the device at connection time. 
+   
 Device naming
 ^^^^^^^^^^^^^
-A device has a name which can be used to select it::
+The local device name is used for local selection::
 
    device example1
 
@@ -349,20 +283,14 @@ Wild-cards (globbing) can be used to select multiple devices::
 
    device example*
 
-Further, device-groups can be configured and accessed as a single entity(NB: device-groups are currently not implemented)::
+Further, device-groups can be configured and accessed as a single entity::
   
    device-group all-examples
-  
+
+.. note::
+          Device groups can be statically configured but not used in most operations
+   
 In the forthcoming sections, selecting `<devices>` means any of the methods described here.
-
-Device config
-^^^^^^^^^^^^^
-The controller manipulates device configuration, according to YANG models downloaded from the device at start time. A very simple device configuration data example is::
-
-   interfaces {
-     interface eth0;
-     interface enp0s3;
-   }
 
 Device state
 ^^^^^^^^^^^^
@@ -500,6 +428,7 @@ Modifications using set, merge and delete can also be applied on multiple device
 
 Commits
 -------
+This section describes `remote` commit, i.e., commit operations that have to do with modifying remote device configuration. See Section `devices`_ for how to make local commits for setting up device connections.
 
 commit diff
 ^^^^^^^^^^^
@@ -556,10 +485,6 @@ A non-recoverable error that requires manual intervention is shown as::
    cli# commit push
    Non-recoverable error: device example2: remote peer disconnected
    
-One can also choose to not push the changes to the remote devices::
-
-   cli# commit local
-
 To validate the configuration on the remote devices, use the following command::
 
    cli# validate push
@@ -567,6 +492,22 @@ To validate the configuration on the remote devices, use the following command::
 If you want to rollback the current edits, use discard::
 
    cli# discard
+
+One can also choose to not push the changes to the remote devices::
+
+   cli# commit local
+
+This is useful for setting up device connections. If a local commit is performed for remote device config, you need to make an explicit `push` as described in Section `Explicit push`_.
+
+Limitations
+^^^^^^^^^^^
+The following combinations result in an error when making a remote commit:
+
+1) No devices are present. However, it is allowed if no remote validate/commit is made. You may want to dryrun service python code for example even if no devices are present.
+2) Local device fields are changed. These may potentially effect the device connection and should be made using regular netconf local commit followed by rpc connection-change, as described in Section `devices`_.
+3) One of the devices is not in an OPEN state. Also in this case is it allowed if no remote valicate/commit is made, which means you can do local operations (like `commit diff`) even when devices are down.
+
+Further, avoid doing BOTH local and remote edits simultaneously. The system detects local edits (according to (2) above) but if one instead  uses local commit, the remote edits need to be explicitly pushed
 
 Compare and check
 -----------------
@@ -585,8 +526,8 @@ Further, the following command checks whether devices are is out-of-sync::
 Out-of-sync means that a change in the remote device config has been made, such as a manual edit, since the last "pull".
 You can resolve an out-of-sync state with the "pull" command.
 
-Push
-----
+Explicit push
+-------------
 There are also explicit sync commands that are implicitly made in
 `commit push`. Explicit pushes may be necessary if local commits are
 made (eg `commit local`) which needs an explicit push. Or if a new device has been off-line::
@@ -598,6 +539,108 @@ Push the configuration to the devices, validate it and then revert::
      cli> push <devices> validate 
 
             
+Transactions
+============
+A basis of controller operation is the use of transactions. Clixon itself has underlying candidate/running datastore transactions. The controller expands the transaction concept to span multiple devices.
+There are two such types of composite transactions:
+
+1. `Device connect`: where devices are connected via NETCONF over ssh, key exchange, YANG retrieval and config pull
+2. `Config push`: where a service is (optionally) edited, changed device config is pushed to remote devices via NETCONF.
+
+.. image:: transaction.jpg
+   :width: 100%
+           
+A `device connect` transaction starts in state `CLOSED` and if succesful stops in `OPEN`. there are multiple intermediate steps as follows (for each device):
+
+1. An SSH session is created to the IP address of the device
+2. An SSH login is made which requires:
+
+   a) The device to have enabled a NETCONF ssh sub-system
+   b) The public key of the controller to be installed on the device
+   c) The public key of the device to be in the `known_hosts` file of the controller
+3. A mutual NETCONF `<hello>` exchange
+4. Get all YANG schema identifiers from the device using the ietf-netconf-monitoring schema.
+5. For each YANG schema identifier, make a `<get-schema>` RPC call (unless already retrieved).
+6. Get the full configuration of the device.
+
+While a `device connect` operates on individual devices, the `config push` transaction operates on all devices. It starts in `OPEN` for all devices and ends in `OPEN` for all devices involved in the transaction:
+
+1. The user edits a service definition and commits
+2. The commit triggers PyAPI services code, which rewrites the device config
+3. Alternatively, the user edits the device configuration manually
+4. The updated device config is validated by the controller
+5. The remote device is checked for updates, if it is out of sync, the transaction is aborted
+6. The new config is pushed to the remote devices
+7. The new config is validated on the remote devices
+8. If validation succeeds on all remote devices, the new config is committed to all devices
+9. The new config is retreived from the device and is installed on the controller
+10. If validation is not successful, or only a `push validate` was requested, the config is reverted on all remote devices.
+
+Use the show transaction command to get details about transactions::
+
+   cli> show transaction
+     <transaction>
+        <tid>2</tid>
+        <state>DONE</state>
+        <result>FAILED</result>
+        <description>pull</description>
+        <origin>example1</origin>
+        <reason>validation failed</reason>
+        <timestamp>2023-03-27T18:41:59.031690Z</timestamp>
+     </transaction>
+
+
+YANG
+====
+The clixon-controller YANG has the following structure::
+
+   module: clixon-controller
+     +--rw processes
+     |   +--rw services
+     |     +--rw enabled              boolean
+     +--rw services
+     |   +--rw properties
+     +--rw devices
+     |   +--rw device-timeout         uint32
+     |   +--rw device-group* [name]
+     |   | +--rw name                 string
+     |   +--rw device* [name]
+     |     +--rw name                 string
+     |     +--rw description?         string
+     |     +--rw enabled?             boolean
+     |     +--rw conn-type            connection-type
+     |     +--rw user?                string
+     |     +--rw addr?                string
+     |     +--rw yang-config?         yang-config
+     |     +--rw capabilities
+     |     | +--rw capability*        string
+     |     +--ro conn-state-timestamp yang:date-and-time
+     |     +--ro sync-timestamp       yang:date-and-time
+     |     +--ro logmsg               string
+     |     +--rw config
+     +--ro transactions
+         +--ro transaction* [tid]
+           +--ro tid                  uint64
+     notifications:
+       +---n services-commit
+       +---n controller-transaction
+     rpcs:
+         +--config-pull
+         +--controller-commit
+         +--connection-change
+         +--get-device-config
+         +--transaction-error
+         +--transaction-actions-done
+         +--datastore-diff
+  
+The services section contains user-defined services not provided by
+the controller.  A user adds services definitions using YANG `augment`. For example::
+
+    import clixon-controller { prefix ctrl; }
+    augment "/ctrl:services" {
+        list myservice {
+            ...
+
 Actions API
 ===========
 The controller provides an `actions API` which is a YANG-defined protocol for external action handlers, including the `PyAPI`.
@@ -760,7 +803,7 @@ An example PyAPI script takes the service ssh-users definition and creates users
             for device in root.devices.device:
                 new_user = Element("user",
                                    attributes={
-                                       "cl:creator": "users",
+                                       "cl:creator": "users[group='ops']",
                                        "nc:operation": "merge",
                                        "xmlns:cl": "http://clicon.org/lib"})
                 new_user.create("name", cdata=username)
