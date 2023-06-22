@@ -22,6 +22,7 @@ A minimal service module may look like this:
 
   SERVICE = "example"
 
+
   @rpc()
   def setup(root, log, **kwargs):
       log.info("I am a module")
@@ -63,6 +64,9 @@ otherwise they will be written to syslog.
 * kwargs is a dict of optional arguments. kwargs can contain the argument
 "instance" which is the name of the current service instance that is being
 changed by the user.
+
+There is also a variable named "SERVICE" that should have the same name as the 
+service without revision.
 
 .. code:: python
 
