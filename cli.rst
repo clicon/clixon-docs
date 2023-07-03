@@ -223,6 +223,9 @@ CLICON_PROMPT
 CLICON_PLUGIN
   The name of the object file containing callbacks in this file.
 
+CLICON_PIPETREE
+  Name of a pipe output tree as described in 
+
 CLI callbacks
 =============
 CLI callback functions are "library" functions that an application may call from a clispec. A
@@ -351,6 +354,48 @@ pretty parameter
 ^^^^^^^^^^^^^^^^
 All show commands have a pretty-print parameter. If `true` the putput is pretty-printed.
 Indentation level is controlled by the ``PRETTYPRINT_INDENT`` compile-time option
+
+Output pipes
+============
+Output pipes resemble UNIX shell pipes and are useful to filter or modify CLI output. Example::
+
+  cli> print all | grep parameter
+    <parameter>5</parameter>
+    <parameter>x</parameter>
+  cli>
+
+Output pipe functions are declared using a special variant of a tree
+with a name starting with vertical bar. Example::
+
+  CLICON_MODE="|mypipe";
+  \| { 
+     grep <arg:rest>, grep_fn("grep -e", "arg");
+     tail, tail_fn();
+  }
+
+where ``grep_fn`` and ``tail_fn`` are special callbacks that use stdio to modify output.
+
+Such a pipe tree can be referenced with either an explicit reference, or an implicit rule.
+
+An explicit reference looks something like this::
+
+   print {     
+      all, @|mypipe, print_cb("all");
+      detail, @|mypipe, print_cb("detail");
+   }
+
+where a pipe tree is added as a tree reference, appending pipe functions to the regular ``print_cb`` callback.
+
+An example of an implicit rule is as follows::
+
+  CLICON_PIPETREE="|mypipe";
+  print {
+    all, print_cb("all");
+    detail, print_cb("detail);
+
+where the pipe tree is added implicitly to all commands.
+
+Pipe trees also work for sub-trees, ie a subtree referenced by the top-level tree may also use output pipes.
 
 Autocli
 =======
@@ -680,13 +725,11 @@ This section describes some advanced options in the Clixon CLI not described els
 
 Backend socket
 --------------
-
 By default, the CLI uses a UNIX socket as an IPC to communicate with
 the backend.  It is possible to use an IP socket but with a restricted functionality, see :ref:`backend section<clixon_backend>`.
 
 Start session
 ^^^^^^^^^^^^^
-
 The session creation is "lazy" in the sense that a NETCONF session is
 only established when needed. After the session has been
 established, it is maintained (cached) by the CLI client to keep track
@@ -810,7 +853,7 @@ Clixon adds some features and structure to CLIgen which include:
 - A plugin framework for both textual CLI specifications(.cli) and object files (.so)
 - Object files contains compiled C functions referenced by callbacks in the CLI specification. For example, in the cli spec command: `a,fn()`, `fn` must exist in the object file as a C function.
 - The CLIgen `treename` syntax does not work.
-- A CLI specification file is enhanced with the CLIgen variables `CLICON_MODE`, `CLICON_PROMPT`, `CLICON_PLUGIN`.
+- A CLI specification file is enhanced with the CLIgen variables `CLICON_MODE`, `CLICON_PROMPT`, `CLICON_PLUGIN` and `CLICON_PIPETREE`.
 - Clixon generates a command syntax from the Yang specification that can be referenced as `@datamodel`. This is useful if you do not want to hand-craft CLI syntax for configuration syntax.
 
 Example of `@datamodel` syntax:
