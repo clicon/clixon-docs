@@ -362,6 +362,14 @@ Output pipes resemble UNIX shell pipes and are useful to filter or modify CLI ou
   cli> print all | grep parameter
     <parameter>5</parameter>
     <parameter>x</parameter>
+  cli> show config | showas json
+    {
+      "table": {
+        "parameter": [
+          {
+            "name": "x",
+            "value": "a"
+            ...
   cli>
 
 Output pipe functions are declared using a special variant of a tree
