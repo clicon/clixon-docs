@@ -377,11 +377,11 @@ with a name starting with vertical bar. Example::
 
   CLICON_MODE="|mypipe";
   \| { 
-     grep <arg:rest>, grep_fn("grep -e", "arg");
-     tail, tail_fn();
+     grep <arg:rest>, pipe_grep_fn("-e", "arg");
+     showas json, pipe_json_fn();
   }
 
-where ``grep_fn`` and ``tail_fn`` are special callbacks that use stdio to modify output.
+where ``pipe_grep_fn`` and ``pipe_json_fn`` are special callbacks that use stdio to modify output.
 
 Such a pipe tree can be referenced with either an explicit reference, or an implicit rule.
 
