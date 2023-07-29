@@ -540,7 +540,12 @@ The following options set default values to the auto-cli, some of these may be f
    Generate code for CLI completion of existing db symbols. 
    That is, check existing configure database for completion options.
    This is normally always enabled.
-   
+
+`grouping-treeref`
+   Controls the behaviour when generating CLISPEC of YANG 'uses' statements into the
+   corresponding 'grouping' definition. If 'true', use indirect tree reference '@treeref'
+   to reference the grouping definition. This may reduces memory footprint of the CLI.
+
 Rules
 ^^^^^
 To complement options, a set of rules to further define the autocli can be defined. 
