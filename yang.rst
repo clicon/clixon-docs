@@ -9,7 +9,6 @@ YANG
 
 This chapter describes some aspects of the YANG implementation in Clixon. Regarding standard compliance, see :ref:`Standards<clixon_standards>`.
 
-
 Leafrefs
 ========
 Some notes on `YANG leafref <https://www.rfc-editor.org/rfc/rfc7950.html#section-9.9.3>`_ implementation in Clixon, especially as used in `openconfig modules <https://datatracker.ietf.org/doc/html/draft-openconfig-netmod-opstate-01>`_,  which rely heavily on leafrefs.
@@ -277,3 +276,122 @@ The following config option is related:
 CLICON_YANG_UNKNOWN_ANYDATA
    Treat unknown XML/JSON nodes as anydata when loading from startup db.
   
+Schema mounts
+=============
+
+Clixon implements Yang schema mounts as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_  with the following restrictions:
+
+1. A YANG mount-point can only be defined in a `presence container`.
+2. Only `inline` mount-points are supported
+3. `config false` mount-points are not supported
+
+Configuration
+-------------
+The following configure options are associated to mount-points:
+
+CLICON_YANG_SCHEMA_MOUNT
+  Enable YANG library support as state data according to RFC8525. Should be set to: ``true``
+
+YANG
+----
+Mount-points are enabled by importing `ietf-yang-schema-mount` and then apply the `mount-point` extension at a presence container. Example::
+
+   module mymod {
+      namespace "urn:example:my";
+      ...
+      import ietf-yang-schema-mount {
+         prefix yangmnt;
+      }
+      list mylist {
+         key name;
+         leaf name{
+            type string;
+         }
+         container myroot{
+            presence "Otherwise root is not visible";
+            yangmnt:mount-point "mylabel"{
+               description "Root for other yang models";
+            }
+         }
+      }
+   }
+
+Once declared in the YANG schema, moint-points will appear dynamically
+in the data as they are added. For example, if a NETCONF `<edit-config>`
+adds the `myroot` container above, it will be recognized as a
+mount-point and populated with another set of YANG modules than the
+top-level.
+
+Populating a moint-point with YANG schemas is made by an application-dependent callback as described in Section `Mount callback`_.
+
+State
+-----
+The moint-points appear in the state-data and can be retrieved using NETCONF get. The data appears in two places. 
+
+First, on the top-level `schema-mounts`::
+
+   <schema-mounts xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-schema-mount">
+      <mount-point>
+         <module>mymod</module>
+         <label>mylabel</label>
+         <config>true</config>
+         <inline/>
+      </mount-point>
+   </schema-mounts>
+      
+Second, at the mount-point level for all dynamically added moint-points::
+
+   <mylist xmlns="urn:example:my">
+      <name>x</name>
+      <myroot>
+         <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+            <module-set>
+               <name>mylabel</name>
+               <module>
+                  <name>clixon-mount1</name>
+                  <namespace>urn:example:mount1</namespace>
+                  <revision>2023-05-01</revision>
+               </module>
+            </module-set>
+         </yang-library>
+      </myroot>
+   </mylist>
+
+In this example, there is one dynamically created moint-point in the
+list `x` where the single YANG module `clixon-mount1` is mounted.
+   
+Mount callback
+--------------
+Mount-points need to be populated with YANG schemas. This is done by defining the `ca_yang_mount` callback. The following example illustrates how this is done in a C plugin::
+
+   static clixon_plugin_api api = {
+       ...
+       .ca_yang_mount=example_mount,
+
+As input the callback takes the XML mount-point, and as output a yang-lib module-set tree. It also provides how to validate the YANG schemas and whether it is read-only or read-write::
+
+   int
+   main_yang_mount(clicon_handle   h,
+                   cxobj          *xt,
+                   int            *config,
+                   validate_level *vl,
+                   cxobj         **yanglib)
+
+For example, the callback could return something like::
+
+   <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+      <module-set>
+         <name>mount</name>
+         <module>
+            <name>clixon-mount1</name>
+            <namespace>urn:example:mount1</namespace>
+            <revision>2023-05-01</revision>
+         </module>
+      </module-set>
+   </yang-library>
+
+Clixon calls this callback when needed, such as when a new mount-point is created.
+
+CLI
+---
+It is possible to extend the Autocli with mount-points. However, it is application-dependent. For the interested user, the :ref:`Clixon controller <clixon_controller>` has an adapted autocli for mount-points.

@@ -1,6 +1,6 @@
 .. _clixon_misc:
 .. sectnum::
-   :start: 20
+   :start: 19
    :depth: 3
 
 ****
@@ -248,7 +248,6 @@ When running, several things may happen:
      3. It is restarted due to rpc or config change (eg a server is added, a key modified, etc). The parent kills the process and enters EXITING waiting for a SIGCHLD that triggers a wait, therafter a new process is started and it goes to RUNNING with a new pid::
 
            RUNNING --restart--> EXITING  --sigchld/wait + restart --> RUNNING(pid)
-
 
 Event notifications
 ===================

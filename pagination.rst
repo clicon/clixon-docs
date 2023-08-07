@@ -1,6 +1,6 @@
 .. _clixon_pagination:
 .. sectnum::
-   :start: 18
+   :start: 17
    :depth: 3
 
 **********

@@ -84,7 +84,7 @@ Assigned meta-data are hardcoded. The following attributes are defined:
   
 Schema mount
 ------------
-Yang schema mount support is experimental as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .
+Yang schema mount is supported as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .
 
 Enable by enable the `CLICON_YANG_SCHEMA_MOUNT` configuration option.
 

@@ -28,11 +28,9 @@ mechanism.
    snmp
    yang
    usecases
-   controller
    client
    xml
    pagination
    upgrade
    misc
-   pyapi
-   services
+

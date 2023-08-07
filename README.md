@@ -2,5 +2,5 @@
 # clixon-docs
 Clixon documentation.
 
-See [Documentation project status](https://readthedocs.org/projects/clixon-docs/)-
+See [Documentation project status](https://readthedocs.org/projects/clixon-docs/)
 

@@ -1,6 +1,6 @@
 .. _client_api:
 .. sectnum::
-   :start: 16
+   :start: 15
    :depth: 3
 
 **********

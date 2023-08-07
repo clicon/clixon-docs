@@ -102,6 +102,16 @@ The `clixon_cli` client has the following command-line options:
   -U <user>       Over-ride unix user with a pseudo user for NACM.
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
+Inline CLI commands
+^^^^^^^^^^^^^^^^^^^
+CLI commands can be given directly after the options. These are executed directly::
+
+  clixon_cli -f example.xml show config
+
+One can also add extra application-dependent plugin options after `--` which can be read with `clicon_argv_get()`::
+
+    clixon_cli -f example.xml show config -- -x extra-option
+  
 Configure options
 =================
 The following config options are related to clispec and plugin files (clixon config options), ie they are set in the XML Clixon config file:
@@ -692,12 +702,17 @@ The CLI ``hidden`` command is not shown but the command still exists::
 The following autocli extensions are defined:
 
 ``hide``
-   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node. 
+   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node.
+
+``skip``
+   Skip the command altogether.
 ``hide-show``
    Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
 ``strict-expand``
    Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.
-
+``alias``
+   Replace the command with another value
+   
 Edit modes
 ----------
 The autocli supports *automatic edit modes* where by entering a ``<cr>``, you enter an edit mode. An edit mode is created for every YANG container or list.
