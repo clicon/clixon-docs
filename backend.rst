@@ -40,7 +40,7 @@ The backend have the following command-line options:
   -u <path|addr>  Internal socket domain path or IP addr (see -a)
   -P <file>       Process ID filename
   -1              Run once and then quit (do not wait for events)
-  -s <mode>       Specify backend startup mode: none|startup|running|init)
+  -s <mode>       Specify backend startup mode: none|startup|running|init|dump-xml)
   -c <file>       Load extra XML configuration file, but do not commit.
   -q              Quit startup directly after upgrading and print result on stdout
   -U <user>       Run backend daemon as this user AND drop privileges permanently
@@ -80,6 +80,8 @@ The backend can perform startup in four different modes. The difference is how t
    Commit running db configuration into running state. Typically after reboot if a persistent running db exists.
 `startup`
    Commit startup configuration into running state. After reboot when no persistent running db exists.
+`dump-xml`
+   Initialize from the configuration, dump that state to ``stdout``, then exit.
 
 Use the ``-s`` option to select startup mode, example::
    
