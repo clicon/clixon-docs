@@ -35,6 +35,7 @@ The `clixon_netconf` client has the following command-line options:
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -C <format>     Dump configuration options on stdout after loading and quit. Format is one of xml|json|text
   -q              Quiet mode, server does not send hello message on startup
   -0              Set netconf base capability to 0, server does not expect hello, force EOM framing
   -1              Set netconf base capability to 1, server does not expect hello, force chunked framing

@@ -86,6 +86,8 @@ The `clixon_cli` client has the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Stderr is default. 
+  -C <format>     Dump configuration options on stdout after loading. Format is one of xml|json|text
   -F <file>       Read commands from file (default stdin)
   -1              Run once, do not enter interactive mode
   -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
@@ -96,7 +98,6 @@ The `clixon_cli` client has the following command-line options:
   -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -G              Print auo-cli CLI syntax generated from YANG
   -L              Debug print dynamic CLI syntax including completions and expansions
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Stderr is default. 
   -y <file>       Load yang spec file (override yang main modul)e
   -c <file>       Specify cli spec file
   -U <user>       Over-ride unix user with a pseudo user for NACM.

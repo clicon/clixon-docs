@@ -59,6 +59,7 @@ The restconf daemon have the following command-line options:
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -C <format>     Dump configuration options on stdout after loading and quit. Format is one of xml|json|text
   -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -y <file>       Load yang spec file (override yang main module)
   -a <family>     Internal backend socket family: UNIX|IPv4|IPv6

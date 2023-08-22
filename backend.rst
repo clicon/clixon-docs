@@ -31,6 +31,7 @@ The backend have the following command-line options:
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Syslog is default. If foreground, then syslog and stderr is default.
+  -C <format>     Dump configuration options on stdout after loading. Format is one of xml|json|text
   -d <dir>        Specify backend plugin directory
   -p <dir>        Add Yang directory path (see CLICON_YANG_DIR)
   -b <dir>        Specify datastore directory
@@ -51,23 +52,28 @@ The backend have the following command-line options:
   
 Logging and debugging
 ---------------------
-In case of debugging, the backend can be run in the foreground and with debug flags:
-::
+In case of debugging, the backend can be run in the foreground and with debug flags::
 
    clixon_backend -FD 1
 
-Logging is by default on syslog.  Alternatively, logging can be made on a file using the `-l` option:
-::
+Note that debug levels can be combined as described in Section :ref:`debugging <clixon_misc>`.
+   
+Logging is by default on syslog.  Alternatively, logging can be made on a file using the `-l` option::
 
    clixon_backend -lf<file>
 
 When run in foreground, logging is by default done on both syslog and stderr.
 
-In a debugging mode, it can be useful to run in `once-only` mode, where the backend quits directly after starting up, instead of waiting for events:
-::
+In a debugging mode, it can be useful to run in `once-only` mode, where the backend quits directly after starting up, instead of waiting for events::
 
    clixon_backend -F1D 1
 
+It may be interesting to dump all config options after load, taking into account default values, config-dirs and option overriding. Use the `-C` option to dump the options on stdout::
+
+   clixon_backend -1C xml
+
+The config options are also dumped on log using debug level 1 as a normal procedure.
+   
 Startup
 =======
 The backend can perform startup in four different modes. The difference is how the running state is handled, i.e., what state the system is in when you start the daemon and how loading the configuration affects it:
