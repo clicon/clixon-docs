@@ -68,11 +68,11 @@ In a debugging mode, it can be useful to run in `once-only` mode, where the back
 
    clixon_backend -F1D 1
 
-It may be interesting to dump all config options after load, taking into account default values, config-dirs and option overriding. Use the `-C` option to dump the options on stdout::
+It may be useful to see all config options after load, taking into account default values, config-dirs and option overriding. This is normally dumped in debug level 1.
+
+But you can also make an explicit dump of all config options on stdout using the `-C` option::
 
    clixon_backend -1C xml
-
-The config options are also dumped on log using debug level 1 as a normal procedure.
    
 Startup
 =======
