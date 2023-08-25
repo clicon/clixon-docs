@@ -216,7 +216,6 @@ socket port
 socket ssl
    If true: HTTPS; if false: HTTP protocol
 
-
 Examples
 --------
 Configure a single HTTP on port 80 in the default config file::
@@ -303,7 +302,7 @@ The Restconf service can be installed at, for example, /etc/systemd/system/examp
 
 Internal start
 --------------
-For starting restconf internally, you need to enable ``CLICON_BACKEND_RESTCONF_PROCESS`` option
+For starting restconf internally, you need to enable ``CLICON_BACKEND_RESTCONF_PROCESS`` option. See Section `datastore`_.
 
 Thereafter, you can either use the ``clixon-restconf.yang`` configuration or use the ``clixon-lib.yang`` process control RPC:s to start/stop/restart the daemon or query status.
 

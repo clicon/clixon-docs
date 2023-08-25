@@ -383,8 +383,8 @@ Output pipes resemble UNIX shell pipes and are useful to filter or modify CLI ou
             ...
   cli>
 
-Output pipe functions are declared using a special variant of a tree
-with a name starting with vertical bar. Example::
+Output pipe functions are declared using a special variant of a CLI tree
+with a name starting with a `vertical bar`. Example::
 
   CLICON_MODE="|mypipe";
   \| { 
@@ -396,7 +396,9 @@ where ``pipe_grep_fn`` and ``pipe_json_fn`` are special callbacks that use stdio
 
 Such a pipe tree can be referenced with either an explicit reference, or an implicit rule.
 
-An explicit reference looks something like this::
+Explicit reference
+------------------
+An explicit reference is for single commands. For example, adding a pipe to the two print commands::
 
    print {     
       all, @|mypipe, print_cb("all");
@@ -405,14 +407,16 @@ An explicit reference looks something like this::
 
 where a pipe tree is added as a tree reference, appending pipe functions to the regular ``print_cb`` callback.
 
-An example of an implicit rule is as follows::
+Implicit rule
+-------------
+An implicit rule adds pipes to `all` commands in a cli mode. An example of an implicit rule is as follows::
 
   CLICON_PIPETREE="|mypipe";
   print {
     all, print_cb("all");
     detail, print_cb("detail);
 
-where the pipe tree is added implicitly to all commands.
+where the pipe tree is added implicitly to all commands in that file, and possibly on other files with the sqme mode.
 
 Pipe trees also work for sub-trees, ie a subtree referenced by the top-level tree may also use output pipes.
 

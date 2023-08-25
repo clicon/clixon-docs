@@ -87,6 +87,7 @@ clixon_snmp command line options
 	-D <level>	Debug level
 	-f <file>	Configuration file (mandatory)
 	-l (e|o|s|f<file>) Log on std(e)rr, std(o)ut, (s)yslog(default), (f)ile
+        -C <format>     Dump configuration options on stdout after loading and exit. Format is one of xml|json|text
         -z              Kill other clixon_snmp daemon and exit
 	-o "<option>=<value>"	Give configuration option overriding config file (see clixon-config.yang)
 
