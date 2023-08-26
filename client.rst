@@ -8,7 +8,7 @@ Client API
 **********
 
 .. note::
-   This section is not complete and outdated. A new Client API is developed as part of the (:ref:`Clixon controller <clixon_controller>`)
+   This section is not complete and outdated. A new Client API is developed as part of the `Clixon controller <https://clixon-controller-docs.readthedocs.io>`_.
 
 Clixon's client API provides a way to communicate with the built-in
 XML datastore. This can be used to fetch or manipulate configurations

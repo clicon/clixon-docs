@@ -398,11 +398,12 @@ Such a pipe tree can be referenced with either an explicit reference, or an impl
 
 Explicit reference
 ------------------
-An explicit reference is for single commands. For example, adding a pipe to the two print commands::
+An explicit reference is for single commands. For example, adding a pipe to the print commands::
 
-   print {     
-      all, @|mypipe, print_cb("all");
-      detail, @|mypipe, print_cb("detail");
+   print {
+      @|mypipe, print_cb("all");
+      all  @|mypipe, print_cb("all");
+      detail @|mypipe, print_cb("detail");
    }
 
 where a pipe tree is added as a tree reference, appending pipe functions to the regular ``print_cb`` callback.
