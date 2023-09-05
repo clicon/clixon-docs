@@ -394,4 +394,4 @@ Clixon calls this callback when needed, such as when a new mount-point is create
 
 CLI
 ---
-It is possible to extend the Autocli with mount-points. However, it is application-dependent. For the interested user, the :ref:`Clixon controller <clixon_controller>` has an adapted autocli for mount-points.
+It is possible to extend the Autocli with mount-points. However, it is application-dependent. For the interested user, the `Clixon controller <https://clixon-controller-docs.readthedocs.io>`_ has an adapted autocli for mount-points.

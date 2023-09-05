@@ -377,9 +377,6 @@ Output pipes resemble UNIX shell pipes and are useful to filter or modify CLI ou
     {
       "table": {
         "parameter": [
-          {
-            "name": "x",
-            "value": "a"
             ...
   cli>
 
@@ -396,30 +393,79 @@ where ``pipe_grep_fn`` and ``pipe_json_fn`` are special callbacks that use stdio
 
 Such a pipe tree can be referenced with either an explicit reference, or an implicit rule.
 
+Only a single level of pipes is possibly in this release. For example, ``a|b|c`` is `not` possible.
+
+.. note::
+        Only one level of pipes is supported
+
 Explicit reference
 ------------------
 An explicit reference is for single commands. For example, adding a pipe to the print commands::
 
-   print {
+   print, print_cb("all");{
       @|mypipe, print_cb("all");
-      all  @|mypipe, print_cb("all");
-      detail @|mypipe, print_cb("detail");
+      all @|mypipe, print_cb("all");
+      detail;
    }
 
 where a pipe tree is added as a tree reference, appending pipe functions to the regular ``print_cb`` callback.
+Note that the following commands are possible in this example::
+
+   print
+   print | count
+   print all | count
+   print detail
 
 Implicit rule
 -------------
 An implicit rule adds pipes to `all` commands in a cli mode. An example of an implicit rule is as follows::
 
-  CLICON_PIPETREE="|mypipe";
-  print {
-    all, print_cb("all");
-    detail, print_cb("detail);
-
-where the pipe tree is added implicitly to all commands in that file, and possibly on other files with the sqme mode.
+   CLICON_PIPETREE="|mypipe";
+   print, print_cb("all");{
+      all, print_cb("all");
+      detail, print_cb("detail);
+   }
+   
+where the pipe tree is added implicitly to all commands in that file, and possibly on other files with the same mode.
 
 Pipe trees also work for sub-trees, ie a subtree referenced by the top-level tree may also use output pipes.
+
+Combinations
+------------
+It is possible to combine an implicit (default) rule with an explict rule as follows::
+
+   CLICON_MODE="|commonpipe";
+   print, print_cb("all");{
+      @|mypipe, print_cb("all");
+      all @|mypipe, print_cb("all");
+      detail;
+   }
+     
+In this example, `print` and `print all` use the `¡mypipe` menu, while `print detail` uses the `|common` menu
+
+Inheriting
+----------
+Sub-trees inherit pipe commands from the top-level according to the following rules:
+  1. Top-level implicit rules are inherited to all sub-trees, unless
+  2. Explicit rules are present at the tree-reference
+  3. No pipe commands are allowed in a pipe-command (only single level allowed)
+
+Rules 1 and 2 are illustrated as follows::
+
+   CLICON_MODE="|commonpipe";
+   aaa {
+      @datamodel, cli_show();
+      @|mypipe, cli_show();
+   }
+   bbb {
+      @datamodel, cli_show();
+   }
+
+Pipe commands in the `datamodel` tree are `|mypipe` if preceeded by `aaa`, but `|commonpipe` if preceeded by `bbb`
+
+Pipe functions
+--------------
+Clixon contains several example pipe functions primarily for testing, users of Clixon should review these and consider implementing their own.
 
 Autocli
 =======
@@ -715,9 +761,9 @@ The following autocli extensions are defined:
 ``hide-show``
    Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
 ``strict-expand``
-   Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.
+   Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.o
 ``alias``
-   Replace the command with another value
+   Replace the command with another value, only implemented for YANG leaves.
    
 Edit modes
 ----------
