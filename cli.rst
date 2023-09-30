@@ -305,7 +305,8 @@ The callback has the following parameters, only the first is mandatory:
  * `pretty` : If `true`, make output pretty-printed
  * `state`  : If `true`, include non-config data in output
  * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. See also extended values below
- * `prepend` : Opional prefix to prepend before cli syntax output, only valid for CLI format.
+ * `prepend` : Optional prefix to prepend before cli syntax output, only valid for CLI format.
+ * `fromroot` : If `false` show from xpath node, if `true` show from root
 
 cli_show_auto
 -------------

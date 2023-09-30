@@ -28,7 +28,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # The full version, including alpha/beta/rc tags
-release = '6.3'
+release = '6.4'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
