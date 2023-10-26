@@ -32,5 +32,6 @@ mechanism.
    xml
    pagination
    upgrade
+   errors
    misc
 

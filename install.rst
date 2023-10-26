@@ -270,6 +270,9 @@ These include (standard options are omitted)
   --with-yang-installdir=DIR  Install Clixon yang files here (default: ${prefix}/share/clixon)
   --with-yang-standard-dir=DIR  Location of standard IETF/IEEE YANG specs for tests and example
                                 (default: $prefix/share/yang/standard). You can retrieve the standard files at https://github.com/YangModels/yang
+  --with-clicon-user=user     Run as this user in example and test
+  --with-clicon-group=group   Run as this group in example and test
+
 
 There are also some variables that can be set, such as::
 

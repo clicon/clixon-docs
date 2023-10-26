@@ -79,6 +79,12 @@ exit
    Called just before plugin is unloaded at exit
 extension
   Called at parsing of yang modules containing an extension statement.  A plugin may identify the extension by its name, and perform actions on the yang statement, such as transforming the yang in-memory. A callback is made for every statement, which means that several calls per extension can be made. See :ref:`Misc section<clixon_misc>` and the main example on how to use extensions.
+yang_mount
+  Called when populating a RFC8525 mount-point. See :ref:`YANG section<clixon_yang>` for more info.
+yang_patch
+  Patch a yang module. This may be necessary with an imported faulty or non-compliant YANG module
+errmsg
+  Customize a netconf error message for CLI return, log or debug messages. See :ref:`Error section<clixon_errors>` and the main example.
 
 See :ref:`Backend section<clixon_backend>` for backend specific callbacks, as well as corresponding manual sections for netconf/restconf/cli callbacks.
 
