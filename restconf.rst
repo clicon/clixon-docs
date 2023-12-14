@@ -55,6 +55,7 @@ Command-line options
 ====================
 The restconf daemon have the following command-line options:
   -h              Help
+  -V              Show version and exit
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory

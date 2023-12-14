@@ -84,6 +84,7 @@ clixon_snmp command line options
    usage:clixon_snmp
    where options are
 	-h		Help
+        -V              Show version and exit
 	-D <level>	Debug level
 	-f <file>	Configuration file (mandatory)
 	-l (e|o|s|f<file>) Log on std(e)rr, std(o)ut, (s)yslog(default), (f)ile

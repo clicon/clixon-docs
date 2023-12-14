@@ -7,7 +7,6 @@
 Errors and debug
 ****************
 
-
 Error reporting
 ===============
 
@@ -130,7 +129,9 @@ The error message is now::
   My error message: List key m1 length mismatch
 
 The example above is taken from the main example for CLI. Customizing error messages for backend or other applications is similar.
-  
+
+Note that `cberr` may contain a prefix on entry. This can be used as an input argument, or simply be discarded with `cb_reset(cberr)`.
+
 Note that the Netconf errors are only a part of all errors. The CLI in particular have error messages (or part of messages) that are not related to NETCONF and are therefore not affected by this translation.
 
 Error categories

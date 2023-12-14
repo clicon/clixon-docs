@@ -31,6 +31,7 @@ Command-line options
 
 The `clixon_netconf` client has the following command-line options:
   -h              Help
+  -V              Show version and exit
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
@@ -229,6 +230,8 @@ Overview of a callhome architecture with a device (where clixon resides) and a c
   | clixon_backend  |
   +-----------------+
 
+
+Requirement for the netconf callhome solutions are openssh and openssh-server.
 
 The steps to make a Netconf callhome is as follows:
 

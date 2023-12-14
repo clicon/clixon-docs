@@ -83,6 +83,7 @@ Command-line options
 --------------------
 The `clixon_cli` client has the following command-line options:
   -h              Help
+  -V              Show version and exit
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
@@ -718,8 +719,7 @@ Note to use ``@datamodelstate`` config option ``treeref-state-default`` must be 
   
 YANG Extensions
 ---------------
-A third method to define the autocli is using :ref:`YANG
-extensions<clixon_yang>`, where a YANG specification is annotated with extension.
+A third method to define the autocli is using :ref:`YANG extensions<clixon_yang>`, where a YANG specification is annotated with extension.
 
 Clixon provides a dedicated YANG extension for the autocli for this purpose: ``clixon-lib:autocli``.
 
@@ -965,6 +965,12 @@ Or using "shebang"::
   show version
   quit
 
+Two caveats regarding "shebang":
+  1. The clixon config file is `/usr/local/etc/clixon.xml`
+  2. The mode is `CLICON_CLI_MODE`
+
+You may mod this by using soft links or creating a new executable to use use in the "shebang" with other default values.
+     
 How to deal with large specs
 ----------------------------
 CLIgen is designed to handle large specifications in runtime, but it may be

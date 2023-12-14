@@ -14,7 +14,7 @@ This section describes how to build Clixon from source on Ubuntu
 Linux. You can use this as a base for other platforms as well since
 many steps (such as prereqs) are similar.
 
-Further, the `vagrant`_ scripts show how to build for some other Linux variants, such as Centos.
+Further, the `vagrant`_ scripts show how to build for some other Linux variants.
 
 Prerequisites
 -------------
