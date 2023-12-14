@@ -62,7 +62,7 @@ An example of a minimal plugin is as follows::
      return &api;
   }
 
-First the ``clixon_plugin_api`` struct defines the callbacks. There are two blockx of callbacks:
+First the ``clixon_plugin_api`` struct defines the callbacks. There are two blocks of callbacks:
 
 * Common callbacks for backend, cli, netconf, and restconf
 * Application-specific callbacks. In the example, only ``ca_daemon`` is specific to backends. By far, the backend have most specific callbacks.
@@ -85,6 +85,8 @@ yang_patch
   Patch a yang module. This may be necessary with an imported faulty or non-compliant YANG module
 errmsg
   Customize a netconf error message for CLI return, log or debug messages. See :ref:`Error section<clixon_errors>` and the main example.
+version
+  Print a plugin-specific version string
 
 See :ref:`Backend section<clixon_backend>` for backend specific callbacks, as well as corresponding manual sections for netconf/restconf/cli callbacks.
 
