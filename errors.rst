@@ -167,9 +167,12 @@ Each clixon application has a ``-D <level>`` command-line option to enable debug
 - ``CLIXON_DBG_DEFAULT`` (= 1) Default logs
 - ``CLIXON_DBG_MSG``     (= 2) In/out messages and datastore reads
 - ``CLIXON_DBG_DETAIL``  (= 4) Detailed logs
-- ``CLIXON_DBG_EXTRA``   (= 8) Extra Detailed logs
+- ``CLIXON_DBG_EXTRA``   (= 8) Extra logs
+- ``CLIXON_DBG_XML``    (= 16) XML logs
+- ``CLIXON_DBG_XPATH``  (= 32) XPath processing logs
+- ``CLIXON_DBG_YANG``   (= 64) YANG processing logs
 
-You can combine flags, so that, for example ``-D 5`` means default + detailed, but no packet debugs.
+You can combine flags, so that, for example ``-D 5`` means default + detailed, but no packet debugs.  Similarly, some messages require multiple flags, like XML + DETAIL would be ``-D 20``.
 
 You can direct the debug logs using the ``-l <option>`` as follows:
 
