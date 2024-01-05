@@ -251,7 +251,7 @@ containing a keyword (`example`) and a variable (`var`) and `mycallback` is a cl
 
 In C, the callback has the following signature::
 
-  int mycallback(clicon_handle h, cvec *cvv, cvec *argv);
+  int mycallback(clixon_handle h, cvec *cvv, cvec *argv);
 
 Suppose a user enters the following command in the CLI::
 

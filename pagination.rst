@@ -65,7 +65,6 @@ clixon extends the database lock mechanism with a specific
 developer. It works the same way as a database lock, but there is no
 config database associated with it, it is specially made for paginated
 state data only.
-
    
 Pagination protocol
 ===================

@@ -20,26 +20,26 @@ An example of a clixon error as it may appear in a syslog::
 
   Mar 24 10:30:48 Alarik clixon_restconf[3993]: clixon_restconf openssl: 3993 Started
 
-In C-code, clixon error and logging is initialized by ``clicon_log_init``::
+In C-code, clixon error and logging is initialized by ``clixon_log_init``::
 
-  clicon_log_init(prefix, upto, flags); 
+  clixon_log_init(h, prefix, upto, flags); 
 
 where:
 
 * `prefix`: appears first in the error string
 * `upto`: log priority as defined by syslog(3), eg: LOG_DEBUG, LOG_INFO,..
-* `flags`: a bitmask of where logs appear, values are: ``CLICON_LOG_STDERR``, ``_STDOUT``, ``_SYSLOG``, ``_FILE``.
+* `flags`: a bitmask of where logs appear, values are: ``CLIXON_LOG_STDERR``, ``_STDOUT``, ``_SYSLOG``, ``_FILE``.
 
 Error call
 ----------
-An error is typically called by ``clicon_err()`` and a return value of ``-1`` as follows::
+An error is typically called by ``clixon_err()`` and a return value of ``-1`` as follows::
 
-  clicon_err(category, errno, format, ...)
+  clixon_err(category, errno, format, ...)
   return -1;
 
 where:
 
-* `category` is an error "category" including for example "yang", "xml" See `enum clicon_err` for more examples.
+* `category` is an error "category" including for example "yang", "xml" See `enum clixon_err` for more examples.
 * `errno`  if given, usually errors as given by ``errno.h``
 * `format` A variable arg string describing the error.
 
@@ -104,7 +104,7 @@ The default error message is constructed from the Netconf message as follows::
 To replace this message with a customized variant, a callback is written as follows in plugin code::
 
    int
-   example_cli_errmsg(clicon_handle h,
+   example_cli_errmsg(clixon_handle h,
                       cxobj        *xerr,
                       cbuf         *cberr)
    {

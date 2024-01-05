@@ -47,7 +47,7 @@ Example::
    * @param[in] msd  Info on datastore module-state, if any
    */
   int
-  example_upgrade(clicon_handle h,
+  example_upgrade(clixon_handle h,
                   char         *db,
 		  cxobj        *xt,
 		  modstate_diff_t *msd)
@@ -191,7 +191,7 @@ The second way is by programming the plugin_reset() in the backend
 plugin. The following code illustrates how to do this (see also example_reset() in example_backend.c)::
 
    int
-   example_reset(clicon_handle h,
+   example_reset(clixon_handle h,
                  const char   *db)
    {
       cxobj *xt = NULL;

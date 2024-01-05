@@ -57,7 +57,7 @@ An example of a minimal plugin is as follows::
   };
   
   clixon_plugin_api *
-  clixon_plugin_init(clicon_handle h)
+  clixon_plugin_init(clixon_handle h)
   {
      return &api;
   }
@@ -86,7 +86,7 @@ yang_patch
 errmsg
   Customize a netconf error message for CLI return, log or debug messages. See :ref:`Error section<clixon_errors>` and the main example.
 version
-  Print a plugin-specific version string
+  Print a plugin-specific version stringh
 
 See :ref:`Backend section<clixon_backend>` for backend specific callbacks, as well as corresponding manual sections for netconf/restconf/cli callbacks.
 
@@ -137,7 +137,7 @@ YANG::
 		
 Register RPC in clixon_plugin_init()::		
 
-    clixon_plugin_api *clixon_plugin_init(clicon_handle h)
+    clixon_plugin_api *clixon_plugin_init(clixon_handle h)
     {
        ...
        rpc_callback_register(h, example_rpc, NULL, "urn:example:clixon", "example");
@@ -145,7 +145,7 @@ Register RPC in clixon_plugin_init()::
 Callback function reading value input x, modifying value and writing it as output value y::
 
    static int 
-   example_rpc(clicon_handle h,            /* Clicon handle */
+   example_rpc(clixon_handle h,            /* Clicon handle */
                cxobj        *xe,           /* Request: <rpc><xn></rpc> */
 	       cbuf         *cbret,        /* Reply eg <rpc-reply>... */
 	       void         *arg,          /* client_entry */
@@ -182,7 +182,7 @@ example.
 Register Action in example_reset()::
 
    int
-   example_start(clicon_handle h)
+   example_start(clixon_handle h)
    {
       ...
       if (action_callback_register(h, ya, example_action_reset, NULL) < 0)

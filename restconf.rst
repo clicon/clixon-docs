@@ -389,7 +389,7 @@ If the message is authenticated, a user is associated with the message. This use
 
 The signature of the auth callback is as follows::
 
-  int ca_auth(clicon_handle h, void *req, clixon_auth_type_t auth_type, char **authp);
+  int ca_auth(clixon_handle h, void *req, clixon_auth_type_t auth_type, char **authp);
 
 where:  
 

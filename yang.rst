@@ -371,7 +371,7 @@ Mount-points need to be populated with YANG schemas. This is done by defining th
 As input the callback takes the XML mount-point, and as output a yang-lib module-set tree. It also provides how to validate the YANG schemas and whether it is read-only or read-write::
 
    int
-   main_yang_mount(clicon_handle   h,
+   main_yang_mount(clixon_handle   h,
                    cxobj          *xt,
                    int            *config,
                    validate_level *vl,
