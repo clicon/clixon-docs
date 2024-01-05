@@ -78,61 +78,6 @@ A third class of CLI errors are similar to the previous class but quits the CLI:
 
 These errors are typically due to system functions failing in a fatal way.
   
-Customized errors
------------------
-Netconf errors, such as returned by the backend on error, may be shown as a log message or CLI output.
-A default Netconf to text translation is provided by the system, but
-it is possible to customize the message by defining the ``ca_errmsg`` callback.
-
-Customized errors applies to all clixon applications. In particular, logs for the backend and return output in the CLI.
-
-For example, a Netconf message could be::
-
-   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-      <rpc-error>
-         <error-type>rpc</error-type>
-         <error-tag>malformed-message</error-tag>
-         <error-severity>error</error-severity>
-         <error-message>List key m1 length mismatch</error-message>
-      </rpc-error>
-   </rpc-reply>
-
-The default error message is constructed from the Netconf message as follows::
-
-   rpc malformed-message List key m1 length mismatch
-
-To replace this message with a customized variant, a callback is written as follows in plugin code::
-
-   int
-   example_cli_errmsg(clixon_handle h,
-                      cxobj        *xerr,
-                      cbuf         *cberr)
-   {
-       int    retval = -1;
-       cxobj *x;
-
-       cprintf(cberr, "My error message: ");
-       if ((x=xpath_first(xerr, NULL, "//error-message"))!=NULL)
-          cprintf(cberr, "%s ", xml_body(x));
-       retval = 0;
-    done:
-       return retval;
-   }
-
-   static clixon_plugin_api api = {
-     ...
-    .ca_errmsg=example_cli_errmsg,
-   };
-
-The error message is now::
-
-  My error message: List key m1 length mismatch
-
-The example above is taken from the main example for CLI. Customizing error messages for backend or other applications is similar.
-
-Note that `cberr` may contain a prefix on entry. This can be used as an input argument, or simply be discarded with `cb_reset(cberr)`.
-
-Note that the Netconf errors are only a part of all errors. The CLI in particular have error messages (or part of messages) that are not related to NETCONF and are therefore not affected by this translation.
 
 Error categories
 ----------------
@@ -235,3 +180,84 @@ Or massif for memory usage::
   
   valgrind --tool=massif clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
   massif-visualizer
+
+Customization
+=============
+Errors, logs and denugs can be customized by plugins via the `ca_errmsg` API.
+
+Customized errors applies to all clixon applications. For example, logs for the backend and return output in the CLI.
+
+The API provides a single function callback which can be used in a various ways. The example shows one simple way as described here.
+
+First define an error message callback as part of the plugin initialization::
+
+   static clixon_plugin_api api = {
+     ...
+    .ca_errmsg=example_cli_errmsg,
+   };
+
+The errmsg callback has many parameters. Some are not always applicable:
+
+  * h : Clixon handle
+  * fn : name of source file (only err)
+  * line: line of source file (only err)
+  * type: log, err or debug (actual types called ``LOG_TYPE_LOG`` etc)
+  * category: Error category (see Section `error-categories`_) (only err)
+  * suberr: Error number, eg ``errno`` (only err)
+  * xerr: XML structure, either NETCONF (for err) or just generic XML (debug, log)
+  * format: Format string similar to `printf`
+  * ap: Variable argument list assciated with format. Similar to `vprintf`
+  * cbmsg: Customized error message as output of the function. If NULL, use regular message.
+   
+A simple way to replace all error messages would be::
+
+   int
+   example_cli_errmsg(clixon_handle        h,
+                      const char          *fn,
+                      const int            line,
+                      enum clixon_log_type type,
+                      int                 *category,
+                      int                 *suberr,
+                      cxobj               *xerr,
+                      const char          *format,
+                      va_list              ap,
+                      cbuf               **cbmsg)
+   {
+       if (type != LOG_TYPE_ERR)
+          return 0;
+       if ((*cberr = cbuf_new()) == NULL){
+          fprintf(stderr, "cbuf_new: %s\n", strerror(errno));
+          return -1;
+       }
+       cprintf(*cberr, "My error message");
+       *category = 0;
+       suerr = 0;
+       retval = 0;
+    done:
+       return retval;
+   }
+
+All error message are now::
+
+  My error message
+
+Which may not be useful.
+
+More logic needs to be added, for example a more advanced
+classification and translation/changing of error messages. Any field
+can be used to classify. The `format` string and the `ap` objects may
+be translated/converted which is out-of-scope of this document.
+
+Indirection
+-----------
+
+The customized callback may also be changed dynamically. The example
+shows an extra indirection layer, where a new function is registered
+before a call, and deregistered after.
+
+Please see the main example, where `example_cli_errmsg` just
+dispatches the call to a dynamic `myerrmsg`.
+
+
+  
+
