@@ -144,7 +144,9 @@ included and that eventual dropped hello messages from external NETCONF sessions
 
 Default handling
 ----------------
-Clixon treats default data according to what is defined as explicit basic mode in `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_, i.e. the server consider any data node that is not explicitly set data to be default data.
+Clixon treats default data according to what is defined as `explicit basic mode` in `RFC 6243: With-defaults Capability for NETCONF <http://www.rfc-editor.org/rfc/rfc6243.txt>`_, i.e. the server consider any data node that is not explicitly set data to be default data.
+
+One effect is that if you view the contents of datastores (or import/export them), they should be in `explicit basic mode`.
 
 The `:with-defaults` capability indicates that clixon default behaviour is explicit and also indicates that additional retrieval modes supported by the server are:.
 
@@ -152,6 +154,8 @@ The `:with-defaults` capability indicates that clixon default behaviour is expli
 * trim
 * report-all
 * report-all-tagged
+
+Internally in memory, however, `report-all` is used.
 
 RESTCONF
 ========
