@@ -1058,3 +1058,18 @@ Given them in XML and JSON follows thus, eg XML::
    <flags>fin rst syn</flags>
 
 Clixon CLI does not treat individual bits as "first-level objects". Instead it only validates the whole string of bit names. Operations (add/remove) are made atomically on the whole string.
+
+Api-path-fmt
+------------
+The clixon CLI uses an internal meta-format called ``api_path_fmt`` which is used to generate api-paths, as described i Section :ref:`XML <_clixon_xml>`.
+
+An api-path-fmt extends an api-path with ``%`` flag characters (like ``printf``) as follows:
+
+* %s: The value of a cligen-variable
+* %k: The key of a YANG list
+
+Example, an explicit clispec expansion variable could be::
+
+  <name:string expand_dbvar("candidate","/interface=%s/%k")>
+
+which could expand to ``/interface=eth0/mykey`` if "eth0" is given as the "name" variable and "mykey" is the YANG interface list key.

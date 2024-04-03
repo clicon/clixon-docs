@@ -116,6 +116,7 @@ The subject-area levels are the following:
 
 - ``default``   Default logs
 - ``msg``       In/out messages and datastore reads
+- ``init``      Initialization
 - ``xml``       XML logs
 - ``xpath``     XPath processing logs
 - ``yang``      YANG processing logs
@@ -129,6 +130,7 @@ The subject-area levels are the following:
 - ``datastore`` Datastore handling
 - ``event``     Event handling
 - ``rpc``       RPC handling
+- ``rpc``       Notification streams
 - ``app``       Application-specific handling, ie any application using clixon can use this
 - ``app2``      Application-specific 2
 - ``app3``      Application-specific 3
@@ -139,7 +141,6 @@ The detail area levels are the following:
 - ``detail``    Detail logging
 - ``detail2``   Extra details
 - ``detail3``   Probably more detail than you want
-
 
 You can combine flags, so that, for example ``-D 5`` means default + detailed, but no packet debugs.  Similarly, some messages require multiple flags, like XML + DETAIL would be ``-D 20``.
 
@@ -281,7 +282,3 @@ before a call, and deregistered after.
 
 Please see the main example, where `example_cli_errmsg` just
 dispatches the call to a dynamic `myerrmsg`.
-
-
-  
-
