@@ -547,26 +547,27 @@ NETCONF operations
 The autocli `set/merge/delete` commands are modelled after NETCONF operations as defined in the `NETCONF RFC <https://datatracker.ietf.org/doc/html/rfc6241#section-7.2>`_, with the following (shortened) definition, and mapping to the autocli operations above):
 
 * `merge`: (Autocli `merge`) The configuration data is merged with the configuration in the configuration datastore
-* `replace`: (Autocli `set`)The configuration data replaces any related configuration in the configuration datastore.
+* `replace`: (Autocli `set`) The configuration data replaces any related configuration in the configuration datastore.
 * `create`: The configuration data is added to the configuration if and only if the configuration data does not already exist in the configuration datastore.
 * `delete`: The configuration data is deleted from the configuration if and only if the configuration data currently exists in the configuration datastore.
 * `remove`: (Autocli `delete`) The configuration data is deleted from the configuration if the configuration data currently exists in the configuration datastore.  If the configuration data does not exist, the "remove" operation is silently ignored
 
-In particular, `set/replace` may cause some confusion. For
-leafs/terminals the behavior of "replace/set" and "merge" are
-identical. However for non-terminals (container/list) "replace/set"
-and "merge" differ: "set" replaces the existing configuration with the
-statement. "Merge" merges the existing configuration with the
-statement.
+In particular, the autocli `set` operation may cause some
+confusion. For terminals, i.e., CLI commands derived from YANG leaf or
+leaf-list, the behavior of "replace/set" and "merge" are
+identical. However for non-terminals (i.e., CLI commands derived from
+YANG container or list) "replace/set" and "merge" differ: "set"
+replaces the existing configuration. "Merge" merges the existing
+configuration.
 
-Example, where x is a container and y is a leaf::
+Example, where x is (derived from) a container and y is (derived from) a leaf::
 
   set x y 22
-  set x y 24      # y changes value to 24
-  set x           # y is removed
+  set x y 24      # Replace y: y changes value to 24
+  set x           # Replace x: y is removed
   merge x y 26
-  merge x y 28    # y changes value to 28
-  merge x         # y still has value 28
+  merge x y 28    # Merge y: y changes value to 28
+  merge x         # Merge x: y still has value 28
 
 Therefore, most users may want to use `merge` as default autocli operation, instead of `set`.
 
