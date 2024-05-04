@@ -37,7 +37,7 @@ The CLI depends on the following:
 The following example from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_. First, a cli-spec file containing two commands::
 
   set("Set configuration symbol") @datamodel, cli_auto_set();
-  show("Show a particular state of the system") configuration("Show configuration"), cli_show_config("candidate", "text", "/");
+  show("Show a particular state of the system") configuration("Show configuration"), cli_show_config("candidate", "default", "/");
   example("Callback example") <var:int32>("any number"), mycallback("myarg");
 
 In the CLI, these generate CLI commands such as::
@@ -65,7 +65,7 @@ The following example shows an auto-cli session from the `main example <https://
    user@host> set interfaces interface eth9 type ex:eth
    user@host> validate 
    user@host> commit 
-   user@host> show configuration xml 
+   user@host> show configuration xml
    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
      <interface>
        <name>eth9</name>
@@ -88,7 +88,7 @@ The `clixon_cli` client has the following command-line options:
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Stderr is default. 
-  -C <format>     Dump configuration options on stdout after loading. Format is one of xml|json|text
+  -C <format>     Dump configuration options on stdout after loading. Format is one of xml|json|text|cli|default
   -F <file>       Read commands from file (default stdin)
   -1              Run once, do not enter interactive mode
   -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
@@ -109,7 +109,9 @@ Inline CLI commands
 CLI commands can be given directly after the options. These are executed directly::
 
   clixon_cli -f example.xml show config
+  clixon_cli -f example.xml set table parameter b \; show config
 
+Multiple commands are separated with `\;`.
 One can also add extra application-dependent plugin options after `--` which can be read with `clicon_argv_get()`::
 
     clixon_cli -f example.xml show config -- -x extra-option
@@ -126,6 +128,9 @@ CLICON_CLISPEC_DIR
 
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
+
+CLICON_CLI_OUTPUT_FORMAT
+  Default CLI output format.
 
 Terminal I/O
 ------------
@@ -300,7 +305,7 @@ Using this command in the CLI could provicde the following output::
 The callback has the following parameters, only the first is mandatory:
 
  * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
- * `format` : Show format, one of `text`, `xml`, `json`, `cli`, or `netconf` (see :ref:`datastore formats <clixon_datastore>`)
+ * `format` : Show format, one of `text`, `xml`, `json`, `cli`, `netconf`, or `default` (see :ref:`datastore formats <clixon_datastore>`)
  * `xpath`  : Static xpath (only present in this API function)
  * `namespace` : Default namespace for xpath (only present in this API function)
  * `pretty` : If `true`, make output pretty-printed
@@ -328,7 +333,7 @@ An example CLI usage is::
 The arguments are similar to `cli_show_config` with the difference that the `xpath` is implicitly defined by the current position of the tree reference::
   
  * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
- * `format` : Show format, one of `text`, `xml`, `json`, `cli`, or `netconf` (see :ref:`datastore formats <clixon_datastore>`)
+ * `format` : Show format, one of `text`, `xml`, `json`, `cli`, `netconf`, or `default` (see :ref:`datastore formats <clixon_datastore>`)
  * `pretty` : If `true`, make output pretty-printed
  * `state`  : If `true`, include non-config data in output
  * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. See also extended values below
@@ -519,7 +524,7 @@ For example, the `set` part is expanded using the CLIgen tree-operator to someth
   set table, cli_auto_set(); {
         parameter <name:string>, cli_auto_set();
   }
-  
+
 An example run of the above example is as follows::
 
   > clixon_cli
@@ -536,6 +541,37 @@ An example run of the above example is as follows::
   user@host />
 
 where the generated autocli extends the Clixon CLI with YANG-derived configuration statements.
+
+NETCONF operations
+------------------
+The autocli `set/merge/delete` commands are modelled after NETCONF operations as defined in the `NETCONF RFC <https://datatracker.ietf.org/doc/html/rfc6241#section-7.2>`_, with the following (shortened) definition, and mapping to the autocli operations above):
+
+* `merge`: (Autocli `merge`) The configuration data is merged with the configuration in the configuration datastore
+* `replace`: (Autocli `set`)The configuration data replaces any related configuration in the configuration datastore.
+* `create`: The configuration data is added to the configuration if and only if the configuration data does not already exist in the configuration datastore.
+* `delete`: The configuration data is deleted from the configuration if and only if the configuration data currently exists in the configuration datastore.
+* `remove`: (Autocli `delete`) The configuration data is deleted from the configuration if the configuration data currently exists in the configuration datastore.  If the configuration data does not exist, the "remove" operation is silently ignored
+
+In particular, `set/replace` may cause some confusion. For
+leafs/terminals the behavior of "replace/set" and "merge" are
+identical. However for non-terminals (container/list) "replace/set"
+and "merge" differ: "set" replaces the existing configuration with the
+statement. "Merge" merges the existing configuration with the
+statement.
+
+Example, where x is a container and y is a leaf::
+
+  set x y 22
+  set x y 24      # y changes value to 24
+  set x           # y is removed
+  merge x y 26
+  merge x y 28    # y changes value to 28
+  merge x         # y still has value 28
+
+Therefore, most users may want to use `merge` as default autocli operation, instead of `set`.
+
+.. note::
+        Use autocli `merge` as default operation
 
 Config file
 -----------
@@ -814,7 +850,7 @@ Start session
 The session creation is "lazy" in the sense that a NETCONF session is
 only established when needed. After the session has been
 established, it is maintained (cached) by the CLI client to keep track
-of candidate edits and locks, as described in 7.5 of `RFC 6241 <https://www.rfc-editor.org/rfc/rfc6241.html/>`_.
+of candidate edits and locks, as described in 7.5 of `RFC 6241 <https://www.rfc-editor.org/rfc/rfc6241.html>`_.
 
 If there is no backend running at the time of session establishment, a warning is printed::
   
@@ -1061,7 +1097,7 @@ Clixon CLI does not treat individual bits as "first-level objects". Instead it o
 
 Api-path-fmt
 ------------
-The clixon CLI uses an internal meta-format called ``api_path_fmt`` which is used to generate api-paths, as described i Section :ref:`XML <_clixon_xml>`.
+The clixon CLI uses an internal meta-format called ``api_path_fmt`` which is used to generate api-paths, as described in Section :ref:`XML <clixon_xml>`.
 
 An api-path-fmt extends an api-path with ``%`` flag characters (like ``printf``) as follows:
 
