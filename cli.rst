@@ -58,7 +58,7 @@ Example usage
 -------------
 The following example shows an auto-cli session from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_ how to add an interface in candidate, validate and commit it to running, then look at it as xml and cli and finally delete it::
 
-   clixon_cli -f /usr/local/etc/example.xml 
+   clixon_cli -f /usr/local/etc/clixon/example.xml 
    user@host> set interfaces interface eth9 ?
      description               enabled                   ipv4                     
      ipv6                      link-up-down-trap-enable  type                     
@@ -581,7 +581,7 @@ autocli configurations.  A typical CLI configuration
 with default autocli settings is as follows::
 
   <clixon-config xmlns="http://clicon.org/config">
-    <CLICON_CONFIGFILE>/usr/local/etc/example.xml</CLICON_CONFIGFILE>
+    <CLICON_CONFIGFILE>/usr/local/etc/clixon/example.xml</CLICON_CONFIGFILE>
     ...
     <autocli>
       <module-default>true</module-default>

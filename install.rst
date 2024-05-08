@@ -175,7 +175,7 @@ The backend service is installed at /etc/systemd/system/example.service, for exa
    User=root
    RestartSec=60
    Restart=on-failure
-   ExecStart=/usr/local/sbin/clixon_backend -s running -f /usr/local/etc/example.xml
+   ExecStart=/usr/local/sbin/clixon_backend -s running -f /usr/local/etc/clixon/example.xml
    [Install]
    WantedBy=multi-user.target
 
@@ -192,7 +192,7 @@ The Restconf service can be installed at, for example, /etc/systemd/system/examp
    Type=simple
    User=root
    Restart=on-failure
-   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/example.xml
+   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/clixon/example.xml
    [Install]
    WantedBy=multi-user.target
 

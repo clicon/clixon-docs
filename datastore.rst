@@ -22,33 +22,93 @@ Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCON
 
 There are also other datastores, Clixon is not limited to the three datastores above. For example:
 
-`tmp`
+`Tmp`
    The tmp datastore appears in several cases as an intermediate datastore.
 `Rollback`
    If the confirmed-commit feature is enabled, the rollback datastore holds the running datastore as it existed before the confirm commit. If a cancel or timeout occurs, the rollback datastore is used to revert to.
 
 Datastore files
 ===============
-The mandatory `CLICON_XMLDB_DIR` option determines where the
-datastores are placed. Example:
-::
 
-   <CLICON_XMLDB_DIR>/usr/local/var/example</CLICON_XMLDB_DIR>
+Clixon datastores are stored in regular files, by default one file per datastore.
 
-The permission of the datastores files is accessible to the user that
-starts the backend only. Typically this is `root`, but if the backend is started as a non-privileged user, or if privileges are dropped (see :ref:`Backend section<clixon_backend>`) this may be another user, such as in the following example where `clicon` is used:
-::
+Options
+-------
+Datastore files are controlled by the following options:
+
+CLICON_XMLDB_DIR
+   Mandatory directory where datastores are placed.
+
+CLICON_XMLDB_MULTI
+   Split configure datastore into multiple sub files. Default is single file
+
+Datastores files are only accessible by the user that starts the
+backend. Typically this is `root`, but if the backend is started as a
+non-privileged user, or if privileges are dropped (see :ref:`Backend
+section<clixon_backend>`) this may be another user, such as in the
+following example where `clicon` is used: ::
 
    sh> ls -l /usr/local/var/example
    -rwx------ 1 clicon clicon   0 sep 15 17:02 candidate_db
    -rwx------ 1 clicon clicon   0 sep 15 17:02 running_db
    -rwx------ 1 clicon clicon   0 sep 14 18:12 startup_db
 
-Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon may use a datastore cache, see `Datastore caching`_.
+Split datastores
+----------------
+By default, a datastore is a single file. However, it is possible to
+split the store into multiple files in a `db.d/`  directory. For example::
 
+  > ls -1 /usr/local/var/multi/running.d/
+  0.xml
+  35819a66.xml
+  762894da.xml
+  ...
+
+where:
+
+* `0.xml` is a top-level datastore
+* `35819a66.xml` is a sub-store linked from `0.xml`
+
+There are some limitations to split datastores:
+
+* XML is the only format supported by split datastores.
+* One-level of splits are allowed, that is, a sub-store may not link ot another sub-store
+
+Backward-compatibility is ensured by reading ``<db>_db`` if ``<db>.d/0.xml`` is not present at startup.
+
+The sub filenames are SHA1 digests of the XPath to the XML node where the split is made.
+
+A typical example of splitting a datastore is in combination with RFC 8528 YANG Schema mounts.
+
+Mechanism
+^^^^^^^^^
+The YANG `cl:xmldb-split` extension and the `cl:link` attribute is used to define how datastores are split as the following example illustrates.
+
+Assume a YANG specification with nodes `a` and `b`::
+
+    container a {
+       cl:xmldb-split {
+          description "Multi-XMLDB: split datastore here";
+       }
+       container b {
+           description "Will be in separate file";
+       }
+    }
+
+If the YANG above is instantiated to, for example, ``<a><b>foo</b></a>``, this will result in the following two datastores::
+
+   0.xml:
+      <config>
+         <a xmlns:cl="http://clicon.org/lib" cl:link="35819a66.xml"/>
+      </config>
    
-Datastore and file formats
-==========================
+   35819a66.xml:
+      <config>
+         <b>foo</b>
+      </config>
+
+File formats
+============
 By default, the datastore files use pretty-printed XML, with the top-symbol `config`. The following is an example of a valid datastore:
 ::
 
@@ -61,98 +121,24 @@ By default, the datastore files use pretty-printed XML, with the top-symbol `con
 The format of the datastores can be changed using the following options:
    
 `CLICON_XMLDB_FORMAT`
-   Datastore format. `xml` is the primary alternative. `json` is also available, while `text` and `cli` are available as file formats but not specifically for the datastore.
+   Datastore format. `xml` is the primary alternative. `json` is also available
 `CLICON_XMLDB_PRETTY`
    XMLDB datastore pretty print. The default value is `true`, which inserts spaces and line-feeds making the XML/JSON human readable. If false, the XML/JSON is more compact.
 
-Note that the format settings applies to all datastores.
+Limitations:
+* Format settings apply to all datastores
+* `xml` and `json` are allowed for single datastores
+* `xml` is allowed for split datstores
 
-Other formats
--------------
-While only XML and JSON are currently supported as datastore formats, Clixon also supports `CLI` and `TEXT` formats for printing, and saving and loading files.
 
-The main example contains example code showing how to load and save a config using other formats.
 
-Example of showing a config as XML, JSON, TEXT and CLI::
-  
-   cli> show configuration xml 
-   <table xmlns="urn:example:clixon">
-      <parameter>
-         <name>a</name>
-         <value>17</value>
-      </parameter>
-      <parameter>
-         <name>b</name>
-         <value>99</value>
-      </parameter>
-   </table>
-   cli> show configuration json
-   {
-     "clixon-example:table": {
-       "parameter": [
-         {
-           "name": "a",
-           "value": "17"
-         },
-         {
-           "name": "b",
-           "value": "99"
-         }
-       ]
-     }
-   }
-   cli> show configuration text
-   clixon-example:table {
-       parameter a {
-           value 17;
-       }
-       parameter b {
-           value 99;
-       }
-   }
-   cli> show configuration cli 
-   set table parameter a 
-   set table parameter a value 17
-   set table parameter b 
-   set table parameter b value 99
-
-Save and load a file using TEXT::
-
-   cli> save foo.txt text
-   cli> load foo.txt replace text 
-
-Internal C API
-^^^^^^^^^^^^^^
-CLI show and save commands uses an internal API for print, save and load of the formats. Such CLI functions include: `cli_show_config`, `cli_pagination`, `load_config_file`, `save_config_file`.
-
-The following internal C API is available for output:
-
-* XML: ``clixon_xml2file()`` and ``clixon_xml2cbuf()`` to file and memory respectively.
-* JSON: ``clixon_json2file()`` and ``clixon_json2cbuf()``
-* CLI: ``clixon_cli2file()``
-* TEXT: ``clixon_txt2file()``
-
-The arguments of these functions are similar with some local variance. For example::
-
-   int
-   clixon_xml2file(FILE             *f, 
-                   cxobj            *xn, 
-		   int               level, 
-		   int               pretty,
-		   clicon_output_cb *fn,
-		   int               skiptop,
-		   int               autocliext)
-
-where:
-
-* `f` is the output stream (such as `stdout`)
-* `xn` is the top-level XML node
-* `level` is indentation level to start with, normally `0`
-* `pretty` makes the output indented and use newlines
-* `fn` is the output function to use. `NULL` means `fprintf`, `cligen_output` is used for scrolling in CLI
-* `skiproot` only prints the children by skipping the top-level XML node `xn`
-* `autocliext` Set if you want to activate autocli extensions (eg `hide` extensions)
-
+Caching
+=======
+Clixon stores datastore content in an in-memory write-through cache
+managed by the Clixon backend.
+As soon as data is modified in-mem, a write is made to file.
+Reads from file is made only on startup, or more precisley, if the cache is empty.
+Modifications by an external part of the file is only read by the backend on startup.
 
 Module library support
 ======================
@@ -174,6 +160,8 @@ Example of a (simplified) datastore with Yang module-state:
 ::
    
    <config>
+     <a1 xmlns="urn:example:a">some text</a1>
+     <!-- Here goes regular config -->
      <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
        <content-id>42</content-id>
        <module-set>
@@ -185,23 +173,18 @@ Example of a (simplified) datastore with Yang module-state:
          </module>
        </module-set>
      </yang-library>
-     <a1 xmlns="urn:example:a">some text</a1>
    </config>
 
 Note that the module-state is not available to the user, the backend
 datastore handler strips the module-state info. It is only shown in
 the datastore itself.
 
-Datastore caching
-=================
-Clixon datastore cache behaviour is controlled by the `CLICON_DATASTORE_CACHE` and can have the following values:
+C API
+=====
+Some C functions to modify the datastore are:
 
-`nocache`
-   No cache, always read and write directly with datastore file. 
-`cache`
-   Use in-memory write-through cache. Make copies of the XML when accessing internally by callbacks and plugins. This is the default.
-`cache-zerocopy`
-   Use in-memory write-through cache and do not copy when doing callbacks.  This is the fastest but opens up for callbacks changing the cache. That is, plugin callbacks may not edit the XML in any way.
-
-.. note::
-        Netconf locks are not supported for nocache mode
+* `xmldb_put` for modifying data
+* `xmldb_get0` for a copy of the cache
+* `xmldb_cache_get` for a copy of the cache
+* `xmldb_copy` for copying datastores: both file and cache are copied
+* `xmldb_volatile_set` to disable cache write-through temporarily

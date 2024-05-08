@@ -35,7 +35,7 @@ a value stored under "/table/parameter" in the XML store::
 
        uint32_t n = 0;
 
-       if ((h = clixon_client_init("/usr/local/etc/example.xml")) == NULL)
+       if ((h = clixon_client_init("/usr/local/etc/clixon/example.xml")) == NULL)
 	   return -1;
 
        if ((ch = clixon_client_connect(h, CLIXON_CLIENT_NETCONF)) == NULL)

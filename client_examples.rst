@@ -53,7 +53,7 @@ to find YANG models (usually `/usr/local/share/clixon`)::
 The Clixons configuration should look something like::
 
   <clixon-config xmlns="http://clicon.org/config">
-    <CLICON_CONFIGFILE>/usr/local/etc/example.xml</CLICON_CONFIGFILE>
+    <CLICON_CONFIGFILE>/usr/local/etc/clixon/example.xml</CLICON_CONFIGFILE>
     <CLICON_FEATURE>ietf-netconf:startup</CLICON_FEATURE>
     <CLICON_YANG_DIR>/usr/local/share/clixon</CLICON_YANG_DIR>
     <CLICON_YANG_MODULE_MAIN>example</CLICON_YANG_MODULE_MAIN>
@@ -83,7 +83,7 @@ The next step is to modify configuration values with NETCONF. A new
 In the example, NETCONF is running over SSH. The SSH configuration needs to contain
 the following line::
 
-  Subsystem netconf /usr/local/bin/clixon_netconf -f /usr/local/etc/example.xml
+  Subsystem netconf /usr/local/bin/clixon_netconf -f /usr/local/etc/clixon/example.xml
 
 The following NETCONF operation is used::
 

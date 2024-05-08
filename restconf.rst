@@ -297,7 +297,7 @@ The Restconf service can be installed at, for example, /etc/systemd/system/examp
    Type=simple
    User=root
    Restart=on-failure
-   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/example.xml
+   ExecStart=/usr/local/sbin/clixon_restconf -f /usr/local/etc/clixon/example.xml
    [Install]
    WantedBy=multi-user.target
 
