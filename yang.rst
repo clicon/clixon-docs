@@ -278,7 +278,6 @@ CLICON_YANG_UNKNOWN_ANYDATA
   
 Schema mounts
 =============
-
 Clixon implements Yang schema mounts as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_  with the following restrictions:
 
 1. A YANG mount-point can only be defined in a `presence container`.
@@ -291,6 +290,8 @@ The following configure options are associated to mount-points:
 
 CLICON_YANG_SCHEMA_MOUNT
   Enable YANG library support as state data according to RFC8525. Should be set to: ``true``
+CLICON_YANG_SCHEMA_MOUNT_SHARE
+  For optimization purposes, share same YANGs of same moint-points
 
 YANG
 ----

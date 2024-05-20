@@ -68,6 +68,7 @@ The restconf daemon have the following command-line options:
   -r              Do not drop privileges if run as root
   -W <user>       Run restconf daemon as this user, drop according to ``CLICON_RESTCONF_PRIVILEGES``
   -R <xml>        Restconf configuration in-line overriding config file
+  -t <sec>        Upper bound on notification event streams (native debugging)
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
 Note that the restconf daemon started as root, drops privileges to `wwwuser`, unless the ``-r`` command-line option is used, or ``CLICON_RESTCONF_PRIVILEGES`` is defined.
@@ -662,15 +663,16 @@ There is support for URI path internal redirect to a file called
 RESTCONF streams
 ================
 Clixon has an experimental RESTCONF event stream implementations following
-RFC8040 Section 6 using Server-Sent Events (SSE).  Currently this is implemented in FCGI/Nginx only (not native).
+RFC8040 Section 6 using Server-Sent Events (SSE).
 
-.. note::
-        RESTCONF streams are experimental and only implemented for FCGI.
+Limitations are:
+
+* *native*: HTTP/1.1 only, not HTTP/2
+* *FCGI*: single request only
+* Regular subscription and stop-time only
 
 Example: set the Clixon configuration options::
 
-  <CLICON_STREAM_PATH>streams</CLICON_STREAM_PATH>
-  <CLICON_STREAM_URL>https://example.com</CLICON_STREAM_URL>
   <CLICON_STREAM_RETENTION>3600</CLICON_STREAM_RETENTION>
 
 In this example, the stream ``example`` is accessed with ``https://example.com/streams/example``.

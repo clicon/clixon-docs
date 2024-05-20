@@ -130,7 +130,8 @@ The subject-area levels are the following:
 - ``datastore`` Datastore handling
 - ``event``     Event handling
 - ``rpc``       RPC handling
-- ``rpc``       Notification streams
+- ``stream``    Notification streams
+- ``parse``     XML, YANG, XPath, etc parsing
 - ``app``       Application-specific handling, ie any application using clixon can use this
 - ``app2``      Application-specific 2
 - ``app3``      Application-specific 3
@@ -158,7 +159,6 @@ Example::
 
 Change debug
 ------------
-
 You can also change debug level in run-time in different ways.
 For example, using netconf to change debug level in backend::
 
@@ -172,7 +172,6 @@ Using curl to change debug in backend via the restconf daemon::
 
 Debugger
 --------
-
 Enable debugging when configuring (compile-time)::
 
    ./configure --enable-debug
