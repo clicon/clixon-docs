@@ -168,6 +168,26 @@ The design is similar to bash history but is simpler in some respects:
 
 Further, tilde-expansion is supported and if history files are not found or lack appropriate access will not cause an exit but are logged at debug level
 
+CLI command log
+^^^^^^^^^^^^^^^
+The history API also allows for adding CLI command logging. Register the callback in the plugin init, and then call logging (or debug) for each CLI command. Example::
+
+   static int
+   cli_history_cb(cligen_handle ch,
+                  char         *cmd,
+                  void         *arg)
+   {
+      int           retval = -1;
+
+      return clixon_log(arg, LOG_INFO, "command: %s", cmd);
+   }
+
+   clixon_plugin_api *
+   clixon_plugin_init(clixon_handle h)
+   {
+      ...
+      cligen_hist_fn_set(cli_cligen(h), cli_history_cb, h);
+
 Help strings
 ------------
 Help strings are specified using the following example syntax: ``("help string")``. help strings are shown at queries, eg "?"::
