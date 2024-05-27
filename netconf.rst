@@ -241,7 +241,7 @@ The steps to make a Netconf callhome is as follows:
 4) The callhome-client returns with an open stream socket to the ssh client establishing an SSH stream to the server
 5) Netconf messages are sent on stdin to the ssh client in turn using the established SSH stream and the Netconf subsystem to clixon, which returns a reply.
 
-The callhome and callhome-client referred to above are implemented by the utility functions: ``util/clixon_netconf_ssh_callhome`` and ``util/clixon_netconf_ssh_callhome_client``.
+The callhome and callhome-client referred to above are implemented by the utility functions: ``clixon_netconf_ssh_callhome`` and ``clixon_netconf_ssh_callhome_client`` found in `clixon utilities <https://github.com/clicon/clixon-util>`_
 
 Example::
 
