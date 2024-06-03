@@ -33,11 +33,11 @@ Install and build CLIgen::
   make;
   sudo make install
 
-Add a clixon user and group, using useradd and usermod::
+Add a clicon user and group, using useradd and usermod::
    
-  sudo useradd -M -U clixon
-  sudo usermod -a -G clixon <youruser>  # Remember to re-log in for this to take effect
-  sudo usermod -a -G clixon www-data # Only if RESTCONF
+  sudo useradd -M -U clicon
+  sudo usermod -a -G clicon <youruser>  # Remember to re-log in for this to take effect
+  sudo usermod -a -G clicon www-data # Only if RESTCONF
   
 If you do not require RESTCONF, then continue with `Build clixon from source`_.
 
