@@ -15,9 +15,9 @@ This is a brief note on a potential future feature.
 
 Clixon is mainly a stand-alone app tightly coupled to the application/device with "shared fate", that is, if clixon fails, so does the application.
 
-That said, the primary state is the *backend* holding the *configuration database* that can be shared in several ways. This is not implemented in Clixon, but potential implementation strategies include:
-  * *Active/standby*: With a standard failure/liveness detection of a master backend, a standby could be started when the master fails using "-s running" (just picking up the state from the failed master). The default cache write-through can be used (``CLICON_DATASTORE_CACHE = cache``). Would suffer from outage during standby boot.
-  * *Active/active*: The config-db cache is turned off (``CLICON_DATASTORE_CACHE = nocache``) and two backend process started with a load-balancing in front. Turning the cache off would suffer from performance degradation (and its not currently tested in regression tests). Would also need a failure/liveness detection.
+That said, the primary state is the *backend* holding the *configuration datastore* that can be shared in several ways. This is not implemented in Clixon, but potential implementation strategies include:
+  * *Active/standby*: With a standard failure/liveness detection of a master backend, a standby could be started when the master fails using "-s running" (just picking up the state from the failed master). The cache write-through mechanism supports this. Would suffer from outage during standby boot. One way already possible today is using existing detection/restart mechanisms in SystemD for example.
+  * *Active/active*: Would need an active cache coherence algorithm. Would also need a failure/liveness detection.
 
 In both cases the *config-db* would be a single-point-of-failure but could be mitigated by a replicated file system, for example.
 

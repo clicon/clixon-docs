@@ -667,7 +667,6 @@ RFC8040 Section 6 using Server-Sent Events (SSE).
 
 Limitations are:
 
-* *native*: HTTP/1.1 only, not HTTP/2
 * *FCGI*: single request only
 * Regular subscription and stop-time only
 

@@ -199,7 +199,7 @@ are invoked atomically and revert on error.
 .. note::
         Clixon currently runs in a single thread and all transactions run
 	from `begin,` to `end` without interruption. However, it is strongly
-	recommended that the callbaks be thread-safe for future compatibility.
+	recommended that the callbacks be thread-safe for future compatibility.
 
 .. warning::
         Clixon can only guarantee a consistent system state if you follow

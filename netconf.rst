@@ -268,29 +268,16 @@ Clixon uses NETCONF in the internal IPC protocol between its clients
 (cli/netconf/restconf) and the backend. This *internal* Netconf (IPC)
 is slightly different from regular Netconf:
 
-- A different framing
+- Fixed to Netconf 1.1 framing
+- Default runs over a Unix socket
+- No hello / capability exchange
 - Netconf extentions
 
 .. note::
         The IPC is an internal interface, do not use externally
-  
-Framing
--------
-A fixed header using session id and message length before the netconf message::
-
-  struct clicon_msg {
-     uint32_t    op_len;     /* length of whole message: body+header, network byte order. */
-     uint32_t    op_id;      /* session-id. network byte order. */
-     char        op_body[0]; /* rest of message, actual data */
-  };
-
-The ``session-id`` is a number determined by the server. In the first
-hello, the client can assign zero, and assign the correct session-id in subsequent messages.
-The server hello contains the assigned session-id.
 
 Extensions
 ----------
-
 The internal IPC protocol have a couple of attributes that are extensions to the Netconf protocol.
 These attributes are all in the ``clixon-lib`` namespace (``http://clicon.org/lib``)
 
@@ -350,7 +337,6 @@ These attributes are all in the ``clixon-lib`` namespace (``http://clicon.org/li
       <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
          <ok objectexisted="true"/>
       </rpc-reply>]]>]]>
-
       
 The reason for introducing the objectcreate/objectexisted attributes are as follows:
       * RFC 8040 4.5 PUT: if the PUT request creates a new resource, a "201 Created" status-line is returned.  If an existing resource is modified, a "204 No Content" status-line is returned.

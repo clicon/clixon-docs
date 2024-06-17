@@ -86,7 +86,7 @@ Schema mount
 ------------
 Yang schema mount is supported as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .
 
-Enable by enable the `CLICON_YANG_SCHEMA_MOUNT` configuration option.
+Enable by the `CLICON_YANG_SCHEMA_MOUNT` configuration option.
 
 NETCONF
 =======
@@ -127,9 +127,9 @@ Further, in `get-config` filter expressions, the RFC6241 XPath
 Capability is preferred over default subtrees. This has two reasons:
 
 1. XPath has better performance since the underlying system uses xpath, and subtree filtering is done after the complete tree is retrieved.
-2. Subtree filtering does not support namespaces yet.
+2. Subtree filtering does not support namespaces.
 
-Clixon supports netconf locks in default settings but *not* if ``CLICON_DATASTORE_CACHE`` is ``nocache`` mode.
+Clixon supports netconf locks in default settings.
 
 RFC 6022
 --------
@@ -175,8 +175,6 @@ The following features are *not* implemented:
 
 RESTCONF event notification as described in RFC7950 section 6 is supported as follows:
 
-* *native*: HTTP/1.1 only, not HTTP/2
-* *FCGI*: single request only
 * Limited to regular subscription, start-time and stop-time
 
 `NMDA` is partly supported according to `RFC 8324 <https://tools.ietf.org/html/rfc8342>`_ and `RFC 8527 <https://tools.ietf.org/html/rfc8527>`_. With-defaults and with-origin are not implemented.

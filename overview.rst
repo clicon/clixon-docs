@@ -55,7 +55,8 @@ as a Network Management System (NMS) or an interactive human user. The
 external interfaces include interactive CLI, RESTCONF over HTTP/HTTPS, and XML
 NETCONF over TCP or SSH.  Internally, the clients and backend
 communicate over an inter-process communication (IPC) bus via NETCONF
-over a UNIX socket. It is possible to run over an INET socket as well.
+over a UNIX socket. It is possible to run over an INET socket as well, but some authentication
+mechanisms are then disabled.
 
 The backend manages configuration datastores and implements a
 transaction mechanism for configuration operations (eg, create, read,

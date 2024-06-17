@@ -663,8 +663,8 @@ The following options set default values to the auto-cli, some of these may be f
    This is normally always enabled.
 
 `grouping-treeref`
-   Controls the behaviour when generating CLISPEC of YANG 'uses' statements into the
-   corresponding 'grouping' definition. If 'true', use indirect tree reference '@treeref'
+   Controls the behaviour when generating CLISPEC of YANG `uses` statements into the
+   corresponding `grouping` definition. If `true`, use indirect tree reference ``@treeref``
    to reference the grouping definition. This may reduces memory footprint of the CLI.
 
 Rules
