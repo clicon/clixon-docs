@@ -16,10 +16,26 @@ Clixon core applications typically have a command-line option controlling the lo
 
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
 
+Multiple ``-l`` options may appear
+
 An example of a clixon error as it may appear in a syslog::
 
   Mar 24 10:30:48 Alarik clixon_restconf[3993]: clixon_restconf openssl: 3993 Started
 
+Configure options
+-----------------
+The following options control the Clixon logging:
+
+``CLICON_LOG_DESTINATION``
+   Log destination, a bitmask of syslog, stderr, stdout, and file. Example: ``syslog stderr``
+
+``CLICON_LOG_FILE``
+   If log destination includes ``file``, this is the log-file
+
+Note that the configure options are overriden by the command-line argument ``-l``.
+
+C-code
+------
 In C-code, clixon error and logging is initialized by ``clixon_log_init``::
 
   clixon_log_init(h, prefix, upto, flags); 
@@ -29,6 +45,7 @@ where:
 * `prefix`: appears first in the error string
 * `upto`: log priority as defined by syslog(3), eg: LOG_DEBUG, LOG_INFO,..
 * `flags`: a bitmask of where logs appear, values are: ``CLIXON_LOG_STDERR``, ``_STDOUT``, ``_SYSLOG``, ``_FILE``.
+
 
 Error call
 ----------
@@ -155,7 +172,14 @@ You can direct the debug logs using the ``-l <option>`` as follows:
 
 Example::
 
-  clixon_backend -D 5 -f/tmp/log.txt
+  clixon_backend -D 5 -lf/tmp/log.txt
+
+Configure options
+-----------------
+The following options control the Clixon debugging:
+
+``CLICON_DEBUG``
+   Debug flags, a bitmask of debug values. Example: ``msg app2``
 
 Change debug
 ------------
