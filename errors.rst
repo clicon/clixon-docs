@@ -16,8 +16,6 @@ Clixon core applications typically have a command-line option controlling the lo
 
   -l <option>     Log on (s)yslog, std(e)rr, std(o)ut or (f)ile. Syslog is default. If foreground, then syslog and stderr is default. Filename is given after -f as follows: ``-lf<file>``.
 
-Multiple ``-l`` options may appear
-
 An example of a clixon error as it may appear in a syslog::
 
   Mar 24 10:30:48 Alarik clixon_restconf[3993]: clixon_restconf openssl: 3993 Started
