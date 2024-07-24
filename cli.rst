@@ -494,6 +494,41 @@ Pipe functions
 --------------
 Clixon contains several example pipe functions primarily for testing, users of Clixon should review these and consider implementing their own.
 
+CLI aliases
+===========
+Clixon provides a simple API for creating CLI aliases.
+
+Three clispec utility functions exists that create and show aliases as follows:
+
+1. `cli_alias_add` : Add a constant alias command by specifying name and command
+2. `cli_aliasref_add` : Add an alias command by using completion
+3. `cli_alias_show` : Show aliases
+
+An example clispec using these three functions::
+
+   alias("Define alias function") <name:string>("Name of alias") <command:rest>("Alias commands"), cli_alias_add("name", "command");
+   aliasref("Define alias function using completion") <name:string>("Name of alias") @example, cli_aliasref_add("name");
+   show("Show a particular state of the system") alias, cli_alias_show();
+
+Example of setting a CLI alias, invoking it, and showing its definition::
+
+  cli> alias cmd show config
+  cli> cmd
+    <table>
+       <parameter/>
+    </table>
+  cli> show alias
+    cmd: show config
+  cli>
+
+Restrictions
+------------
+The alias API is limited and an application developer may need to modify or extend these functions when integrating aliases into a system. These cases include:
+
+1. Saving aliases persistently, eg an src file.
+2. Adding help-texts
+3. Mode/tree support
+
 Autocli
 =======
 The Clixon CLI contains parts that are *generated* from a YANG

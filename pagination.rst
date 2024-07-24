@@ -10,22 +10,22 @@ Pagination
 .. This is a comment
 
 Pagination and scrolling is the technique of showing large amount of data in smaller
-chunks. Pagination was introduced in Clixon 5.3 and updated in 5.4. Expect further development and changes.
+chunks.
 
 Overview
 ========
 The pagination solution is based on the following drafts:
 
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-00.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-00.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-00.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-04.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-04.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-04.html>`_
 
 The drafts define two YANGs:
 
-- ietf-list-pagination@2022-07-24.yang
-- ietf-list-pagination-nc@2022-07-24.yang
+- ietf-list-pagination@2024-07-08.yang
+- ietf-list-pagination-nc@2024-07-08.yang
   
-The pagination in Clixon is currently restricted to the `offset` and `limit` attributes. For example, the following requests a list of 120 items in chunks of 20::
+For example, the following requests a list of 120 items in chunks of 20::
 
    get offset=0 limit=20
    get offset=20 limit=20
@@ -36,14 +36,11 @@ This is referred to as `stateless` pagination, since the state may
 change between "get" calls. For paging of a consistent snapshot view,
 consider `locked` pagination.
 
-Clixon pagination encompasses several aspects:
+The pagination in Clixon currently implements the `offset`, `limit`, `where`, `sort-by` and `direction` attributes.
 
-1. Locked pagination
-2. NETCONF/RESTCONF protocol extensions
-3. CLI scrolling
-4. Plugin state API
+.. note::
+        Clixon does currently not implement the `cursor`, `locale`, `sublist-limit` and `remaining`.
 
-   
 Locked pagination
 =================
 Using NETCONF, one can lock the datastore during a session to ensure that the data

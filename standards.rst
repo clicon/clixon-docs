@@ -254,9 +254,11 @@ Pagination
 ==========
 The pagination solution is based on the following drafts:
 
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-00.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-00.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-00.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-04.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-04.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-04.html>`_
+
+Clixon implements all attributes except `cursor`, `locale`, `sublist-limit` and `remaining`.
 
 See :ref:`Pagination section <clixon_pagination>` for more info.
 
