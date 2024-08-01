@@ -7,7 +7,7 @@
 SNMP
 **********
 
-Clixon supports SNMP for retreiving and setting values via netsnmp
+Clixon supports SNMP for retreiving / setting values and sending SNMPv2c traps via netsnmp
 using a MIB-YANG mapping defined in RFC6643.
 
 Architecture
@@ -32,7 +32,8 @@ A user can then communicate with snmpd using any of the SNMP
 v2/v3 tools, such as `snmpget`, `snmpwalk` and others.
 
 .. note::
-        SNMP support is introduced in Clixon version 5.8
+   * SNMP support is introduced in Clixon version 5.8
+   * SNMPv2 traps support is introduced in Clixon version 7.2.0
 
 Configuration
 =============
@@ -56,7 +57,7 @@ It is necessary to ensure snmpd does `not` to load modules
 implemented by Clixon. For example, if Clixon implements the IF-MIB and
 system MIBs, snmpd should not load those modules. This can be done
 using the "-I" flag and prepending a "-" before each module::
-   
+
    -I -ifTable -I -system_mib -I -sysORTable
 
 Further, Clixon itself does not start netsnmp itself, you need to ensure that
@@ -101,7 +102,7 @@ CLICON_SNMP_AGENT_SOCK
    String description of the AgentX socket that clixon_snmp listens to.
 
 CLICON_SNMP_MIB
-   Names of MIBs that are used by clixon_snmp. 
+   Names of MIBs that are used by clixon_snmp.
 
 Example::
 
@@ -130,7 +131,7 @@ and point it to a MIB. MIBs will usually be in the directory
 
 .. note::
    smidump 0.5 or later must be used
-   
+
 Once a MIB is converted to YANG, two things should be done:
 
 1) The YANG is registered as an SNMP module using the ``CLICON_SNMP_MIB`` configuration option
@@ -164,7 +165,7 @@ SNMP API, or via any of the other CLIXON frontends.
 Table indexes can be integers and non-integers.  Multiple table indexes are supported.
 
 As an implementation detail, Clixon uses the `table` abstraction in
-the netsnmp agent library, not `table-data` or `table-instance`. 
+the netsnmp agent library, not `table-data` or `table-instance`.
 
 RowStatus
 ---------
@@ -180,3 +181,11 @@ mode uses an internal cache which is held in memory by the clixon snmp
 agent. This internal cache is flushed to Clixon when setting a row to
 `active`, like a "pre-commit phase". When `clixon_snmp` is restarted,
 the cache is cleared.
+
+SNMPv2 traps
+------------
+All stream notifications are converted to SNMPv2 traps and forwarded to the Net-SNMP daemon. The precondition is that an OID mapping is also defined for the notifications. If the notification has status data, it is bound to the corresponding OID and sent with the trap.
+
+.. note::
+   * clixon_snmp subscribes to all streams which are read from the backend.
+   * The Net-SNMP daemon must be configured for sending traps. (Check trap2sink configuration in snmpd.conf config file.)
