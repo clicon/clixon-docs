@@ -377,6 +377,70 @@ An example usage using edit-modes is::
 
 Same parameters as ``cli_show_auto``
 
+cli_start_program
+------------------
+You need to add a callback and its name in the `.cli` file.
+
+Here is an example of how you can do it::
+
+    run_program_err("Run program"), cli_start_program();
+    run_program_python3("Run program"), cli_start_program("python3");
+    run_program_python3_source_arg("Run program"), cli_start_program("python3", "/tmp/test.py");
+    run_program_python3_source_arg_vector("Run program") <source:rest>("Path program"), cli_start_program("python3");
+    run_program_python3_source_arg_vector_err("Run program") <source:rest>("Path program"), cli_start_program("python3", "/tmp/test2.py");
+    run_program_bash("Run program"), cli_start_program("bash");
+
+What the above-described callbacks do:
+
+Starts a new process and the specified program in it. The function creates a new child process and starts the specified program in it.
+Before starting the program in the child process, environment variables are set from the cvv.
+The function checks the parameters passed to it. Situations where at least one function argument is absent
+or when two arguments are present both in the function and in the cvv vector are considered invalid.
+
+
+``run_program_python3_source_arg_vector_err`` will fail because you can either enter interactively or write in a call::
+
+    roma@f-15 /> run_program_python3_source_arg_vector_err /tmp/test.py
+    Aug 14 08:52:47.375126: cli_start_program: 830: Plugins: A lot of arguments: Invalid argument
+    CLI command error
+
+``run_program_err`` will fail because there are no parameters::
+
+    user@pc_name /> run_program_err
+    Aug 14 08:37:41.386765: cli_start_program: 826: Plugins: Can not found argument in a function: Invalid argument
+    CLI command error
+
+``run_program_bash`` executes `bash`::
+
+    user@pc_name /> run_program_bash
+    user_pc@pc_name:~#
+
+``run_program_python3`` runs `python3`::
+
+    user@pc_name /> run_program_python3
+    Python 3.11.2 (main, May  2 2024, 11:59:08) [GCC 12.2.0] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>>
+
+``run_program_python3_source_arg`` runs `/tmp/test.py` using `python3`.
+
+`/tmp/test.py` file ::
+
+    #!/usr/bin/python3
+    print("Hello world! :)")
+
+Run: ::
+
+    user@pc_name /> run_program_python3_source_arg
+    Hello world! :)
+    user@pc_name />
+
+``run_program_python3_source_arg_vector`` entails interactive input of the filename ::
+
+    user@pc_name run_program_python3_source_arg_vector /tmp/test.py
+    Hello world! :)
+    user@pc_name />
+
 Common show parameters
 ----------------------
 
