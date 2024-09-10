@@ -269,6 +269,12 @@ end
    Any resources allocated in the begin callback should be released at this point.
    When the callback returns, the transaction is complete.
 
+commit_failed
+   This callback is called in case of commit callback failure, run once and will be
+   followed by an revert callback.
+   The code placed here is capable for incremental rollback of the "prints" that
+   were made by failed commit callback.
+
 revert
    When the revert callback is called the plugin must revert the system to the
    state prior (atomicity) to the beginning of the transaction. The transaction
@@ -320,6 +326,8 @@ the transaction is aborted and the commit reverted:
   +--------->+--------->+ validate
   |          |          |
   +--------->+---->X    + commit error
+  |          |          |
+  +-------------------->+ commit_failed
   |          |          |
   +--------->+          + revert
   |          |          |
