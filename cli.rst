@@ -720,7 +720,7 @@ The following options set default values to the auto-cli, some of these may be f
 `module-default`
    How to generate the autocli from modules:
 
-   - If `true`, all modules with a top-level datanode are generated, ie they get a top-level entry in the ``@basemodel`` tree. This is default
+   - If `true`, all modules with a top-level datanode are generated, ie they get a top-level entry in the ``@basemodel`` tree. You can explicitly disable modules. This is default
    - If `false`, you need to explicitly enable modules for autocli generation  using `module enable rules`_.
 
 `list-keyword-default`
@@ -801,6 +801,19 @@ For example, assume you want to enable modules `example1`, `example2` and no oth
    </autocli>
 
 If the option ``module-default`` is ``true``, module enable rules have no effect since all modules are already enabled.
+
+You can also disable all modules by default, and enable them individually, like the following example shows::
+
+   <autocli>
+      <module-default>true</module-default>
+      <rule>
+         <name>exclude example 2</name>
+         <operation>disable</operation>
+         <module-name>example2</module-name>
+     </rule>
+   </autocli>
+
+Likewise, ``disable`` rules haveno effect if ``module-default`` is ``false``.
    
 Compress rules
 ^^^^^^^^^^^^^^

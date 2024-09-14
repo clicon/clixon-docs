@@ -290,6 +290,8 @@ The following configure options are associated to mount-points:
 
 CLICON_YANG_SCHEMA_MOUNT
   Enable YANG library support as state data according to RFC8525. Should be set to: ``true``
+CLICON_YANG_DOMAIN_DIR
+  Virtual directory for YANG isolation domains.
 CLICON_YANG_SCHEMA_MOUNT_SHARE
   For optimization purposes, share same YANGs of same moint-points
 
@@ -360,7 +362,9 @@ Second, at the mount-point level for all dynamically added moint-points::
 
 In this example, there is one dynamically created moint-point in the
 list `x` where the single YANG module `clixon-mount1` is mounted.
-   
+
+Note that the module-set name (``mylabel`` ) may define an isolated YANG `domain` as described in `YANG domains`_.
+
 Mount callback
 --------------
 Mount-points need to be populated with YANG schemas. This is done by defining the `ca_yang_mount` callback. The following example illustrates how this is done in a C plugin::
@@ -396,3 +400,35 @@ Clixon calls this callback when needed, such as when a new mount-point is create
 CLI
 ---
 It is possible to extend the Autocli with mount-points. However, it is application-dependent. For the interested user, the `Clixon controller <https://clixon-controller-docs.readthedocs.io>`_ has an adapted autocli for mount-points.
+
+YANG domains
+------------
+Using ``CLICON_YANG_DOMAIN_DIR`` it is possible to specify a directory as alternative to ``CLICON_YANG_MAIN_DIR`` for maintaining separate YANG file domains.
+
+This allows for having YANG files with the same name and revision, but with different content.
+
+Within a YANG domain, uniqueness of revisions is assumed, you may not
+have two different YANGs having the same revision in the same domain.
+
+But in separate domains, there is no such restriction.
+
+Virtual domain directory
+^^^^^^^^^^^^^^^^^^^^^^^^
+First, you need to set a virtual directory with ``CLICON_YANG_DOMAIN_DIR``, such as ``/usr/local/share/domains``.
+
+Thereafter, you specify the domain using the mount-point identifier, such as::
+
+     yangmnt:mount-point "mylabel";
+
+The domain directory is formed by concatenating the dir with the domain::
+
+    /usr/local/share/domains/mylabel/
+
+YANG files placed in this directory are loaded by the mounts and are isolated from other domains.
+
+You must also ensure that the <yang-library> callback ``ca_yang_mount`` returns the domain in the module-set name as follows::
+
+   <yang-library xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">"
+      <module-set>
+         <name>mylabel</name> <--
+         <module>...

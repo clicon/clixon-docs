@@ -43,7 +43,7 @@ Plugin integration
 ------------------
 
 .. image:: overview1.jpg
-   :width: 100%
+   :width: 75%
 		 
 This describes how to integrate a base system with Clixon using plugins.
 
