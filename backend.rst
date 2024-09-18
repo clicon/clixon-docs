@@ -271,7 +271,7 @@ end
 
 commit_failed
    This callback is called in case of commit callback failure, run once and will be
-   followed by an revert callback.
+   followed by a revert callback.
    The code placed here is capable for incremental rollback of the "prints" that
    were made by failed commit callback.
 
