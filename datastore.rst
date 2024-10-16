@@ -177,6 +177,141 @@ Note that the module-state is not available to the user, the backend
 datastore handler strips the module-state info. It is only shown in
 the datastore itself.
 
+System-only config
+==================
+`System-only` config is a mechanism to disable storing of sensitive configuration data in the datastore.
+Instead, a user implements application callbacks to store the data in a `system state`.
+
+This guide follows the test and main example in the clixon repository.
+
+While the code in this description is somewhat simplified, see the following files for full details:  ``test/test_datastore_system_only.sh`` and the clixon main example ``example/main/example_backend.c``.
+
+
+Options
+-------
+CLICON_XMLDB_SYSTEM_ONLY_CONFIG
+   Enable system-only-config, set to true
+
+Extensions
+----------
+Second, identify and mark state-only YANG elements with the ``system-only-config`` extension. This is done either by:
+
+1. Directly marking the element
+2. Using augment to mark a standard YANG from a local YANG
+
+The logic of the second approach is a standard YANG not under your control.
+
+The example uses the second approach with a `clixon-standard` YANG as follows::
+
+   module clixon-standard{
+      yang-version 1.1;
+      namespace "urn:example:std";
+      prefix std;
+      grouping system-only-group {
+         leaf system-only-data {   // <----
+            type string;
+         }
+      }
+      grouping store-grouping {
+         container keys {
+            list key {
+               key "name";
+               leaf name {
+                  type string;
+               }
+               uses system-only-group;
+            }
+         }
+      }
+      container store {
+         uses store-grouping;
+      }
+   }
+
+The second local module augments the standard YANG by marking the ``system-only-data`` with the ``system-only-config`` extension::
+
+   module clixon-local{
+      yang-version 1.1;
+      namespace "urn:example:local";
+      prefix local;
+      import clixon-lib {
+         prefix cl;
+      }
+      import clixon-standard {
+         prefix std;
+      }
+      augment "/std:store/std:keys/std:key/std:system-only-data" {
+         cl:system-only-config;  // <----
+      }
+   }
+
+Commit callback
+---------------
+The third step is to add a commit callback for the system-only-config data.
+The callback is called on changes to the marked data.
+
+For example, assume that an edit has changed the config to::
+
+   <store xmlns="urn:example:std">
+      <keys>
+         <key>
+            <name>a</name>
+            <system-only-data>mydata</system-only-data>  <---
+         </key>
+      </keys>
+   </store>
+
+That is, the ``system-only-data`` is changed to ``mydata``. This value is not written to the running datastores and need to be saved elsewhere. 
+
+The code identifies changed values using xpath ``store/keys/key/system-only-data`` and then loops over all instances. A proper application needs to store the values of x::
+
+   static int
+   main_system_only_commit(clixon_handle    h,
+                           transaction_data td)
+   {
+      cxobj     *target;
+      cxobj   **vec0 = NULL;
+      size_t    veclen0;
+
+      target = transaction_target(td); /* wanted XML tree */
+      if (xpath_vec_flag(target, NULL, "store/keys/key/system-only-data", XML_FLAG_ADD | XML_FLAG_CHANGE,
+                       &vec0, &veclen0) < 0)
+          goto done;
+      for (i=0; i<veclen0; i++){
+         x = vec0[i];
+         // Save x to system
+      ...
+  }
+ 
+  static clixon_plugin_api api = {
+     ...
+     .ca_trans_commit=main_system_only_commit,
+     
+
+System-only callback
+--------------------
+The last step is to write a system-only callback to recreate state-only data in a get-config request, for example.
+
+The purpose is to merge the system-only data into the cached XML tree
+in-memory after reading the datastore.
+
+In this example, the system-only config data is hardcode to the xamplke shown above, whereas a real example would extract this information from the system. Not that the contructed XML must be a valid from the top-level, that is include all list keys::
+
+   int
+   main_system_only_callback(clixon_handle h,
+                             cvec         *nsc,
+                             char         *xpath,
+                             cxobj        *xconfig)
+   {
+      if (clixon_xml_parse_string("<store xmlns=\"urn:example:std\"><keys><key><name>a</name><system-only-data>mydata</system-only-data></key></keys></store>",
+                                  YB_NONE, 0, &xconfig, 0) < 0)
+         err;
+      ...
+   }
+   static clixon_plugin_api api = {
+      ...
+      .ca_system_only=main_system_only_callback,
+
 C API
 =====
 Some C functions to modify the datastore are:
