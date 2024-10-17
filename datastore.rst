@@ -101,7 +101,7 @@ If the YANG above is instantiated to, for example, ``<a><b>foo</b></a>``, this w
       <config>
          <a xmlns:cl="http://clicon.org/lib" cl:link="35819a66.xml"/>
       </config>
-   
+  
    35819a66.xml:
       <config>
          <b>foo</b>
@@ -119,7 +119,7 @@ By default, the datastore files use pretty-printed XML, with the top-symbol `con
    </config>
 
 The format of the datastores can be changed using the following options:
-   
+
 `CLICON_XMLDB_FORMAT`
    Datastore format. `xml` is the primary alternative. `json` is also available
 `CLICON_XMLDB_PRETTY`
@@ -156,7 +156,7 @@ A backend with `CLICON_XMLDB_MODSTATE` disabled will silently ignore module stat
 
 Example of a (simplified) datastore with Yang module-state:
 ::
-   
+
    <config>
      <a1 xmlns="urn:example:a">some text</a1>
      <!-- Here goes regular config -->
@@ -179,13 +179,23 @@ the datastore itself.
 
 System-only config
 ==================
-`System-only` config is a mechanism to disable storing of sensitive configuration data in the datastore.
-Instead, a user implements application callbacks to store the data in a `system state`.
 
-This guide follows the test and main example in the clixon repository.
+`System-only` config is a mechanism to disable storing of sensitive
+configuration data in the datastore.  Instead, a user implements
+application callbacks to store the data in a `system state`, which
+could be something like a system configuration file(e.g., a password
+file), a system call, device config, etc.
 
-While the code in this description is somewhat simplified, see the following files for full details:  ``test/test_datastore_system_only.sh`` and the clixon main example ``example/main/example_backend.c``.
+This system-only configuration can also act as the source-of-truth.
 
+This guide follows the test and main example in the clixon repository. The code in this description is somewhat simplified, see the following files for full details:  ``test/test_datastore_system_only.sh`` and the clixon main example ``example/main/example_backend.c``.
+
+Restrictions
+------------
+The following functionality is restricted with system-only config:
+
+* Rollbacks
+* Commit confirm
 
 Options
 -------
@@ -194,7 +204,7 @@ CLICON_XMLDB_SYSTEM_ONLY_CONFIG
 
 Extensions
 ----------
-Second, identify and mark state-only YANG elements with the ``system-only-config`` extension. This is done either by:
+Identify and mark state-only YANG elements with the ``system-only-config`` extension. This is done either by:
 
 1. Directly marking the element
 2. Using augment to mark a standard YANG from a local YANG
@@ -247,55 +257,22 @@ The second local module augments the standard YANG by marking the ``system-only-
 
 Commit callback
 ---------------
-The third step is to add a commit callback for the system-only-config data.
-The callback is called on changes to the marked data.
+The next step is to commit the system-only-config data following the regular commit callback mechanism described in the :ref:`backend section<clixon_backend>`.
 
-For example, assume that an edit has changed the config to::
-
-   <store xmlns="urn:example:std">
-      <keys>
-         <key>
-            <name>a</name>
-            <system-only-data>mydata</system-only-data>  <---
-         </key>
-      </keys>
-   </store>
-
-That is, the ``system-only-data`` is changed to ``mydata``. This value is not written to the running datastores and need to be saved elsewhere. 
-
-The code identifies changed values using xpath ``store/keys/key/system-only-data`` and then loops over all instances. A proper application needs to store the values of x::
-
-   static int
-   main_system_only_commit(clixon_handle    h,
-                           transaction_data td)
-   {
-      cxobj     *target;
-      cxobj   **vec0 = NULL;
-      size_t    veclen0;
-
-      target = transaction_target(td); /* wanted XML tree */
-      if (xpath_vec_flag(target, NULL, "store/keys/key/system-only-data", XML_FLAG_ADD | XML_FLAG_CHANGE,
-                       &vec0, &veclen0) < 0)
-          goto done;
-      for (i=0; i<veclen0; i++){
-         x = vec0[i];
-         // Save x to system
-      ...
-  }
- 
-  static clixon_plugin_api api = {
-     ...
-     .ca_trans_commit=main_system_only_commit,
-     
+The only difference is that the system-only config data is then deleted and not stored in running-db.
 
 System-only callback
 --------------------
-The last step is to write a system-only callback to recreate state-only data in a get-config request, for example.
+The last step is to write a system-only callback to recreate system-only data on read. This is necessary in a NETCONF get-config request, for example.
 
 The purpose is to merge the system-only data into the cached XML tree
 in-memory after reading the datastore.
 
-In this example, the system-only config data is hardcode to the xamplke shown above, whereas a real example would extract this information from the system. Not that the contructed XML must be a valid from the top-level, that is include all list keys::
+The way to add system-only config data is similar to how to add state data with the ``ca_statedata`` callback, as desctibed in the :ref:`backend section<clixon_backend>`.
+
+In this example, the system-only config data is hardcoded, whereas a real example would extract this information from the system.
+
+Note that the contructed XML must be a valid with respect to YANG from the top-level all the way down to the system-only data, which includes having valid list keys::
 
    int
    main_system_only_callback(clixon_handle h,
@@ -303,7 +280,14 @@ In this example, the system-only config data is hardcode to the xamplke shown ab
                              char         *xpath,
                              cxobj        *xconfig)
    {
-      if (clixon_xml_parse_string("<store xmlns=\"urn:example:std\"><keys><key><name>a</name><system-only-data>mydata</system-only-data></key></keys></store>",
+      if (clixon_xml_parse_string("<store xmlns=\"urn:example:std\">
+                                      <keys>
+                                         <key>
+                                            <name>a</name>
+                                            <system-only-data>mydata</system-only-data>
+                                         </key>
+                                      </keys>
+                                   </store>",
                                   YB_NONE, 0, &xconfig, 0) < 0)
          err;
       ...

@@ -180,7 +180,88 @@ The callback also supports three forms of registered callbacks:
 * ``action_callback_register()`` - for user-defined Action callbacks.
 * ``upgrade_callback_register()`` - for upgrading, see :ref:`Upgrade section <clixon_upgrade>`.
 * ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`Pagination section<clixon_pagination>`.
-  
+
+Writing a state callback
+------------------------
+The ``ca_statedata``  callback is used retrieving non-configuration (state) data. This is typically done for NETCONF ``<get>`` or RESTCONF ``GET`` requests.
+
+A plugin can only register a single callback, but can be used for multiple state data treees.
+
+Xconfig
+^^^^^^^
+The callback is called with an ``xconfig`` parameter, which is a top-level tree on the form::
+
+  <config/>
+
+The plugin is expected to add state data to this tree, for example::
+
+  <config
+     <store xmlns="urn:example:std">
+        <keys>
+           <key>
+              <name>a</name>
+           </key>
+        </keys>
+     </store
+  </config>
+
+XPath
+^^^^^
+The callback is also called with an ``xpath`` and a corresponding ``nsc`` namespace context. The callback matches the XPath with its system data, and returns the data if the XPath matches.
+
+The XPath is given às part of the original request, e.g., the ``<filter>`` element.
+
+If the XPath is ``/`` the whole system state is requested, but if the XPath is more specific, such as ``/a``, only system state for the ``<a>`` top-level tree is expected.
+
+Since it is difficult to match XPaths in the general case, it is not strictly
+necessary to match the XPath. If system state is given which does not
+match the XPath, it is filtered at a later stage. However, filtering on XPaths give better performance.
+
+Example
+^^^^^^^
+In the following example, the state data is hardcoded, whereas a real example would extract this information from the system::
+
+   int
+   example_statedata(clixon_handle h,
+                     cvec         *nsc,
+                     char         *xpath,
+                     cxobj        *xconfig)
+   {
+      if (clixon_xml_parse_string("<store xmlns=\"urn:example:std\">
+                                      <keys>
+                                         <key>
+                                            <name>a</name>
+                                         </key>
+                                      </keys>
+                                   </store>",
+                                  YB_NONE, 0, &xconfig, 0) < 0)
+         err;
+      ...
+   }
+   static clixon_plugin_api api = {
+      ...
+      .ca_statedata=example_statedata,
+
+Note that the contructed XML must be a valid with respect to YANG from the top-level all the way down to the system-only data, which includes having valid list keys.
+
+Note also that no match with XPaths is done. For example, an XPath of ``/system`` would not match the ``<store>`` top-level.
+
+Errors
+^^^^^^
+If the callback returns an invalid XML, an `operation-failed` NETCONF error is returned. Something like::
+
+   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <rpc-error>
+         <error-type>application</error-type>
+         <error-tag>operation-failed</error-tag>
+         <error-info>
+            <bad-element>store</bad-element>
+         </error-info>
+         <error-severity>error</error-severity>
+         <error-message>Failed to find YANG spec of XML node: store with parent: config in namespace: urn:example:std. Internal error, state callback returned invalid XML from plugin: example_statedata</error-message>
+      </rpc-error>
+   </rpc-reply>
+
 Transactions
 ============
 Clixon follows NETCONF in its validate and commit semantics.
@@ -390,7 +471,6 @@ The "td" parameter can be accessed with the following functions:
 
 Flags
 ^^^^^
-
 A programmer can also use XML flags that are set in "src" and "target" XML trees to identify what has changed. The following flags are used to makr the trees:
 
 XML_FLAG_DEL
@@ -418,7 +498,7 @@ You can use functions, such as ``xpath_vec_flag()`` to query for changed nodes::
       xn = vec[i];
          ...
    }
-  
+
 Privileges
 ==========
 The backend process itself does not really require any specific
