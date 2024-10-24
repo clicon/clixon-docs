@@ -130,8 +130,6 @@ Limitations:
 * `xml` and `json` are allowed for single datastores
 * `xml` is allowed for split datstores
 
-
-
 Caching
 =======
 Clixon stores datastore content in an in-memory write-through cache

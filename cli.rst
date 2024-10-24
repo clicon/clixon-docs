@@ -813,7 +813,7 @@ You can also disable all modules by default, and enable them individually, like 
      </rule>
    </autocli>
 
-Likewise, ``disable`` rules haveno effect if ``module-default`` is ``false``.
+Likewise, ``disable`` rules have no effect if ``module-default`` is ``false``.
    
 Compress rules
 ^^^^^^^^^^^^^^
