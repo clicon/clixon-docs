@@ -112,7 +112,7 @@ This can also be triggered via the CLI::
   cli> no notify
   cli>
 
-Restconf notifications (FCGI only) is also supported, 
+Restconf notifications are also supported.
 
 Formats
 =======

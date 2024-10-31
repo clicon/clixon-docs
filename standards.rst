@@ -32,8 +32,6 @@ Not implemented:
 * Default values on leaf-lists (7.7.2)
 * error-message is not implemented as sub-statement of "range", "length" and "pattern"
 
-Further:
-
 Clixon supports the following extended XPath functions (10):
   
    - current()
@@ -42,7 +40,7 @@ Clixon supports the following extended XPath functions (10):
    - derived-from-or-self()
    - bit-is-set()
   
-* The following extended XPath functions are *not* supported (10):
+The following extended XPath functions are *not* supported (10):
   
    - re-match()
    - enum-value()
@@ -212,7 +210,16 @@ The following XPath axes are supported:
 * self
 * parent
 
-The following xpath axes are *not* supported: preceding, preceding_sibling, namespace, following_sibling, following, ancestor,ancestor_or_self, and attribute
+The following xpath axes are *not* supported:
+
+* preceding
+* preceding_sibling
+* namespace
+* following_sibling
+* following
+* ancestor
+* ancestor_or_self
+* attribute
 
 The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 standard are supported:
 

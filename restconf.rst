@@ -660,8 +660,8 @@ All applicable features of the native restconf implementation are available for 
 There is support for URI path internal redirect to a file called
 `index.html`. This can be changed by compile-time option ``HTTP_DATA_INTERNAL_REDIRECT``.
 
-RESTCONF streams
-================
+RESTCONF stream notifications
+=============================
 Clixon has an experimental RESTCONF event stream implementations following
 RFC8040 Section 6 using Server-Sent Events (SSE).
 
