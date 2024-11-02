@@ -35,6 +35,7 @@ Not implemented:
 Clixon supports the following extended XPath functions (10):
   
    - current()
+   - re-match()
    - deref()
    - derived-from(),
    - derived-from-or-self()
@@ -42,7 +43,6 @@ Clixon supports the following extended XPath functions (10):
   
 The following extended XPath functions are *not* supported (10):
   
-   - re-match()
    - enum-value()
 
 See also support of standard XPath functions `XML and XPath`_
@@ -223,16 +223,23 @@ The following xpath axes are *not* supported:
 
 The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 standard are supported:
 
-* contains()
-* count()
-* false()
-* name()
-* node()
-* boolean()
-* not()
-* position()
-* text()
-* true()
+* position
+* count
+* name
+* string
+* starts-with
+* contains
+* substring-before
+* substring-after
+* substring
+* string-length
+* translate
+* boolean
+* not
+* true
+* false
+* text
+* node
 
 The following standard XPath functions are *not* supported:
 
@@ -249,13 +256,8 @@ The following standard XPath functions are *not* supported:
 * number
 * processing-instructions
 * round
-* starts-with
-* string
-* substring
-* substring-after
-* substring-before
 * sum
-* translate
+
 
 Pagination
 ==========
