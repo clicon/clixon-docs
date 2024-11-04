@@ -41,7 +41,7 @@ Clixon supports the following extended XPath functions (10):
    - derived-from-or-self()
    - bit-is-set()
   
-The following extended XPath functions are *not* supported (10):
+The following extended XPath function is *not* supported (10):
   
    - enum-value()
 
@@ -257,7 +257,6 @@ The following standard XPath functions are *not* supported:
 * processing-instructions
 * round
 * sum
-
 
 Pagination
 ==========
