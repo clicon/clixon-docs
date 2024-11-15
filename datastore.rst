@@ -183,10 +183,13 @@ System-only config
 `System-only` config is a mechanism to disable storing of sensitive
 configuration data in the datastore.  Instead, a user implements
 application callbacks to store the data in a `system state`, which
-could be something like a system configuration file(e.g., a password
+could be something like a system configuration file (e.g., a password
 file), a system call, device config, etc.
 
-This system-only configuration can also act as the source-of-truth.
+System-only config is never stored in datastore files and is stored in memory only temporary while a candidate commit is taking place.
+
+.. note::
+    System-only config is never stored in datastore files.
 
 This guide follows the test and main example in the clixon repository. The code in this description is somewhat simplified, see the following files for full details:  ``test/test_datastore_system_only.sh`` and the clixon main example ``example/main/example_backend.c``.
 
@@ -197,14 +200,60 @@ The following functionality is restricted with system-only config:
 * Rollbacks
 * Commit confirm
 
+The reason saved configurations as rollbacks do not support system-only config is simply that system-only config is not stored in configuration files.  Rollback of system-only needs to be solved by other means.
+
 Options
 -------
 CLICON_XMLDB_SYSTEM_ONLY_CONFIG
    Enable system-only-config, set to true
 
+Source-of-truth
+---------------
+System-only config acts as source of truth in the sense that a user can modify the system directly, outside clixon. For example, modifying a password via the OS, or calling a system-call directly.
+
+This is different from regular configured data, where NETCONF clients
+are the only configuration source.  Any direct modification of
+configured data is ignored, and is overwritten at next commit.
+
+Running
+^^^^^^^
+Example: Assume a system-only data ``A`` initially is set to: ``A=X``. A ``get-config running`` retrieves ``X``.
+
+Then, set ``A=Y`` directly by the system (not via clixon), then ``get-config running`` retrieves ``Y``.
+
+Likewise, if ``A=Z`` via NETCONF and committed, then ``get-config running`` retrieves ``Z``.
+
+Candidate
+^^^^^^^^^
+A candidate which is not locked or modified behaves as running. That is, changed system-only config also appears in candidate.
+
+However, as soon as candidate is modified or locked, the system-only config is not changed.
+
+For example, assume a system-only config is initially set to ``A=X``.
+
+Assume then a NETCONF client performs ``lock candidate`` (or ``edit-config``). Then, ``get-config candidate`` still retrieves ``X`` and there is no difference between running and candidate.
+
+Then, ``A=Y`` is set directly by the system (not via clixon), then ``get-config candidate`` retrieves ``X`` but ``get-config running`` retrieves ``Y``.
+
+A ``show compare`` of candidate and running shows::
+
+  - A Y
+  + A X
+
+If now a NETCONF client performs ``edit-config A=Z``. Then, ``get-config candidate`` retrieves ``Z`` and ``get-config running`` retrieves ``Y``.
+
+A ``show compare`` of candidate and running shows::
+
+  - A Y
+  + A Z
+
+And a ``commit`` sets running: ``A=Z``.
+
+Note that for RESTCONF or short edit/commit cycles, this is usually inconsequential.
+
 Extensions
 ----------
-Identify and mark state-only YANG elements with the ``system-only-config`` extension. This is done either by:
+You identify and mark state-only YANG elements with the ``system-only-config`` extension. This is done either by:
 
 1. Directly marking the element
 2. Using augment to mark a standard YANG from a local YANG
