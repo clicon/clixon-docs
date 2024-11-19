@@ -488,6 +488,77 @@ The "td" parameter can be accessed with the following functions:
 ``size_t  transaction_clen(transaction_data td)``
   Get length of changed xml vector
 
+
+example:
+::
+   #define NAME "clixon-plug-example"
+   int commit_done(clicon_handle       h,
+                   transaction_data    td)
+   {
+      int         retval = -1;
+      const int   MAX_SIZE = 100;
+      size_t      count = 0;
+      size_t      change_count
+      cxobj     **added_data = NULL;
+      char       *parents[MAX_SIZE]; // just example
+      cxobj      *added = NULL;
+      cxobj      *parent_node = NULL;
+      cbuf       *source_buffer = NULL;
+
+      clicon_log(LOG_INFO, "[%s]: commit_done start", NAME);
+      clicon_log(LOG_INFO, "[%s]: transaction_clen = %zu", NAME, transaction_clen(td));
+      clicon_log(LOG_INFO, "[%s]: transaction_alen = %zu", NAME, transaction_alen(td));
+      clicon_log(LOG_INFO, "[%s]: transaction_dlen = %zu", NAME, transaction_dlen(td));
+
+      added_data = transaction_avec(td); // we get diff
+      change_count = transaction_alen(td); //count diff
+
+      if (change_count == 0) {
+         // skip step
+         goto done;
+      }
+
+      for (size_t i = 0; i < change_count; ++i) {
+         added = added_data[i];
+         parent_node = xml_parent(added);
+
+         parents[count] = xml_name(parent_node);
+         count++;
+         while (parent_node) {
+            parent_node = xml_parent(parent_node);
+            if (parent_node) {
+               parents[count] = xml_name(parent_node);
+               count++;
+               if(count >= MAX_SIZE){
+                  // error ...
+                  goto done;
+               }
+            }
+         }
+         clicon_log(LOG_INFO, "[%s]: parent node OK", NAME);
+         source_buffer = cbuf_new();
+         if (source_buffer == NULL) {
+               // error alloc ...
+               goto done;
+         } else {
+               if (clixon_xml2cbuf(source_buffer, added, 0, 0, (char*)"", -1, 0) != -1) {
+                  // error xml ...
+                  goto done;
+               }
+               // the main logic of the program
+               // for example, we got all the parents of the current dif,
+               // we can output
+               // '<' + parent's name + '>' + dif itself + '<'+ '/' + parent's name + '>'
+               // and thus get the original xml with only this dif
+         }
+      }
+      clicon_log(LOG_INFO, "[%s]: commit_done done", NAME);
+      retval = 0;
+   done:
+      return retval;
+   }
+
+
 Flags
 ^^^^^
 A programmer can also use XML flags that are set in "src" and "target" XML trees to identify what has changed. The following flags are used to makr the trees:
