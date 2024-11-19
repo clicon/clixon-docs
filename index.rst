@@ -27,6 +27,7 @@ mechanism.
    restconf
    snmp
    yang
+   events
    usecases
    client
    xml

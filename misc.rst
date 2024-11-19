@@ -1,6 +1,6 @@
 .. _clixon_misc:
 .. sectnum::
-   :start: 20
+   :start: 21
    :depth: 3
 
 ****
@@ -78,41 +78,6 @@ When running, several things may happen:
      3. It is restarted due to rpc or config change (eg a server is added, a key modified, etc). The parent kills the process and enters EXITING waiting for a SIGCHLD that triggers a wait, therafter a new process is started and it goes to RUNNING with a new pid::
 
            RUNNING --restart--> EXITING  --sigchld/wait + restart --> RUNNING(pid)
-
-Event notifications
-===================
-Clixon implements RFC 5277 NETCONF Event Notifications
-
-The main example illustrates an EXAMPLE stream notification that triggers every 5s. First, declare a notification in YANG::
-
-    notification event {
-         description "Example notification event.";
-         leaf event-class {
-           type string;
-           description "Event class identifier.";
-         }
-	 ...
-
-To start a notification stream via netconf::
-
-   <rpc><create-subscription xmlns="urn:ietf:params:xml:ns:netmod:notification"><stream>EXAMPLE</stream></create-subscription></rpc>]]>]]>
-   <rpc-reply><ok/></rpc-reply>]]>]]>
-   <notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2019-01-02T10:20:05.929272</eventTime><event><event-class>fault</event-class><reportingEntity><card>Ethernet0</card></reportingEntity><severity>major</severity></event></notification>]]>]]>
-
-This can also be triggered via the CLI::
-
-  clixon_cli -f /usr/local/etc/clixon/example.xml
-  cli> notify
-  cli> event-class fault;
-  reportingEntity {
-    card Ethernet0;
-  }
-  severity major;
-
-  cli> no notify
-  cli>
-
-Restconf notifications are also supported.
 
 Formats
 =======

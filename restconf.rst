@@ -702,7 +702,7 @@ Fcgi stream options
 The following options apply only for fcgi mode and notification streams:
 
 CLICON_STREAM_DISCOVERY_RFC8040
-  Enable monitoring information for the RESTCONF protocol from RFC 8040 (only fcgi)
+  Enable monitoring information for the RESTCONF protocol from RFC 8040
 
 CLICON_STREAM_PATH  
-  Stream path appended to CLICON_STREAM_URL to form stream subscription URL (only fcgi)
+  Stream path appended to CLICON_STREAM_URL to form stream subscription URL
