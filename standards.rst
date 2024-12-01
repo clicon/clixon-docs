@@ -94,9 +94,9 @@ Clixon implements the following NETCONF RFC:s:
 * `RFC 6022: YANG Module for NETCONF Monitoring <http://www.rfc-editor.org/rfc/rfc6022.txt>`_.
 * `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_
 * `RFC 6242: Using the NETCONF Configuration Protocol over Secure Shell (SSH) <http://www.rfc-editor.org/rfc/rfc6242.txt>`_
-* `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_ * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
+* `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_
+* `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
-
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
 

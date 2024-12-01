@@ -182,14 +182,29 @@ The callback also supports three forms of registered callbacks:
 * ``clixon_pagination_cb_register()`` - for pagination, as described in :ref:`Pagination section<clixon_pagination>`.
 
 Writing a state callback
-------------------------
+========================
 The ``ca_statedata``  callback is used retrieving non-configuration (state) data. This is typically done for NETCONF ``<get>`` or RESTCONF ``GET`` requests.
 
 A plugin can only register a single callback, but can be used for multiple state data treees.
 
+The statedata API is pretty basic, it is not called for a specific
+XPath, it is called once per plugin. A plugin should submit all its
+state data in one call.
+
+Arguments
+---------
+The statedata callback is called with the following arguments:
+
+* ``h``: Clixon handle
+* ``xpath``: Part of state requested
+* ``nsc``: Namespace context of XPath
+* ``xconfig``: XML tree
+
+A plugin should add state data to ``xconfig`` XML tree for state data matching ``xpath``.
+
 Xconfig
-^^^^^^^
-The callback is called with an ``xconfig`` parameter, which is a top-level tree on the form::
+-------
+The callback is called with an ``xconfig`` parameter, which is a top-level XML tree where you should add state-data matching xpath on the form::
 
   <config/>
 
@@ -206,19 +221,23 @@ The plugin is expected to add state data to this tree, for example::
   </config>
 
 XPath
-^^^^^
+-----
 The callback is also called with an ``xpath`` and a corresponding ``nsc`` namespace context. The callback matches the XPath with its system data, and returns the data if the XPath matches.
 
 The XPath is given às part of the original request, e.g., the ``<filter>`` element.
 
 If the XPath is ``/`` the whole system state is requested, but if the XPath is more specific, such as ``/a``, only system state for the ``<a>`` top-level tree is expected.
 
+The XPath reflects the original filtrering in the the NETCONF
+``select`` tag, or RESTCONF URI.  Without such filtering, the callback
+is called with XPath ``/`` to match all data.
+
 Since it is difficult to match XPaths in the general case, it is not strictly
 necessary to match the XPath. If system state is given which does not
 match the XPath, it is filtered at a later stage. However, filtering on XPaths give better performance.
 
 Example
-^^^^^^^
+-------
 In the following example, the state data is hardcoded, whereas a real example would extract this information from the system::
 
    int
@@ -247,7 +266,7 @@ Note that the contructed XML must be a valid with respect to YANG from the top-l
 Note also that no match with XPaths is done. For example, an XPath of ``/system`` would not match the ``<store>`` top-level.
 
 Errors
-^^^^^^
+------
 If the callback returns an invalid XML, an `operation-failed` NETCONF error is returned. Something like::
 
    <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
