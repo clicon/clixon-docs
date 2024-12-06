@@ -560,11 +560,24 @@ Pipe commands in the `datamodel` tree are `|mypipe` if preceeded by `aaa`, but `
 Generic pipe functions
 ----------------------
 
-You can write own scripts and use them as output pipe functions by placing them in `CLICON_CLI_PIPE_DIR` and then adding a pipe command for example as follows:
+You can write own scripts and use them as output pipe functions by placing them in `CLICON_CLI_PIPE_DIR`.
 
-   generic("Generic callbacks") <callback:string expand_dir("<CLICON_CLI_PIPE_DIR>", "\.sh$")>("Callback"), pipe_generic("callback");
+Assume for example that ``CLICON_CLI_PIPE_DIR=/usr/local/lib/controller/pipes``, and that a script `first.sh` is placed in that dir, with the following content::
 
-where `CLICON_CLI_PIPE_DIR` should be replaced with the actual dir.
+  #!/usr/bin/env bash
+  head -1
+
+Then add a pipe command  as follows::
+
+   generic("Generic callbacks") <callback:string expand_dir("/usr/local/lib/controller/pipes", "\.sh$")>("Callback"), pipe_generic("callback");
+
+Then, start the CLI::
+
+  cli> show config | generic ?
+  first.sh
+  cli> show config | generic first.sh
+  <config>
+  cli>
 
 CLI aliases
 ===========
