@@ -489,8 +489,8 @@ The "td" parameter can be accessed with the following functions:
   Get length of changed xml vector
 
 
-example:
-::
+Example::
+
    #define NAME "clixon-plug-example"
    int commit_done(clicon_handle       h,
                    transaction_data    td)
@@ -510,18 +510,14 @@ example:
       clicon_log(LOG_INFO, "[%s]: transaction_alen = %zu", NAME, transaction_alen(td));
       clicon_log(LOG_INFO, "[%s]: transaction_dlen = %zu", NAME, transaction_dlen(td));
 
-      added_data = transaction_avec(td); // we get diff
-      change_count = transaction_alen(td); //count diff
+      added_data = transaction_avec(td); // diff
+      change_count = transaction_alen(td); // count diff
 
-      if (change_count == 0) {
-         // skip step
+      if (change_count == 0)
          goto done;
-      }
-
       for (size_t i = 0; i < change_count; ++i) {
          added = added_data[i];
          parent_node = xml_parent(added);
-
          parents[count] = xml_name(parent_node);
          count++;
          while (parent_node) {
@@ -529,35 +525,24 @@ example:
             if (parent_node) {
                parents[count] = xml_name(parent_node);
                count++;
-               if(count >= MAX_SIZE){
-                  // error ...
+               if (count >= MAX_SIZE)
                   goto done;
-               }
             }
          }
          clicon_log(LOG_INFO, "[%s]: parent node OK", NAME);
          source_buffer = cbuf_new();
-         if (source_buffer == NULL) {
-               // error alloc ...
-               goto done;
-         } else {
-               if (clixon_xml2cbuf(source_buffer, added, 0, 0, (char*)"", -1, 0) != -1) {
-                  // error xml ...
+         if (source_buffer == NULL)
+            goto done;
+         else {
+            if (clixon_xml2cbuf(source_buffer, added, 0, 0, (char*)"", -1, 0) != -1) 
                   goto done;
-               }
-               // the main logic of the program
-               // for example, we got all the parents of the current dif,
-               // we can output
-               // '<' + parent's name + '>' + dif itself + '<'+ '/' + parent's name + '>'
-               // and thus get the original xml with only this dif
          }
       }
       clicon_log(LOG_INFO, "[%s]: commit_done done", NAME);
       retval = 0;
-   done:
+    done:
       return retval;
    }
-
 
 Flags
 ^^^^^

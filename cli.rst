@@ -126,6 +126,9 @@ CLICON_CLI_DIR
 CLICON_CLISPEC_DIR
   Directory containing frontend cligen spec files. Load all `.cli` files in this directory as CLI specification files.
 
+CLICON_CLI_PIPE_DIR
+  Directory where CLI pipe scripts or binaries are searched for in cli callback
+
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
 
@@ -554,9 +557,14 @@ Rules 1 and 2 are illustrated as follows::
 
 Pipe commands in the `datamodel` tree are `|mypipe` if preceeded by `aaa`, but `|commonpipe` if preceeded by `bbb`
 
-Pipe functions
---------------
-Clixon contains several example pipe functions primarily for testing, users of Clixon should review these and consider implementing their own.
+Generic pipe functions
+----------------------
+
+You can write own scripts and use them as output pipe functions by placing them in `CLICON_CLI_PIPE_DIR` and then adding a pipe command for example as follows:
+
+   generic("Generic callbacks") <callback:string expand_dir("<CLICON_CLI_PIPE_DIR>", "\.sh$")>("Callback"), pipe_generic("callback");
+
+where `CLICON_CLI_PIPE_DIR` should be replaced with the actual dir.
 
 CLI aliases
 ===========
