@@ -31,6 +31,7 @@ mechanism.
    usecases
    client
    xml
+   path
    pagination
    upgrade
    errors

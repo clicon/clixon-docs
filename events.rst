@@ -12,17 +12,9 @@ Overview
 
 Clixon implements RFC 5277 NETCONF Event Notifications.
 
-There are no pre-existing notification streams in Clixon, an application needs to implement them.
+There are no pre-existing notification streams in Clixon, an application needs to set them up.
 
 The main example illustrates an EXAMPLE stream notification that triggers every 5s.
-
-To create a new event notification, there the following parts:
-
-1. `YANG`: Define a schema event spec
-2. `Backend`: and send server-side event messages
-3. `CLI`: Subscribe to the event-stream, read and display events
-4. `Netconf`
-5. `Restconf`
 
 Configure options
 -----------------
@@ -45,6 +37,12 @@ Components
 ==========
 
 This section describes which components are involved to add a new event notification stream in Clixon.
+
+To create a new event notification, you need to define the following:
+
+1. `YANG`: Define a schema event spec
+2. `Backend`: and send server-side event messages
+3. `CLI`: Subscribe to the event-stream, read and display events
 
 YANG
 ----
@@ -110,7 +108,6 @@ But it depends on how you want the CLI to behave.
 
 Netconf
 -------
-
 To start a notification stream via netconf::
 
    <rpc><create-subscription xmlns="urn:ietf:params:xml:ns:netmod:notification"><stream>EXAMPLE</stream></create-subscription></rpc>]]>]]>

@@ -364,7 +364,7 @@ The arguments are similar to `cli_show_config` with the difference that the `xpa
       
 cli_show_auto_mode
 ------------------
-The ``cli_show_auto_mode()`` callback also used together with the autocli but instead of exapansion uses the edit-modes (see Section `edit modes`_).
+The ``cli_show_auto_mode()`` callback also used together with the autocli but instead of expansion uses the edit-modes (see Section `edit modes`_).
 A typical definition is::
 
       show, cli_show_auto_mode("candidate");
@@ -373,10 +373,10 @@ An example usage using edit-modes is::
 
       cli> edit table
       cli> show
-     <parameter>
+      <parameter>
         <name>a</name>
         <value>x</value>
-     </parameter>  
+      </parameter>
 
 Same parameters as ``cli_show_auto``
 
@@ -946,11 +946,10 @@ The following autocli extensions are defined:
 
 ``hide``
    Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node.
-
-``skip``
-   Skip the command altogether.
 ``hide-show``
    Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
+``skip``
+   Skip the command altogether.
 ``strict-expand``
    Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.o
 ``alias``
@@ -1136,7 +1135,6 @@ Example of `@datamodel` syntax:
   show   @datamodel, cli_show_auto("running", "xml");		   
 
 The commands (eg `cli_set`) will be called with the first argument an api-path to the referenced object.
-
 
 Running CLI scripts
 -------------------

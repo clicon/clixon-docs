@@ -89,13 +89,12 @@ acts as a clixon client and uses the clixon client module to subscribe
 to configuration events using Netconf message passing.
 
 In comparison, the tighter plugin architecture uses dynamically loaded plugins, callbacks and a shared datastore. See :ref:`clixon client api<client_api>` for more details.
-
 	    
 Platforms
 =========
 Clixon supports GNU/Linux, FreeBSD and Docker. MacOS may work. Linux
-platforms include Ubuntu, Alpine, Centos, and Raspian. CPU architectures
-include x86_64, i686, and ARM32.
+platforms include Ubuntu, Alpine, Openwrt and Raspian. CPU architectures
+include x86_64, i686, and ARM.
 
 Standards
 =========

@@ -1,6 +1,6 @@
 .. _clixon_errors:
 .. sectnum::
-   :start: 20
+   :start: 21
    :depth: 3
 
 ****************
