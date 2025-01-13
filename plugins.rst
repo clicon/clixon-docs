@@ -189,6 +189,37 @@ Register Action in example_reset()::
  	goto done;
 
 
+Reporting RPC errors
+====================
+
+Some YANG specifications require specific RPC errors to be returns for
+specific issues.  The user may want to control errors returned by a
+transaction, in general.  To do this, use the
+``clixon_plugin_rpc_err()`` function and return a -1 from the
+function::
+
+  clixon_plugin_rpc_err(h, namespace, type, tag, info, severity, format, ...)
+
+where:
+* `h` is a clixon_handle.
+* `ns` is the namespace.  If you pass in NULL, it will use the NETCONF
+  base namespace.
+* `type` is the error type, one of ``rpc``, ``application`` or ``protocol``.
+* `tag` is an error tag, like ``invalid-value`` and the YANG specification
+  will tell you what to put here.
+* `info` is protocol or application specific.  It may be NULL and
+  won't be included in that case.
+* `severity` is one of ``error`` or ``warning``.
+* `format` specifies a normal printf-like format for a string that
+  will be put into the error-message field fo the rpc error.
+
+The specific values for all these are defined in `RFC 6241: NETCONF Protocol
+<http://www.rfc-editor.org/rfc/rfc6241.txt>` in the `rpc-error` section.
+
+This is much like ``clixon_err()`` as defined in :ref:`Error
+section<clixon_errors>`, except you can set the namespace, type, tag,
+info, severity, etc.
+
 Plugin callback guidelines
 ==========================
 .. note::
