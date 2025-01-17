@@ -84,9 +84,17 @@ You can expose ``clixon_netconf`` as an SSH subsystem according to `RFC 6242`. R
 
 	Subsystem netconf /usr/local/bin/clixon_netconf
 
-and then invoke it from a client using::
+        # Add the dedicated NETCONF port
+        Port 830
 
-	ssh -s <host> netconf
+        # Force NETCONF subsystem on port 830
+        Match LocalPort 830
+          ForceCommand /usr/local/bin/clixon_netconf -f /usr/local/etc/clixon.xml 
+
+The netconf Subsystem is listening at port 830(default port for NETCONF over SSH is 830) and now invoke it from a client using::
+
+
+	ssh -s <host> -p 830 netconf
 
 NACM
 ====
