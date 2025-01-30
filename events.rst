@@ -12,7 +12,7 @@ Overview
 
 Clixon implements RFC 5277 NETCONF Event Notifications.
 
-There are no pre-existing notification streams in Clixon, an application needs to set them up.
+There are no pre-existing notification streams in Clixon, an application needs to define them in YANG and write some code.
 
 The main example illustrates an EXAMPLE stream notification that triggers every 5s.
 

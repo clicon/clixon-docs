@@ -218,10 +218,6 @@ then the following XPath matches:
 
 The prefixes in the XPath are evaluated to namespaces that in turn must match.
 
-Note, an exception is that unresolved XPath prefixes also match, which means that the following matches as well::
-
-    /z:y/z:x/z:k1
-
 XML and XPath mapping
 ---------------------
 You can map between XPath:s and XML via the two functions ``xml2xpath`` and ``xpath2xml``.
