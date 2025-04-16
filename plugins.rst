@@ -87,6 +87,8 @@ errmsg
   Customize a netconf error message for CLI return, log or debug messages. See :ref:`Error section<clixon_errors>` and the main example.
 version
   Print a plugin-specific version stringh
+userdef
+  User-defined callback which can be used by an application as special-purpose callback
 
 See :ref:`Backend section<clixon_backend>` for backend specific callbacks, as well as corresponding manual sections for netconf/restconf/cli callbacks.
 

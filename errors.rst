@@ -25,10 +25,13 @@ Configure options
 The following options control the Clixon logging:
 
 ``CLICON_LOG_DESTINATION``
-   Log destination, a bitmask of syslog, stderr, stdout, and file. Example: ``syslog stderr``
+   Log destination, a bitmask of syslog, stderr, stdout, and file. Example: ``syslog stderr``.
 
 ``CLICON_LOG_FILE``
-   If log destination includes ``file``, this is the log-file
+   If log destination includes ``file``, this is the log-file.
+
+``CLICON_LOG_STRING_LIMIT``
+   Length limitation of debug and log strings. Default ``0`` means no limit.
 
 Note that the configure options are overriden by the command-line argument ``-l``.
 
@@ -125,7 +128,7 @@ Each clixon application has a ``-D <level>`` command-line option to enable debug
 
    clixon_cli -D default -D detail
 
-Levels are separated into `subject-area` and `detail`.
+Levels are separated into `subject-area` and `detail`
 
 The subject-area levels are the following:
 

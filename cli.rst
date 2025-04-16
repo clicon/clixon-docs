@@ -24,7 +24,7 @@ specify callbacks defined in plugins.
 For details on CLIgen syntax and behavior, please consult the `CLIgen tutorial <https://github.com/clicon/cligen/blob/master/cligen_tutorial.pdf>`_.
 
 Clixon comes with a generated CLI, the `autocli`_, where all
-configuration-related syntax is generated from YANG. 
+configuration-related syntax is generated from YANG.
 
 You can also create a completely manually-made CLI.
 
@@ -53,18 +53,18 @@ application-defined in a plugin(``mycallback()``)
 In this way, a designer writes cli command specifications which
 invokes C-callbacks. If there are no appropriate callbacks the
 designer must write a new callback function.
-   
+
 Example usage
 -------------
 The following example shows an auto-cli session from the `main example <https://github.com/clicon/clixon/tree/master/example/main>`_ how to add an interface in candidate, validate and commit it to running, then look at it as xml and cli and finally delete it::
 
-   clixon_cli -f /usr/local/etc/clixon/example.xml 
+   clixon_cli -f /usr/local/etc/clixon/example.xml
    user@host> set interfaces interface eth9 ?
-     description               enabled                   ipv4                     
-     ipv6                      link-up-down-trap-enable  type                     
+     description               enabled                   ipv4
+     ipv6                      link-up-down-trap-enable  type
    user@host> set interfaces interface eth9 type ex:eth
-   user@host> validate 
-   user@host> commit 
+   user@host> validate
+   user@host> commit
    user@host> show configuration xml
    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
      <interface>
@@ -74,7 +74,7 @@ The following example shows an auto-cli session from the `main example <https://
      </interface>
    </interfaces>
    user@host> show configuration cli
-   set interfaces interface eth9 
+   set interfaces interface eth9
    set interfaces interface eth9 type ex:eth
    set interfaces interface eth9 enabled true
    user@host> delete interfaces interface eth9
@@ -87,7 +87,7 @@ The `clixon_cli` client has the following command-line options:
   -D <level>      Debug level
   -f <file>       Clixon config file
   -E <dir>        Extra configuration directory
-  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Stderr is default. 
+  -l <option>     Log on (s)yslog, std(e)rr, std(o)ut, (n)one or (f)ile. Stderr is default.
   -C <format>     Dump configuration options on stdout after loading. Format is one of xml|json|text|cli|default
   -F <file>       Read commands from file (default stdin)
   -1              Run once, do not enter interactive mode
@@ -115,7 +115,7 @@ Multiple commands are separated with `\;`.
 One can also add extra application-dependent plugin options after `--` which can be read with `clicon_argv_get()`::
 
     clixon_cli -f example.xml show config -- -x extra-option
-  
+
 Configure options
 =================
 The following config options are related to clispec and plugin files (clixon config options), ie they are set in the XML Clixon config file:
@@ -224,7 +224,7 @@ CLICON_CLI_VARONLY
 Inside the clispec files ``CLICON_MODE`` is used to specify to which modes the syntax in a specific file defines. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
 
 First, lets add a single command in the configure mode::
-   
+
   CLICON_MODE="configure";
   show configure;
 
@@ -237,7 +237,7 @@ Finally, add a command to all modes::
 
   CLICON_MODE="*";
   show("Show") all("Show all");
-   
+
 Note that CLI command trees are merged so that show commands in other files are shown together. Thus, for example, using the clispecs above the two modes are the three commands in total for the *configure* mode::
 
   > clixon_cli -m configure
@@ -246,7 +246,7 @@ Note that CLI command trees are merged so that show commands in other files are 
 
 but only two commands  in the *operation* mode::
 
-  > clixon_cli -m operation 
+  > clixon_cli -m operation
   user@host> show <TAB>
     all      files
 
@@ -264,7 +264,7 @@ CLICON_PLUGIN
   The name of the object file containing callbacks in this file.
 
 CLICON_PIPETREE
-  Name of a pipe output tree as described in 
+  Name of a pipe output tree as described in
 
 CLI callbacks
 =============
@@ -274,7 +274,7 @@ user is expected to create new application-specific callbacks.
 As an example, consider the following clispec::
 
    example("Callback example") <var:int32>("any number"), mycallback("myarg");
- 
+
 containing a keyword (`example`) and a variable (`var`) and `mycallback` is a cli callback with argument: (`myarg`).
 
 In C, the callback has the following signature::
@@ -287,7 +287,7 @@ Suppose a user enters the following command in the CLI::
 
 The callback is called with the following parameters::
 
-  cvv: 
+  cvv:
      0: example 23
      1: 23
   argv:
@@ -305,7 +305,7 @@ Clixon includes show commands for showing datastore and state content.An applica
 - ``cli_pagination()`` - Show paginated data of a large list
 
 The CLI show functions are utility functions in the sense that they are not part of the core functionality and a user or product may want to specialize them.
-  
+
 .. note::
         CLI library functions are subject to change in new releases
 
@@ -316,7 +316,7 @@ The ``cli_show_config`` is a basic function to display datastore and state data.
     show("Show configuration"), cli_show_config("candidate", "text");
 
 Using this command in the CLI could provicde the following output::
-  
+
     cli> show
     <table xmlns="urn:example:clixon">
        <parameter>
@@ -324,7 +324,7 @@ Using this command in the CLI could provicde the following output::
           <value>x</value>
        </parameter>
     </table>
-  
+
 The callback has the following parameters, only the first is mandatory:
 
  * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
@@ -341,7 +341,7 @@ cli_show_auto
 -------------
 The ``cli_show_auto()`` callback is used together with the autocli to show sub-parts of a configured tree using expansion. A typical definition is as follows::
 
-      show("Show expand") @datamodelshow, cli_show_auto("candidate", "xml");  
+      show("Show expand") @datamodelshow, cli_show_auto("candidate", "xml");
 
 That is, it must always be used together with a tree-reference as described in Section `autocli`_.
 
@@ -354,14 +354,14 @@ An example CLI usage is::
     </parameter>
 
 The arguments are similar to `cli_show_config` with the difference that the `xpath` is implicitly defined by the current position of the tree reference::
-  
+
  * `dbname` : Name of datastore to show, such as "running", "candidate" or "startup"
  * `format` : Show format, one of `text`, `xml`, `json`, `cli`, `netconf`, or `default` (see :ref:`datastore formats <clixon_datastore>`)
  * `pretty` : If `true`, make output pretty-printed
  * `state`  : If `true`, include non-config data in output
  * `default` : Optional default retrieval mode: one of `report-all`, `trim`, `explicit`, `report-all-tagged`. See also extended values below
  * `prepend`  : Opional prefix to print before cli syntax output, only valid for CLI format.
-      
+
 cli_show_auto_mode
 ------------------
 The ``cli_show_auto_mode()`` callback also used together with the autocli but instead of expansion uses the edit-modes (see Section `edit modes`_).
@@ -478,7 +478,7 @@ Output pipe functions are declared using a special variant of a CLI tree
 with a name starting with a `vertical bar`. Example::
 
   CLICON_MODE="|mypipe";
-  \| { 
+  \| {
      grep <arg:rest>, pipe_grep_fn("-e", "arg");
      showas json, pipe_json_fn();
   }
@@ -519,7 +519,7 @@ An implicit rule adds pipes to `all` commands in a cli mode. An example of an im
       all, print_cb("all");
       detail, print_cb("detail);
    }
-   
+
 where the pipe tree is added implicitly to all commands in that file, and possibly on other files with the same mode.
 
 Pipe trees also work for sub-trees, ie a subtree referenced by the top-level tree may also use output pipes.
@@ -534,7 +534,7 @@ It is possible to combine an implicit (default) rule with an explict rule as fol
       all @|mypipe, print_cb("all");
       detail;
    }
-     
+
 In this example, `print` and `print all` use the `¡mypipe` menu, while `print detail` uses the `|common` menu
 
 Inheriting
@@ -617,7 +617,7 @@ The alias API is limited and an application developer may need to modify or exte
 Autocli
 =======
 The Clixon CLI contains parts that are *generated* from a YANG
-specification. This *autocli* is generated from YANG into CLI specifications, 
+specification. This *autocli* is generated from YANG into CLI specifications,
 parsed and merged into the top-level Clixon CLI.
 
 The autocli is configured using three basic mechanisms:
@@ -626,7 +626,7 @@ The autocli is configured using three basic mechanisms:
 2. `Tree expansion`_: How the generated cli is merged into the overall CLI
 3. `YANG Extensions`_: Modify CLI behavior via YANG
 
-Each mechanism is described in sub-sections below, but first an overview of autocli usage.   
+Each mechanism is described in sub-sections below, but first an overview of autocli usage.
 
 Overview
 --------
@@ -670,7 +670,7 @@ An example run of the above example is as follows::
   > clixon_cli
   user@host /> set table ?
     <cr>
-    parameter         
+    parameter
   user@host /> set table parameter 23
   user@host /> show config
   table {
@@ -745,7 +745,7 @@ The following options set default values to the auto-cli, some of these may be f
    - If `false`, you need to explicitly enable modules for autocli generation  using `module enable rules`_.
 
 `list-keyword-default`
-   How to generate the autocli from YANG lists. 
+   How to generate the autocli from YANG lists.
    There are several variants defined. To understand the different variants, consider a simple YANG LIST defintion as follows::
 
       list a {
@@ -755,7 +755,7 @@ The following options set default values to the auto-cli, some of these may be f
       }
 
    The different variants with the resulting autocli are as follows:
-   
+
    - `kw-none` : No extra keywords, only variables: ``a <x> <y>``
    - `kw-nokey` : Keywords on non-key variables: ``a <x> y <y>``. This is default.
    - `kw-all` : Keywords on all variables: ``a x <x> y <y>``
@@ -763,22 +763,22 @@ The following options set default values to the auto-cli, some of these may be f
 `treeref-state-default`
    If generate autocli from YANG *state* data. The motivation for this option is that many specs have very large state parts. In particular, some openconfig YANG specifications have  ca 10 times larger state than config parts.
 
-   - If `true`, generate CLI from YANG state/non-config statements, not only from config data. 
+   - If `true`, generate CLI from YANG state/non-config statements, not only from config data.
    - If `false` do not generate autocli commands from YANG state data. This is default.
 
 `edit-mode-default`
    Open automatic edit-modes for some YANG keywords and do not allow others.
-   A CLI edit mode opens a carriage-return option and changes the context to be 
+   A CLI edit mode opens a carriage-return option and changes the context to be
    in that local context.
    For example::
 
       user@host> interfaces interface e0<cr>
-      eth0> 
+      eth0>
 
    Default is to generate edit-modes for all YANG containers and lists. For more info see `edit modes`_
-   
+
 `completion-default`
-   Generate code for CLI completion of existing db symbols. 
+   Generate code for CLI completion of existing db symbols.
    That is, check existing configure database for completion options.
    This is normally always enabled.
 
@@ -787,9 +787,17 @@ The following options set default values to the auto-cli, some of these may be f
    corresponding `grouping` definition. If `true`, use indirect tree reference ``@treeref``
    to reference the grouping definition. This may reduces memory footprint of the CLI.
 
+`clispec-cache`
+   Autocli cache mode for saving generated autocli clispecs between runs.
+   Set to `readwrite` to get a dynamic cache behavior.
+
+`clispec-cache-dir`
+   Directory for generated clispecs. Directory is created if it does not exist.
+   The cli client must have read/write access to this directory.
+
 Rules
 ^^^^^
-To complement options, a set of rules to further define the autocli can be defined. 
+To complement options, a set of rules to further define the autocli can be defined.
 Common rule fields are:
 
 `name`
@@ -835,7 +843,7 @@ You can also disable all modules by default, and enable them individually, like 
    </autocli>
 
 Likewise, ``disable`` rules have no effect if ``module-default`` is ``false``.
-   
+
 Compress rules
 ^^^^^^^^^^^^^^
 Compress rules are used to skip CLI commands, making the complete command name shorter.
@@ -847,7 +855,7 @@ For example, assume YANG definition::
          ...
       }
    }
-   
+
 Instead of typing ``interfaces interface e0`` you would want to type only ``interface e0``.
 The following rule matches all YANG containers with lists as its only child, and removes the keyword ``interfaces``::
 
@@ -856,7 +864,7 @@ The following rule matches all YANG containers with lists as its only child, and
       <operation>compress</operation>
       <yang-keyword>container</yang-keyword>
       <yang-keyword-child>list</yang-keyword-child>
-   </rule>  
+   </rule>
 
 Note that this matches the openconfig compress rule: `The surrounding 'container' entities are removed from 'list' nodes <https://github.com/openconfig/ygot/blob/master/docs/design.md#openconfig-path-compression>`_
 
@@ -869,7 +877,7 @@ A second openconfig compress rule is `The 'config' and 'state' containers are "c
       <schema-nodeid>config</schema-nodeid>
       <module-name>openconfig*</module-name>
    </rule>
-   
+
 Specific fields for compress are:
 
 `yang-keyword`
@@ -906,7 +914,7 @@ defined:
 * ``@datamodelstate`` - A tree for showing state as well as configuration
 
 Note to use ``@datamodelstate`` config option ``treeref-state-default`` must be set.
-  
+
 YANG Extensions
 ---------------
 A third method to define the autocli is using :ref:`YANG extensions<clixon_yang>`, where a YANG specification is annotated with extension.
@@ -934,14 +942,14 @@ The CLI ``hidden`` command is not shown but the command still exists::
   value
   <cr>
   cli /> set table parameter a hidden 99
-  cli /> show configuration 
+  cli /> show configuration
   table {
     parameter {
         name a;
         hidden 99;
     }
   }
-   
+
 The following autocli extensions are defined:
 
 ``hide``
@@ -954,7 +962,7 @@ The following autocli extensions are defined:
    Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.o
 ``alias``
    Replace the command with another value, only implemented for YANG leaves.
-   
+
 Edit modes
 ----------
 The autocli supports *automatic edit modes* where by entering a ``<cr>``, you enter an edit mode. An edit mode is created for every YANG container or list.
@@ -971,13 +979,13 @@ Then an example session for illustration is as follows, where first a small conf
   user@host /> set table parameter a value 42
   user@host /> set table parameter b value 77
   user@host /> edit table parameter a
-  user@host parameter=a/> 
+  user@host parameter=a/>
   user@host parameter=a/> show configuration
     name a;
     value 42;
   user@host parameter=a/> set value 99
   user@host parameter=a/> up
-  user@host table> show configuration 
+  user@host table> show configuration
   parameter {
       name a;
       value 99;
@@ -987,7 +995,7 @@ Then an example session for illustration is as follows, where first a small conf
       value 77;
   }
   user@host table> top
-  user@host /> 
+  user@host />
 
 Advanced
 ========
@@ -1006,11 +1014,11 @@ established, it is maintained (cached) by the CLI client to keep track
 of candidate edits and locks, as described in 7.5 of `RFC 6241 <https://www.rfc-editor.org/rfc/rfc6241.html>`_.
 
 If there is no backend running at the time of session establishment, a warning is printed::
-  
+
   cli /> show config
   Mar 18 11:53:43: clicon_rpc_connect_unix: 541: Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
   Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
-  cli /> 
+  cli />
 
 If at a later time, the backend is started, the session is established normally
 
@@ -1021,13 +1029,13 @@ state associated with the session will be lost, including:
 
 * explicit locks
 * edits in candidate-db
-  
+
 If the backend exits during an existing session, it will close with the same error message as above::
 
   cli /> show config
   Mar 18 11:53:43: clicon_rpc_connect_unix: 541: Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
   Protocol error: /usr/local/var/example/example.sock: config daemon not running?: No such file or directory
-  cli /> 
+  cli />
 
 If the backend restarts, a new session is created with a warning::
 
@@ -1042,12 +1050,12 @@ It is possible to change the default behavior by undefining the compile-option: 
   cli /> show configuration
   Mar 18 12:02:57: clicon_rpc_msg: 210: Protocol error: Unexpected close of CLICON_SOCK. Clixon backend daemon may have crashed.: Cannot send after transport endpoint shutdown
   Protocol error: Unexpected close of CLICON_SOCK. Clixon backend daemon may have crashed.: Cannot send after transport endpoint shutdown
-  bash# 
-  
+  bash#
+
 Sub-tree operator
 -----------------
 Sub-trees are defined using the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes::
-   
+
   CLICON_MODE="subtree";
   subcommand{
     a, a();
@@ -1055,7 +1063,7 @@ Sub-trees are defined using the tree operator `@`. Every mode gets assigned a tr
   }
 
 then access that subtree from other modes::
-   
+
   CLICON_MODE="configure";
   main @subtree;
   other @subtree,c();
@@ -1114,7 +1122,7 @@ As an example, the ``@datamodel`` tree is ``basemodel`` with labels removed as f
 
    @basemodel, @remove:act-prekey, @remove:act-list, @remove:act-leaf, @remove:ac-state;
 
-which is an alternative way of specifying the datamodel tree.   
+which is an alternative way of specifying the datamodel tree.
 
 Extensions to CLIgen
 --------------------
@@ -1128,11 +1136,11 @@ Clixon adds some features and structure to CLIgen which include:
 
 Example of `@datamodel` syntax:
 ::
-   
+
   set    @datamodel, cli_set();
   merge  @datamodel, cli_merge();
   create @datamodel, cli_create();
-  show   @datamodel, cli_show_auto("running", "xml");		   
+  show   @datamodel, cli_show_auto("running", "xml");
 
 The commands (eg `cli_set`) will be called with the first argument an api-path to the referenced object.
 
@@ -1158,7 +1166,7 @@ Two caveats regarding "shebang":
   2. The mode is `CLICON_CLI_MODE`
 
 You may mod this by using soft links or creating a new executable to use use in the "shebang" with other default values.
-     
+
 How to deal with large specs
 ----------------------------
 CLIgen is designed to handle large specifications in runtime, but it may be
@@ -1170,16 +1178,13 @@ Sub-modes
 ^^^^^^^^^
 The `CLICON_MODE` is used to specify in which modes the syntax in a specific file should be added. For example, if you have major modes `configure` and `operation` you can have a file with commands for only that mode, or files with commands in both, (or in all).
 
-First, lets add a basic set in each:
-::
-   
+First, lets add a basic set in each::
+
   CLICON_MODE="configure";
   show configure;
 
-and
+and::
 
-::
-   
   CLICON_MODE="operation";
   show configure;
 
@@ -1192,42 +1197,38 @@ Note that CLI command trees are *merged* so that show commands in other files ar
 will result in both commands in the operation mode:
 ::
 
-  > clixon_cli -m operation 
+  > clixon_cli -m operation
   user@host> show <TAB>
     configure      files
 
-but 
-::
+but::
 
   > clixon_cli -m configure
   user@host> show <TAB>
     configure
-  
+
 Sub-trees
 ^^^^^^^^^
-You can also use sub-trees and the the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes:
-::
-   
+You can also use sub-trees and the the tree operator `@`. Every mode gets assigned a tree which can be referenced as `@name`. This tree can be either on the top-level or as a sub-tree. For example, create a specific sub-tree that is used as sub-trees in other modes::
+
   CLICON_MODE="subtree";
   subcommand{
     a, a();
     b, b();
   }
 
-then access that subtree from other modes:
-::
-   
+then access that subtree from other modes::
+
   CLICON_MODE="configure";
   main @subtree;
   other @subtree,c();
 
 The configure mode will now use the same subtree in two different commands. Additionally, in the `other` command, the callbacks will be overwritten by `c`. That is, if `other a`, or `other b` is called, callback function `c` will be invoked.
-  
+
 C-preprocessor
 ^^^^^^^^^^^^^^
-You can also add the C preprocessor as a first step. You can then define macros, include files, etc. Here is an example of a Makefile using cpp:
-::
-   
+You can also add the C preprocessor as a first step. You can then define macros, include files, etc. Here is an example of a Makefile using cpp::
+
    C_CPP    = clispec_example1.cpp clispec_example2.cpp
    C_CLI    = $(C_CPP:.cpp=.cli
    CLIS     = $(C_CLI)

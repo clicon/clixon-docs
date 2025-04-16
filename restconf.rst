@@ -8,9 +8,9 @@ RESTCONF
 ********
 
 .. This is a comment
-   
-Clixon supports two RESTCONF compile-time variants: *FCGI* and *Native*. 
-   
+
+Clixon supports two RESTCONF compile-time variants: *FCGI* and *Native*.
+
 Architecture
 ============
 
@@ -50,7 +50,7 @@ The RESTCONF daemon can be configured for compile-time (by autotools) as follows
 After that perform system-wide compilation::
 
     make && sudo make install
-  
+
 Command-line options
 ====================
 The restconf daemon have the following command-line options:
@@ -92,7 +92,7 @@ CLICON_RESTCONF_PRIVILEGES
 CLICON_RESTCONF_HTTP2_PLAIN
    Enable plain (non-tls) HTTP/2.
 CLICON_BACKEND_RESTCONF_PROCESS
-   Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore. 
+   Start restconf daemon internally from backend daemon. The restconf daemon reads its config from the backend running datastore.
 CLICON_ANONYMOUS_USER
    If RESTCONF authentication auth-type=none then use this user
 CLICON_RESTCONF_API_ROOT
@@ -101,10 +101,10 @@ CLICON_NOALPN_DEFAULT
    Fallback if no ALPN for https. valid values are "http/1.1" and "http/2"
 
 More more documentation of the options, see the source YANG file.
-   
+
 Advanced config
 ===============
-Apart from options, there is also structured restconf data primarily for native mode encapsulated with ``<restconf>...</restconf>`` as defined in ``clixon-restconf.yang``. 
+Apart from options, there is also structured restconf data primarily for native mode encapsulated with ``<restconf>...</restconf>`` as defined in ``clixon-restconf.yang``.
 
 The first-level fields of the advanced restconf structure are the following:
 
@@ -113,7 +113,7 @@ enable
 auth-type
    Authentication method (see `auth types`_)
 debug
-   Enable debug
+   Set debug level, must be decimal
 log-destination
    Either syslog or file (/var/log/clixon_restconf.log)
 pretty
@@ -136,30 +136,38 @@ Config file
 The restconf config can also be defined locally within the clixon config file, such as::
 
   <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
-  <CLICON_BACKEND_RESTCONF_PROCESS>false</CLICON_BACKEND_RESTCONF_PROCESS>
+  <CLICON_BACKEND_RESTCONF_PROCESS>true</CLICON_BACKEND_RESTCONF_PROCESS>
   <restconf>
       <enable>true</enable>
       <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
    </restconf>
 
+Additionally, The ``<restconf>...`` can be in a separate file using the ``-E`` configuration directory option.
+
 Datastore
 ---------
-Alternatively if ``CLICON_BACKEND_RESTCONF_PROCESS`` is set, the restconf configuration is::
+Finally, if ``CLICON_BACKEND_RESTCONF_PROCESS`` is set, restconf is configuration is in the datastore, not configuration file.
 
-  <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
-  <CLICON_BACKEND_RESTCONF_PROCESS>false</CLICON_BACKEND_RESTCONF_PROCESS>
+The detailed restconf is defined in the regular running datastore by importing ``clixon-restconf.yang`` into your top-level yang::
 
-And the detailed restconf is defined in the regular running datastore by adding something like::
+    import clixon-restconf {
+       prefix clrc; /* This pulls in top-level clrc:restconf */
+    }
+
+Then, the restconf configuration can be part of the datastore::
 
    <restconf xmlns="http://clicon.org/restconf">
       <enable>true</enable>
       <fcgi-socket>/wwwdata/restconf.sock</fcgi-socket>
    </restconf>
-   
-In the latter case, the restconf daemon reads its config from the running datastore on startup. 
+
+In the latter case, the restconf daemon reads its config from the running datastore on startup.
+
+Having the restconf configuration in the datastore is more dynamic and
+flexible, but the bootstrapping is more complex.
 
 .. note::
-      If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config must be in the regular datastore.
+      If ``CLICON_BACKEND_RESTCONF_PROCESS`` is enabled, the restconf config is in the regular datastore.
 
 Features
 --------
@@ -175,7 +183,7 @@ Example, add this in the config file to enable fcgi::
    <clixon-config xmlns="http://clicon.org/config">
       ...
       <CLICON_FEATURE>clixon-restconf:fcgi</CLICON_FEATURE>
-   
+
 Auth types
 ----------
 The RESTCONF daemon uses the following authentication types:
@@ -195,10 +203,10 @@ fcgi-socket
    Path to FCGI unix socket. This path should be the same as specific in fcgi reverse proxy
 
 Need also fcgi feature enabled: `features`_
-   
+
 Native mode
 -----------
-Applies if clixon is configured with ``--with-restconf=native``. 
+Applies if clixon is configured with ``--with-restconf=native``.
 Native specific config options are:
 
 server-cert-path
@@ -275,7 +283,7 @@ If you do not have them, you can generate self-signed certs, for example as foll
    openssl req -x509 -nodes -newkey rsa:4096 -keyout /etc/ssl/private/clixon-server-key.pem -out /etc/ssl/certs/clixon-server-crt.pem -days 365
 
 You can also generate client certs (not shown here) using ``CLICON_SSL_CA_CERT``. Example using client certs and curl for client `andy`::
-  
+
    curl -Ssik --key andy.key --cert andy.crt -X GET https://localhost/restconf/data/example:x
 
 Starting
@@ -289,7 +297,7 @@ You can start the RESTCONF daemon in several ways:
 Start with Systemd
 ------------------
 The Restconf service can be installed at, for example, /etc/systemd/system/example_restconf.service::
-   
+
    [Unit]
    Description=Starts and stops an example clixon restconf service on this system
    Wants=example.service
@@ -311,9 +319,9 @@ Thereafter, you can either use the ``clixon-restconf.yang`` configuration or use
 The algorithm for starting and stopping the clixon-restconf internally is as follows:
 
   1. on RPC start, if enable is true, start the service, if false, error or ignore it
-  2. on RPC stop, stop the service 
+  2. on RPC stop, stop the service
   3. on backend start make the state as configured
-  4. on enable change, make the state as configured  
+  4. on enable change, make the state as configured
 
 Example 1, using netconf `edit-config` to start the process::
 
@@ -341,7 +349,7 @@ Example 1, using netconf `edit-config` to start the process::
   <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10">
      <ok/>
   </rpc-reply>
-  
+
 Example 2, using netconf RPC to restart the process::
 
   <?xml version="1.0" encoding="UTF-8"?>
@@ -369,7 +377,7 @@ init
 start
    Called when application is started and initialization is complete, and after drop privileges.
 exit
-   Called just before plugin is unloaded 
+   Called just before plugin is unloaded
 extension
   Called at parsing of yang modules containing an extension statement.
 auth
@@ -383,7 +391,7 @@ The auth callback is invoked after incoming processing, including cert validatio
 
 If the message is not authenticated, an error message is returned with
 tag: `access denied` and HTTP error code `401 Unauthorized`.
-   
+
 There are default handlers for TLS client certs and for "none" authentication. But other variants, such as http basic authentication, oauth2 or the remapping of client certs to NACM usernames, can be implemented by this callback
 
 If the message is authenticated, a user is associated with the message. This user can be derived from the headers or mapped in an application-dependent way. This user is used internally in Clixon and sent via the IPC protocol to the backend where it may be used for NACM authorization.
@@ -392,14 +400,14 @@ The signature of the auth callback is as follows::
 
   int ca_auth(clixon_handle h, void *req, clixon_auth_type_t auth_type, char **authp);
 
-where:  
+where:
 
 h
    Clixon handle
 req
    Per-message request www handle to use with restconf_api.h
 auth-type
-   Specifies how the authentication is made and what default value 
+   Specifies how the authentication is made and what default value
 authp
    NULL if credentials failed, otherwise malloced string of authentoicated user
 
@@ -408,12 +416,10 @@ The return value is one of:
 - -1: Fatal error, close socket
 - 0: Ignore, undecided, not handled, same as no callback. Fallback to default handler.
 - 1: OK see authp parameter whether the result is authenticated or not, and the associated user.
- 
+
 If there are multiple callbacks, the first result which is not "ignore" is returned. This is to allow for different callbacks registering different classes, or grouping of authentication.
-  
+
 The main example contains example code.
-
-
 
 FCGI
 ====
@@ -441,7 +447,7 @@ The restconf daemon can be started in several ways as described in Section `auth
    </clixon-config>
 
 Reverse proxy config
---------------------     
+--------------------
 If you use FCGI, you need to configure a reverse-proxy, such as NGINX. A typical configuration is as follows::
 
   server {
@@ -466,16 +472,16 @@ Overview
     device/server (n)                            client      (n)
   +-----------------+    (1) connect     +---------------------+
   |                 |  --------------->  |                     |
-  | clixon-restconf |     (2) TLS        |   callhome-client   |  
+  | clixon-restconf |     (2) TLS        |   callhome-client   |
   |                 | <---------------   |                     |
   |                 |     (3) data       |                     |
   |                 | <---------------   |                     |
   +-----------------+                    +---------------------+
           | (4) IPC
-          v                             
+          v
   +-----------------+
   | clixon-backend  |
-  +-----------------+                   
+  +-----------------+
 
 The operation of RESTCONF callhome is as follows:
   1. The RESTCONF server initiates a TCP connection to a client, either persistently or periodically
@@ -486,7 +492,7 @@ The operation of RESTCONF callhome is as follows:
 
 .. note::
    Clixon does not implement client-side call-home functionality, only server-side
-     
+
 Callback clients
 ----------------
 A server may configure multiple HTTP callback clients, for fault-tolerance purposes, for example.
@@ -555,7 +561,7 @@ A callhome session is setup by adding a ``call-home`` section to a native RESTCO
          <address>12.13.14.15</address>
          <port>4336</port>
          <ssl>true</ssl>
-	 <call-home>                
+	 <call-home>
 	   <!-- ... call-home section ... -->
 	 </call-home>
       </socket>
@@ -643,7 +649,7 @@ An example curl call could be::
     curl -X GET -H 'Accept: text/html' http://localhost/data/
 
 The call will retrieve the file at ``/var/www/data/index.hmtl``.
-    
+
 Features and limitation
 -----------------------
 
@@ -704,5 +710,5 @@ The following options apply only for fcgi mode and notification streams:
 CLICON_STREAM_DISCOVERY_RFC8040
   Enable monitoring information for the RESTCONF protocol from RFC 8040
 
-CLICON_STREAM_PATH  
+CLICON_STREAM_PATH
   Stream path appended to CLICON_STREAM_URL to form stream subscription URL
