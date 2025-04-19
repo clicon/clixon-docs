@@ -167,3 +167,16 @@ where:
 * `fn` is the output function to use. `NULL` means `fprintf`, `cligen_output` is used for scrolling in CLI
 * `skiproot` only prints the children by skipping the top-level XML node `xn`
 * `autocliext` Set if you want to activate autocli extensions (eg `hide` extensions)
+
+Event handling
+==============
+
+Clixon uses a single-threaded non-preemptive event handling.
+
+A program registers events and timeouts.
+
+CLICON_EVENT_SELECT
+  Enable select-based event-handling. Otherwise use poll-based event handling
+
+Select-based event-handling have scaling limitations since only 1024
+file descriptors are supported. However, select-based event-handling may be more robust, since poll-based event handling was introduced in Clixon 7.4.

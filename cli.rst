@@ -794,6 +794,7 @@ The following options set default values to the auto-cli, some of these may be f
 `clispec-cache-dir`
    Directory for generated clispecs. Directory is created if it does not exist.
    The cli client must have read/write access to this directory.
+   The directory is expanded, ie can be relative and include tilde.
 
 Rules
 ^^^^^
