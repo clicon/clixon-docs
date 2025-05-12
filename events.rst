@@ -22,12 +22,10 @@ CLICON_STREAM_DISCOVERY_RFC5277
    Enable event stream discovery as described in RFC 5277. This is the main option and should be ``true``.
 CLICON_STREAM_DISCOVERY_RFC8040
    Enable monitoring information, including streams, for RESTCONF
-CLICON_STREAM_URL
-   URL for locating event stream
+CLICON_STREAM_PATH
+   Stream path appended to URI to form, default is `stream`
 CLICON_STREAM_RETENTION
    Retention for stream replay buffers in seconds
-CLICON_STREAM_PUB
-   NCHAN event publication. Obsolete
 
 Restrictions
 ------------

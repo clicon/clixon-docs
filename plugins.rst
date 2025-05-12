@@ -204,16 +204,12 @@ function::
 
 where:
 * `h` is a clixon_handle.
-* `ns` is the namespace.  If you pass in NULL, it will use the NETCONF
-  base namespace.
+* `ns` is the namespace.  If you pass in NULL, it will use the NETCONF base namespace.
 * `type` is the error type, one of ``rpc``, ``application`` or ``protocol``.
-* `tag` is an error tag, like ``invalid-value`` and the YANG specification
-  will tell you what to put here.
-* `info` is protocol or application specific.  It may be NULL and
-  won't be included in that case.
+* `tag` is an error tag, like ``invalid-value`` and the YANG specification will tell you what to put here.
+* `info` is protocol or application specific.  It may be NULL and will not be included in that case.
 * `severity` is one of ``error`` or ``warning``.
-* `format` specifies a normal printf-like format for a string that
-  will be put into the error-message field fo the rpc error.
+* `format` specifies a normal printf-like format for a string that will be put into the error-message field fo the rpc error.
 
 The specific values for all these are defined in `RFC 6241: NETCONF Protocol
 <http://www.rfc-editor.org/rfc/rfc6241.txt>` in the `rpc-error` section.
