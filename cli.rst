@@ -271,11 +271,24 @@ CLI callbacks
 CLI callback functions are "library" functions that an application may call from a clispec. A
 user is expected to create new application-specific callbacks.
 
-As an example, consider the following clispec::
+There are two major types of CLI callbacks:
+
+1. Command callbacks, to implement the semantics of a CLI command
+2. Expand callbacks, for providing a set of values to a variable
+
+Command callbacks
+-----------------
+A CLI command callback is invoked as a result of a command and implements its semantics,
+and is  given as the last statement in a command.
+
+Clixon provides several command callbacks, but a developer typically
+adds new commands applicable for the application.
+
+Consider the following clispec example of the command callback ``mycallback()``::
 
    example("Callback example") <var:int32>("any number"), mycallback("myarg");
 
-containing a keyword (`example`) and a variable (`var`) and `mycallback` is a cli callback with argument: (`myarg`).
+The example contains a keyword (`example`) and a variable (`var`), while `mycallback` is the CLI callback with argument: (`myarg`).
 
 In C, the callback has the following signature::
 
@@ -295,9 +308,65 @@ The callback is called with the following parameters::
 
 which means that `cvv` contains dynamic values set by the user, and `argv` contains static values set by the clispec designer.
 
+Expand callbacks
+----------------
+Some variables may need a dynamic set of values to choose from, for example, currently existing interface names.
+
+An expand callback is always given `inside` a variable declaration.
+
+Clixon currently provides the following set of expand callbacks:
+
+- ``expand_dbvar()``: finding datastore symbols
+- ``expand_dir()``: for files in a directory
+- ``expand_yang_list()``: finding YANG symbols
+
+Just like command callbacks, a developer can add new expand functions.
+
+An example of finding datastore symbols in the `candidate` datastore::
+
+   table parameter <var:int32 expand_dbvar("candidate", "/clixon-example:table/parameter=%s/value")>
+
+where the second argument is an `api-path` (see Section `Api-path-fmt`_) defining a datastore object.
+
+Example, assume there are two table parameters in the candidate datastore::
+
+  cli> table parameter <?>
+       a     Table paramter
+       b     Table parameter
+
+Expanding of leafrefs
+^^^^^^^^^^^^^^^^^^^^^
+Expansion of leafrefs is by default the referred node, but can be changed by the the `dont-follow-leafref` label.
+Typically, "add" operations follow referred nodes while "delete" operations follow referring nodes.
+
+With an example YANG::
+
+   list parameter{
+      key name;
+      leaf name{
+         description "referred node";
+         type string;
+      }
+   }
+   leaf-list leafref{
+      description "referring node";
+      type leafref{
+         path "../parameter/name";
+   }
+
+Example clispec::
+
+   set leafref <var:int32 expand_dbvar(...) ...;
+   delete leafref <var:int32 expand_dbvar(...), leafref-reffering> ...;
+
+Similarly, using tree references::
+
+  add @tree, cli_add();
+  delete @tree, @add:leafref-referring, cli_delete();
+
 Show commands
 =============
-Clixon includes show commands for showing datastore and state content.An application may use these functions as basis for more specialized show functions. Some show functions are:
+Clixon includes show commands for showing datastore and state content. An application may use these functions as basis for more specialized show functions. Some show functions are:
 
 - ``cli_show_config()`` - Multi-purpose show function for manual CLI show commands
 - ``cli_show_auto()`` - Used in conjunction with the autocli with expansion trees

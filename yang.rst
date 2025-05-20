@@ -18,13 +18,13 @@ Typically, a YANG leafref declaration looks something like this::
   container c {  
     leaf x {
       type leafref {
-        path "../config/name";   /* "deferring node" */
-        require-instance <bool>; /* determines existing deferred node */
+        path "../config/name";   /* referring node */
+        require-instance <bool>; /* determines existing referred node */
       }
     }
     container config {
       leaf name {
-        type unit32;             /* "deferred node" */
+        type unit32;             /* "referred node" */
       }
     }
   }
@@ -35,10 +35,10 @@ Other typical uses is where the path is an absolute path, such as eg ``path "/ne
   
 Types
 -----
-Consider the YANG example above, the type of ``x`` is the deferred node:s, in this example ``uint32``.
+Consider the YANG example above, the type of ``x`` is the referred node:s, in this example ``uint32``.
 The validation/commit process, as well as the autocli type system and completion handles accordingly.
 
-For example, if the deferred node is a more complex type such as identityref with options "a, b", the completion of "x" will show the options "a,b".
+For example, if the referred node is a more complex type such as identityref with options "a, b", the completion of "x" will show the options "a,b".
 
 Require-instance
 ----------------
