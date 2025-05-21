@@ -334,12 +334,12 @@ Example, assume there are two table parameters in the candidate datastore::
        a     Table paramter
        b     Table parameter
 
-Expanding of leafrefs
-^^^^^^^^^^^^^^^^^^^^^
+Expanding leafrefs
+^^^^^^^^^^^^^^^^^^
 Expansion of leafrefs is by default the referred node, but can be changed by the the `leafref-no-refer` label.
-Typically, "add" operations follow the reference to the referred nodes while "delete" operations do not.
+When adding a new node, expansion follow the reference to the referred nodes while deleting a node expands on the existing, non-referred nodes.
 
-With an example YANG::
+Assume the following YANG::
 
    list parameter{
       key name;
@@ -361,8 +361,24 @@ Example clispec::
 
 Similarly, using tree references::
 
-  add @tree, cli_add();
+  set @tree, cli_add();
   delete @tree, @add:leafref-no-refer, cli_delete();
+
+This results in the following behavior for adding and removing leafrefs, respectively::
+
+  cli> set parameter a
+  cli> set parameter b
+  cli> set leafref ?
+       a
+       b
+  cli> set leafref a
+  cli> set leafref c
+  cli> delete leafref ?
+       a
+       c
+  cli>
+
+In other words, when adding new nodes, the CLI expands to referred, original values ("a" and "b"), but when deleting nodes, the actual values, non-referred ("a" and "c") are offered as potential choices.
 
 Show commands
 =============
@@ -731,7 +747,7 @@ The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`
 For example, the `set` part is expanded using the CLIgen tree-operator to something like::
 
   set table, cli_auto_set(); {
-        parameter <name:string>, cli_auto_set();
+     parameter <name:string>, cli_auto_set();
   }
 
 An example run of the above example is as follows::
