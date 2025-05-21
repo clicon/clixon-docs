@@ -336,8 +336,8 @@ Example, assume there are two table parameters in the candidate datastore::
 
 Expanding of leafrefs
 ^^^^^^^^^^^^^^^^^^^^^
-Expansion of leafrefs is by default the referred node, but can be changed by the the `dont-follow-leafref` label.
-Typically, "add" operations follow referred nodes while "delete" operations follow referring nodes.
+Expansion of leafrefs is by default the referred node, but can be changed by the the `leafref-no-refer` label.
+Typically, "add" operations follow the reference to the referred nodes while "delete" operations do not.
 
 With an example YANG::
 
@@ -357,12 +357,12 @@ With an example YANG::
 Example clispec::
 
    set leafref <var:int32 expand_dbvar(...) ...;
-   delete leafref <var:int32 expand_dbvar(...), leafref-reffering> ...;
+   delete leafref <var:int32 expand_dbvar(...), leafref-no-refer> ...;
 
 Similarly, using tree references::
 
   add @tree, cli_add();
-  delete @tree, @add:leafref-referring, cli_delete();
+  delete @tree, @add:leafref-no-refer, cli_delete();
 
 Show commands
 =============
@@ -723,7 +723,7 @@ The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`
   CLICON_PROMPT="%U@%H %W> ";
   set @datamodel, cli_auto_set();
   merge @datamodel, cli_auto_merge();
-  delete @datamodel, cli_auto_del();
+  delete @datamodel, @add:leafref-no-refer, cli_auto_del();
   show config, cli_auto_show("datamodel", "candidate", "text", true, false);{
      @datamodel, cli_show_auto("candidate", "text");
   }
