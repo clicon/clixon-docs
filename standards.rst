@@ -31,6 +31,7 @@ Not implemented:
 * YIN (13)
 * Default values on leaf-lists (7.7.2)
 * error-message is not implemented as sub-statement of "range", "length" and "pattern"
+* quoted string concatenation using + for other than the "string" non.-terminal (eg identifer-args)
 
 Clixon supports the following extended XPath functions (10):
   
@@ -225,6 +226,7 @@ The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 sta
 
 * position
 * count
+* local-name
 * name
 * string
 * starts-with
@@ -250,7 +252,6 @@ The following standard XPath functions are *not* supported:
 * id
 * lang
 * last
-* local-name
 * namespace-uri
 * normalize-space
 * number

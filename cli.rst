@@ -1045,7 +1045,7 @@ The following autocli extensions are defined:
 ``skip``
    Skip the command altogether.
 ``strict-expand``
-   Only show exactly the expanded options of a variable. It shuld not be possible to add a *new* value that is not in the expanded list.o
+   Only show exactly the expanded options of a variable. It should not be possible to add a *new* value that is not in the expanded list.
 ``alias``
    Replace the command with another value, only implemented for YANG leaves.
 
