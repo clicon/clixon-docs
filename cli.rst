@@ -739,7 +739,7 @@ The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`
   CLICON_PROMPT="%U@%H %W> ";
   set @datamodel, cli_auto_set();
   merge @datamodel, cli_auto_merge();
-  delete @datamodel, @add:leafref-no-refer, cli_auto_del();
+  delete @datamodel, @add:leafref-no-refer, @add:ac-strict-expand, cli_auto_del();
   show config, cli_auto_show("datamodel", "candidate", "text", true, false);{
      @datamodel, cli_show_auto("candidate", "text");
   }
@@ -1045,7 +1045,7 @@ The following autocli extensions are defined:
 ``skip``
    Skip the command altogether.
 ``strict-expand``
-   Only show exactly the expanded options of a variable. It should not be possible to add a *new* value that is not in the expanded list.
+   Only show exactly the expanded options of a variable. It should not be possible to add a *new* value that is not in the expanded list. See also ``ac-strict-expand`` in Section `Autocli tree labels`_.
 ``alias``
    Replace the command with another value, only implemented for YANG leaves.
 
@@ -1200,7 +1200,8 @@ The currently defined labels are:
 * ``act-leafconst`` : Terminal entries of non-empty non-key YANG LEAF/LEAF_LISTs command nodes.
 * ``act-leafvar``   : Terminal entries of non-key YANG LEAF/LEAF_LISTs variable nodes.
 * ``ac-state``      : Nodes which have YANG ``config false`` as child
-* ``ac-config``     : Nodes nodes which do not have any state nodes as siblings
+* ``ac-config``     : Nodes which do not have any state nodes as siblings
+* ``ac-strict-expand`` : Only show exactly the expanded options of a variable.
 
 Labels with prefix ``act_`` are *terminal* labels in the sense that they mark a terminal command, ie the node itself; while labels with ``ac_`` represent the non-terminal, ie the whole sub-tree.
 
@@ -1209,6 +1210,30 @@ As an example, the ``@datamodel`` tree is ``basemodel`` with labels removed as f
    @basemodel, @remove:act-prekey, @remove:act-list, @remove:act-leaf, @remove:ac-state;
 
 which is an alternative way of specifying the datamodel tree.
+
+Example: strict-expand
+^^^^^^^^^^^^^^^^^^^^^^
+
+One example of the ``strict-expand`` label is to remove all general
+variable options for some trees and keep them for others. For example,
+one may need to set a new unknown value to a variable, but when deleting, it may not make sense to delete a non-existing value::
+
+   delete @datamodel, @add:ac-strict-expand, cli_auto_del();
+   set @datamodel, cli_auto_set();
+
+In the cli::
+
+   # clixon_cli
+   cli /> set table parameter ?
+   a
+   b
+   <name>
+   cli /> delete table parameter ?
+   a
+   b
+   cli />
+
+Note the absence of ``<name>`` in the delete rule.
 
 Extensions to CLIgen
 --------------------

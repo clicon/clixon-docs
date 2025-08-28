@@ -232,7 +232,7 @@ Or massif for memory usage::
 
 Customization
 =============
-Errors, logs and denugs can be customized by plugins via the `ca_errmsg` API.
+Errors, logs and debug messages can be customized by plugins via the `ca_errmsg` API.
 
 Customized errors applies to all clixon applications. For example, logs for the backend and return output in the CLI.
 
