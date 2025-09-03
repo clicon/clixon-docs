@@ -25,7 +25,6 @@ Clixon deviates from the YANG standard as follows (reference to RFC7950 sections
 
 Not implemented:
 
-* augment in a uses sub-clause (7.17) (module-level augment is implemented)
 * instance-identifier type (9.13)
 * status (7.21.2)
 * YIN (13)
@@ -34,20 +33,20 @@ Not implemented:
 * quoted string concatenation using + for other than the "string" non.-terminal (eg identifer-args)
 
 Clixon supports the following extended XPath functions (10):
-  
+
    - current()
    - re-match()
    - deref()
    - derived-from(),
    - derived-from-or-self()
    - bit-is-set()
-  
+
 The following extended XPath function is *not* supported (10):
-  
+
    - enum-value()
 
 See also support of standard XPath functions `XML and XPath`_
-     
+
 Regular expressions
 -------------------
 Clixon supports two regular expression engines:
@@ -57,13 +56,11 @@ Clixon supports two regular expression engines:
 `Libxml2`
    Libxml2  uses the XSD regex engine. This is a complete XSD engine but you need to compile and link with libxml2 which may add overhead.
 
-To use libxml2 in clixon you need enable libxml2 in both cligen and clixon:
-::
-   
+To use libxml2 in clixon you need enable libxml2 in both cligen and clixon::
+
   ./configure --with-libxml2 # both cligen and clixon
 
-You then need to set the following configure option:
-::
+You then need to set the following configure option::
 
   <CLICON_YANG_REGEXP>libxml2</CLICON_YANG_REGEXP>
 
@@ -80,7 +77,7 @@ is defined for attributes so that they can be mapped from XML to JSON, for examp
 Assigned meta-data are hardcoded. The following attributes are defined:
 
 * ietf-netconf-with-defaults:default from RFC 6243 / RFC 8040
-  
+
 Schema mount
 ------------
 Yang schema mount is supported as defined in: `RFC 8528: YANG Schema Mount <http://www.rfc-editor.org/rfc/rfc8528.txt>`_ .
@@ -117,7 +114,7 @@ Clixon does *not* support the following NETCONF features:
 
 * :url capability
 * copy-config source config
-* edit-config testopts 
+* edit-config testopts
 * edit-config erropts
 * edit-config config-text
 * edit-config operation
@@ -130,8 +127,8 @@ Capability is preferred over default subtrees. This has two reasons:
 
 Clixon supports netconf locks in default settings.
 
-RFC 6022
---------
+RFC 6022 YANG Module for NETCONF Monitoring
+-------------------------------------------
 Clixon extends the RFC 6022 session parameter ``transport`` with "cli", "restconf", "netconf" and "snmp".  In particular, the ``clixon_netconf`` application uses stdio to get input and print output and is used in a "piping" fashion, for example directly in a terminal shell or as a part of a SSH sub-system, and therefore has no direct knowledge of whether the NETCONF transport is over SSH or not.
 
 The ``source-host`` parameter is set only in certain
@@ -155,6 +152,14 @@ The `:with-defaults` capability indicates that clixon default behaviour is expli
 * report-all-tagged
 
 Internally in memory, however, `report-all` is used.
+
+Private candidate
+-----------------
+Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_ with the following restrictions:
+
+* No augments on `compare` operation
+* Leaf-list conflict resolution fine-grained as opposed to draft
+* Delete candidate on commit (draft is unclear)
 
 RESTCONF
 ========
@@ -200,7 +205,7 @@ The XML-related standards include:
 * `XML 1.0 <https://www.w3.org/TR/2008/REC-xml-20081126>`_. (DOCTYPE/ DTD not supported)
 * `Namespaces in XML 1.0 <https://www.w3.org/TR/2009/REC-xml-names-20091208>`_
 * `XPath 1.0 <https://www.w3.org/TR/xpath-10>`_
-       
+
 Clixon XML supports version and UTF-8 only.
 
 The following XPath axes are supported:
@@ -263,9 +268,9 @@ Pagination
 ==========
 The pagination solution is based on the following drafts:
 
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-04.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-04.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-04.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-07.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-07.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-07.html>`_
 
 Clixon implements all attributes except `cursor`, `locale`, `sublist-limit` and `remaining`.
 

@@ -9,11 +9,11 @@ Backend
 
  .. image:: backend1.jpg
    :width: 100%
-	       
+
 The backend daemon is the central component in the Clixon architecture. It consists of a main module and a number of dynamically loaded plugins. The backend has four APIs:
 
 *configuration*
-  An XML file read at startup, possibly amended with `-o` options. 
+  An XML file read at startup, possibly amended with `-o` options.
 *Internal interface / IPC*
   A NETCONF socket to frontend clients. This is by default a UNIX domain socket but can also be an IPv4 or IPv6 TCP socket but with limited functionality.
 *Datastores*
@@ -22,7 +22,7 @@ The backend daemon is the central component in the Clixon architecture. It consi
   Backend plugins configure the base system with application-specific APIs. These API:s depend on how the underlying system is configured, examples include configuration files or a socket.
 
 Note that a user typically does not access the datastores directly, it is possible to read, but write operations should not be done, since the backend daemon in most cases uses a datastore cache.
-   
+
 Command-line options
 ====================
 The backend have the following command-line options:
@@ -49,7 +49,6 @@ The backend have the following command-line options:
   -y <file>       Load yang spec file (override yang main module)
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
-  
 Logging and debugging
 ---------------------
 In case of debugging, the backend can be run in the foreground and with debug flags::
@@ -57,7 +56,7 @@ In case of debugging, the backend can be run in the foreground and with debug fl
    clixon_backend -FD 1
 
 Note that debug levels can be combined as described in Section :ref:`debugging <clixon_misc>`.
-   
+
 Logging is by default on syslog.  Alternatively, logging can be made on a file using the `-l` option::
 
    clixon_backend -lf<file>
@@ -73,7 +72,7 @@ It may be useful to see all config options after load, taking into account defau
 But you can also make an explicit dump of all config options on stdout using the `-C` option::
 
    clixon_backend -1C xml
-   
+
 Startup
 =======
 The backend can perform startup in four different modes. The difference is how the running state is handled, i.e., what state the system is in when you start the daemon and how loading the configuration affects it:
@@ -87,12 +86,16 @@ The backend can perform startup in four different modes. The difference is how t
 `startup`
    Commit startup configuration into running state. After reboot when no persistent running db exists.
 
+The following config option is related to startup:
+
+CLICON_STARTUP_MODE
+   Which method to start the backend
+
 Use the ``-s`` option to select startup mode, example::
-   
+
    clixon_backend -s running
 
-You may also add a default method in the configuration file:
-::
+You may also add a default method in the configuration file::
 
    <clixon-config xmlns="http://clicon.org/config">
      ...
@@ -106,11 +109,6 @@ When loading the startup/tmp configuration, the following actions are performed 
 * Validation of the XML against the current Yang models
 * If errors are detected, enter `failsafe` mode.
 
-The following config option is related to startup:
-
-CLICON_BACKEND_RESTCONF_PROCESS
-   Enable process-control of restconf daemon, ie start/stop restconf daemon internally using fork/exec. Disable if you start the restconf daemon by other means.
-  
 IPC Socket
 ==========
 ::
@@ -162,7 +160,7 @@ Apart from the generic plugin callbacks (init, start, etc), the following callba
 pre_daemon
    Called just before server daemonizes(forks). Not called if in foreground.
 daemon
-   Called after the server has daemonized and before privileges are dropped. 
+   Called after the server has daemonized and before privileges are dropped.
 statedata
   Provide state data XML from a plugin
 reset
@@ -416,8 +414,7 @@ In a system with two plugins, for example, a transaction sequence looks like the
 
 
 If an error occurs in the commit call of plugin2, for example,
-the transaction is aborted and the commit reverted:
-::
+the transaction is aborted and the commit reverted::
 
   Backend   Plugin1    Plugin2
   |          |          |
@@ -442,7 +439,7 @@ src
   The original XML tree, such as "running"
 target
   The new XML tree, such as "candidate"
-  
+
 There are three vectors pointing into the XML trees:
 
 delete
@@ -451,7 +448,7 @@ add
   The add vector consists of nodes that exists in "target" and do not exist in "src"
 change
   The change vector consists of nodes that exists in both "src" and "target" but are different
-  
+
 All transaction callbacks are called with a transaction-data argument
 (td). The transaction data describes a system transition from a src to
 target state.  The struct contains source and target XML tree
@@ -534,7 +531,7 @@ Example::
          if (source_buffer == NULL)
             goto done;
          else {
-            if (clixon_xml2cbuf(source_buffer, added, 0, 0, (char*)"", -1, 0) != -1) 
+            if (clixon_xml2cbuf(source_buffer, added, 0, 0, (char*)"", -1, 0) != -1)
                   goto done;
          }
       }
@@ -567,7 +564,7 @@ For example, assume the tree (A B) is replaced with (B C), then the two trees ar
 
 You can use functions, such as ``xpath_vec_flag()`` to query for changed nodes::
 
-   if (xpath_vec_flag(xcur, nsc, "//symbol/foo", XML_FLAG_ADD, &vec, &veclen) < 0) 
+   if (xpath_vec_flag(xcur, nsc, "//symbol/foo", XML_FLAG_ADD, &vec, &veclen) < 0)
       err;
    for (i=0; i<veclen; i++){
       xn = vec[i];
@@ -585,9 +582,8 @@ The backend itself is usually started as root: `sudo clixon_backend -s init`, wh
 
 The backend can also be started as a non-root user. However, you may
 need to set some config options to allow user write access, for
-example as follows(there may be others):
-::
-   
+example as follows(there may be others)::
+
     <CLICON_SOCK>/tmp/example.sock</CLICON_SOCK>
     <CLICON_BACKEND_PIDFILE>/tmp/mytest/example.pid</CLICON_BACKEND_PIDFILE>
     <CLICON_XMLDB_DIR>/tmp/mytest</CLICON_XMLDB_DIR>
@@ -597,8 +593,7 @@ Dropping privileges
 You may want to start the backend as root and then drop privileges
 to a non-root user which is a common technique to limit exposure of exploits.
 
-This can be done either by command line-options: `sudo clicon_backend -s init -U clicon` or (more generally) using configure options:
-::
+This can be done either by command line-options: `sudo clicon_backend -s init -U clicon` or (more generally) using configure options::
 
     <CLICON_BACKEND_USER>clicon</CLICON_BACKEND_USER>
     <CLICON_BACKEND_PRIVILEGES>drop_perm</CLICON_BACKEND_PRIVILEGES>
@@ -609,7 +604,7 @@ ownership of several files to the user, including datastores and the
 clicon socket (if the socket is unix domain).
 
 Note that the unprivileged user must exist on the system, see :ref:`Install section<clixon_install>`.
- 
+
 Drop privileges temporary
 -------------------------
 If you drop privileges permanently, you need to access all privileged
@@ -617,8 +612,7 @@ resources initially before the drop. For a plugin designer, this means
 that you need to access privileges system resources in the
 `plugin_init` or `plugin_start` callbacks. The transaction callbacks, for example, will be run in unprivileged mode.
 
-An alternative is to drop privileges temporary and then be able to raise privileges when needed:
-::
+An alternative is to drop privileges temporary and then be able to raise privileges when needed::
 
     <CLICON_BACKEND_USER>clicon</CLICON_BACKEND_USER>
     <CLICON_BACKEND_PRIVILEGES>drop_temp</CLICON_BACKEND_PRIVILEGES>
@@ -626,8 +620,7 @@ An alternative is to drop privileges temporary and then be able to raise privile
 In this mode, a plugin callback (eg commit), can temporarily raise the
 privileges when accessing system resources, and the lower them when done.
 
-An example C-code for raising privileges in a plugin is as follows:
-::
+An example C-code for raising privileges in a plugin is as follows::
 
    uid_t euid = geteuid();
    restore_priv();

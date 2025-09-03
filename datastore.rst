@@ -7,11 +7,10 @@
 Datastore
 *********
 
-
  .. image:: datastore1.jpg
    :width: 70%
 
-Clixon configuration datastores follow the Netconf model (from `RFC 6241: NETCONF Configuration Protocol <http://rfc-editor.org/rfc/rfc6241.txt>`_):
+Clixon configuration datastores follow the Netconf model (from `RFC 6241 <http://rfc-editor.org/rfc/rfc6241.txt>`_):
 
 `Candidate`
    A configuration datastore that can be manipulated without impacting the device's current configuration and that can be committed to the running configuration datastore.
@@ -40,7 +39,7 @@ CLICON_XMLDB_DIR
    Mandatory directory where datastores are placed.
 
 CLICON_XMLDB_MULTI
-   Split configure datastore into multiple sub files. Default is single file
+   Split configure datastore into multiple sub files. Default is single file. Only applicable for YANG schema mounts
 
 Datastores files are only accessible by the user that starts the
 backend. Typically this is `root`, but if the backend is started as a
@@ -101,7 +100,7 @@ If the YANG above is instantiated to, for example, ``<a><b>foo</b></a>``, this w
       <config>
          <a xmlns:cl="http://clicon.org/lib" cl:link="35819a66.xml"/>
       </config>
-  
+
    35819a66.xml:
       <config>
          <b>foo</b>
@@ -109,8 +108,7 @@ If the YANG above is instantiated to, for example, ``<a><b>foo</b></a>``, this w
 
 File formats
 ============
-By default, the datastore files use pretty-printed XML, with the top-symbol `config`. The following is an example of a valid datastore:
-::
+By default, the datastore files use pretty-printed XML, with the top-symbol `config`. The following is an example of a valid datastore::
 
    <config>
      <hello xmlns="urn:example:hello">
@@ -132,30 +130,73 @@ Limitations:
 
 Caching
 =======
+
 Clixon stores datastore content in an in-memory write-through cache
 managed by the Clixon backend.
 As soon as data is modified in-mem, a write is made to file.
 Reads from file is made only on startup, or more precisley, if the cache is empty.
 Modifications by an external part of the file is only read by the backend on startup.
 
+Candidate
+=========
+The candidate datastore can be manipulated without impacting the current, running
+configuration of a device, and can be committed to the running datastore.
+
+Options
+-------
+CLICON_XMLDB_CANDIDATE_INMEM
+   Run candidate datastore in-memory cache only, do not sync to disk
+CLICON_AUTOLOCK
+   Lock is obtained by edit-config and copy-config and released by discard and commit.
+
+Shared candidate
+----------------
+By default and as defined in `RFC 6241: NETCONF Configuration Protocol <http://www.rfc-editor.org/rfc/rfc6241.txt>`_, the candidate datastore
+is `shared`, meaning that other clients can modify the candidate
+configuration simultaneously.
+
+Exclusive access
+----------------
+An exclusive lock on the shared candidate prohibits other clients to make changes while the client is editing.
+
+There are two ways to obtain an exclusive lock, either explicitly or implicitly:
+
+* An `explicit` lock is made the NETCONF ``lock`` operation or by corresponding CLI operation.
+* `Implicit` locks are enabled by setting `<CLICON_AUTOLOCK>true</CLICON_AUTOLOCK>` in the configuration file.
+
+An implicit lock is obtained by edit-config and copy-config and released by discard and commit.
+
+Locking is not available in RESTCONF.
+
+Private candidate
+-----------------
+Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_.
+
 Module library support
 ======================
+
 Clixon can store Yang module-state information according to `RFC 8525: YANG library <http://www.rfc-editor.org/rfc/rfc8525.txt>`_ in the
 datastores. With module state, you know which Yang version the XML belongs to, which is useful when upgrading, see :ref:`upgrade <clixon_upgrade>`.
 
+Options
+-------
 
-To enable yang module-state in the datastores add the following entry in the Clixon configuration:
-::
+CLICON_XMLDB_MODSTATE
+   Tag datastores with RFC 8525 YANG Module Library info
+
+Operation
+---------
+
+To enable yang module-state in the datastores add the following entry in the Clixon configuration::
 
    <CLICON_YANG_LIBRARY>true</CLICON_YANG_LIBRARY> # (default true)
    <CLICON_XMLDB_MODSTATE>true</CLICON_XMLDB_MODSTATE>
 
 If the datastore does not contain module-state, general-purpose upgrade is the only upgrade mechanism available.
 
-A backend with `CLICON_XMLDB_MODSTATE` disabled will silently ignore module state.
+A backend with ``CLICON_XMLDB_MODSTATE`` disabled will silently ignore module state.
 
-Example of a (simplified) datastore with Yang module-state:
-::
+Example of a (simplified) datastore with Yang module-state::
 
    <config>
      <a1 xmlns="urn:example:a">some text</a1>
@@ -193,6 +234,11 @@ System-only config is never stored in datastore files and is stored in memory on
 
 This guide follows the test and main example in the clixon repository. The code in this description is somewhat simplified, see the following files for full details:  ``test/test_datastore_system_only.sh`` and the clixon main example ``example/main/example_backend.c``.
 
+Options
+-------
+CLICON_XMLDB_SYSTEM_ONLY_CONFIG
+   Enable system-only-config, set to true
+
 Restrictions
 ------------
 The following functionality is restricted with system-only config:
@@ -202,10 +248,7 @@ The following functionality is restricted with system-only config:
 
 The reason saved configurations as rollbacks do not support system-only config is simply that system-only config is not stored in configuration files.  Rollback of system-only needs to be solved by other means.
 
-Options
--------
-CLICON_XMLDB_SYSTEM_ONLY_CONFIG
-   Enable system-only-config, set to true
+
 
 Source-of-truth
 ---------------
