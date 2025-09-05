@@ -172,6 +172,26 @@ Private candidate
 -----------------
 Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_.
 
+The feature is enabled by adding ``ietf-netconf-private-candidate:private-candidate`` to the Clixon configuration.
+
+When a NETCONF client connects, it must send the following capability: ``urn:ietf:params:netconf:capability:private-candidate:1.0`` otherwise the session will be terminated by Clixon.
+
+When a conflict is detected by the ``<update>`` operation or implicitly during commit, the error message contains the type of conflict and the xpath to the object of the first conflict encountered. ::
+
+    <rpc-error>
+        <error-type>application</error-type>
+        <error-tag>operation-failed</error-tag>
+        <error-severity>error</error-severity>
+        <error-message>Conflict occured: Cannot change node value, node is removed: xpath0: /interfaces/interface[name="intf_one"]</error-message>
+    </rpc-error>
+
+A conflict can be handled by discarding all changes made to the private candidate using the ``<discard-changes>`` command and then retrieving the latest configuration from the running configuration to the private candidate using ``<update>``. ::
+
+    <discard-changes/>
+    <update xmlns="urn:ietf:params:xml:ns:netconf:private-candidate:1.0"/>
+
+On a successful ``<commit>``, the running configuration is updated with the changes from the private candidate, after which the private candidate is deleted. A new private candidate is created from the running configuration on the first call of any operation involving the candidate, e.g. ``<edit-config>``.
+
 Module library support
 ======================
 

@@ -157,9 +157,11 @@ Private candidate
 -----------------
 Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_ with the following restrictions:
 
+* ``revert-on-conflict`` is the only resolution mode supported
 * No augments on `compare` operation
 * Leaf-list conflict resolution fine-grained as opposed to draft
 * Delete candidate on commit (draft is unclear)
+* ``<delete-config>`` is not possible on candidate configuration (draft vs RFC6241)
 
 RESTCONF
 ========
