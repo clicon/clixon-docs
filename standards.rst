@@ -95,6 +95,7 @@ Clixon implements the following NETCONF RFC:s:
 * `RFC 6243 With-defaults Capability for NETCONF <http:www.rfc-editor.org/rfc/rfc6243.txt>`_
 * `RFC 8071: NETCONF Call Home and RESTCONF Call Home <http://www.rfc-editor.org/rfc/rfc8071.txt>`_. NETCONF over SSH (external) and RESTCONF call home (internal) over TLS are implemented.
 * `RFC 8341: Network Configuration Access Control Model <http://www.rfc-editor.org/rfc/rfc8341.txt>`_ (NACM). Notification not implemented.
+* `RFC 9144: Comparison of Network Management Datastore Architecture (NMDA) Datastores <http://www.rfc-editor.org/rfc/rfc9144.txt>`_. all, report-origin, subtree-filter not implemented
 
 The following RFC6241 capabilities/features are hardcoded in Clixon:
 

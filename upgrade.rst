@@ -16,6 +16,14 @@ Clixon has three upgrade methods:
 * Module-specific manual upgrade
 * Automatic upgrade (experimental)
 
+Options
+=======
+
+CLICON_XMLDB_UPGRADE_CHECKOLD
+   At upgrade, yang bind and check datastore syntax against old Yang, default is `true`.
+
+If not set, old content (before upgrade) is not checked.
+
 General-purpose
 ===============
 A plugin registers a `ca_datastore_upgrade` function which gets called
