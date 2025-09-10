@@ -145,9 +145,9 @@ configuration of a device, and can be committed to the running datastore.
 Options
 -------
 CLICON_XMLDB_CANDIDATE_INMEM
-   Run candidate datastore in-memory cache only, do not sync to disk
+   Run candidate datastore in-memory cache only, do not sync to disk. For optimization.
 CLICON_AUTOLOCK
-   Lock is obtained by edit-config and copy-config and released by discard and commit.
+   Get exclusive lock automatically by edit-config and copy-config and released by discard and commit.
 
 Shared candidate
 ----------------
