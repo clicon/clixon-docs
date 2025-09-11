@@ -192,6 +192,50 @@ A conflict can be handled by discarding all changes made to the private candidat
 
 On a successful ``<commit>``, the running configuration is updated with the changes from the private candidate, after which the private candidate is deleted. A new private candidate is created from the running configuration on the first call of any operation involving the candidate, e.g. ``<edit-config>``.
 
+**CLI example**
+
+The following commands may be specified to manage private candidates using the cli ::
+
+    show("Show configuration") {
+        candidate("Show private candidate configuration"), cli_show_auto_mode("candidate", "text", true, false);
+        running("Show running configuration"), cli_show_auto_mode("running", "text", true, false);
+     }
+    compare("Compare private candidate and running databases"), compare_dbs("running", "candidate", "text");
+    set("Edit private candidate") @datamodel, cli_auto_set();
+    discard("Discard changes in private candidate"), discard_changes();
+    update("Update private candidate from running if no conflicts"), cli_update();
+    commit("Commit the changes if no conflicts"), cli_commit();
+
+Scenario using these cli commands to handle a conflict ::
+
+    > set interfaces interface intf_one description "Link to Gothenburg"
+    > compare
+        interface intf_one {
+    -        description "Link to London";
+    +        description "Link to Gothenburg";
+    }
+
+ some other session updates the same interface
+
+    > commit
+    Conflict occured: Cannot change node value, it is already changed: xpath0: /interfaces/interface[name="intf_one"]/description value0: Link to London value1: Link to Gothenburg
+    > discard
+    > update
+    > set interfaces interface intf_one description "Link to Gothenburg"
+    > compare
+        interface intf_one {
+    -        description "Link to Stockholm";
+    +        description "Link to Gothenburg";
+    }
+    > commit
+    > show running
+    ietf-interfaces:interfaces {
+        interface intf_one {
+            description "Link to Gothenburg";
+        }
+    }
+
+
 Module library support
 ======================
 

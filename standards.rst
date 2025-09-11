@@ -163,6 +163,7 @@ Clixon implements private candidate as defined in `NETCONF and RESTCONF Private 
 * Leaf-list conflict resolution fine-grained as opposed to draft
 * Delete candidate on commit (draft is unclear)
 * ``<delete-config>`` is not possible on candidate configuration (draft vs RFC6241)
+* ``<get-data>`` and ``<edit-data>`` is not supported by Clixon (RFC8526)
 
 RESTCONF
 ========
