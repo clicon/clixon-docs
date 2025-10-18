@@ -172,9 +172,12 @@ Private candidate
 -----------------
 Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_.
 
-The feature is enabled by adding ``ietf-netconf-private-candidate:private-candidate`` to the Clixon configuration.
+To enable private candidate the CLICON_XMLDB_PRIVATE_CANDIDATE option must be set to true and the feature  ``ietf-netconf-private-candidate:private-candidate`` must be added to the Clixon configuration.::
 
-When a NETCONF client connects, it must send the following capability: ``urn:ietf:params:netconf:capability:private-candidate:1.0`` otherwise the session will be terminated by Clixon.
+      <CLICON_FEATURE>ietf-netconf-private-candidate:private-candidate</CLICON_FEATURE>
+      <CLICON_XMLDB_PRIVATE_CANDIDATE>true</CLICON_XMLDB_PRIVATE_CANDIDATE>
+
+All NETCONF clients must send the capability: ``urn:ietf:params:netconf:capability:private-candidate:1.0`` when connecting, otherwise the session will be terminated by Clixon.
 
 When a conflict is detected by the ``<update>`` operation or implicitly during commit, the error message contains the type of conflict and the xpath to the object of the first conflict encountered. ::
 
