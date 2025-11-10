@@ -144,8 +144,6 @@ configuration of a device, and can be committed to the running datastore.
 
 Options
 -------
-CLICON_XMLDB_CANDIDATE_INMEM
-   Run candidate datastore in-memory cache only, do not sync to disk. For optimization.
 CLICON_AUTOLOCK
    Get exclusive lock automatically by edit-config and copy-config and released by discard and commit.
 
@@ -170,7 +168,7 @@ Locking is not available in RESTCONF.
 
 Private candidate
 -----------------
-Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_.
+Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-08>`_.
 
 To enable private candidate the CLICON_XMLDB_PRIVATE_CANDIDATE option must be set to true and the feature  ``ietf-netconf-private-candidate:private-candidate`` must be added to the Clixon configuration.::
 

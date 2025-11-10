@@ -156,7 +156,7 @@ Internally in memory, however, `report-all` is used.
 
 Private candidate
 -----------------
-Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-07>`_ with the following restrictions:
+Clixon implements private candidate as defined in `NETCONF and RESTCONF Private Candidate Datastores <https://datatracker.ietf.org/doc/html/draft-ietf-netconf-privcand-08>`_ with the following restrictions:
 
 * ``revert-on-conflict`` is the only resolution mode supported
 * No augments on `compare` operation
@@ -238,6 +238,7 @@ The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 sta
 * local-name
 * name
 * string
+* concat
 * starts-with
 * contains
 * substring-before
@@ -249,6 +250,7 @@ The following XPath functions as defined in Section 2.3 / 4 of the XPath 1.0 sta
 * not
 * true
 * false
+* number
 * text
 * node
 
@@ -256,14 +258,12 @@ The following standard XPath functions are *not* supported:
 
 * ceiling
 * comment
-* concat
 * floor
 * id
 * lang
 * last
 * namespace-uri
 * normalize-space
-* number
 * processing-instructions
 * round
 * sum
