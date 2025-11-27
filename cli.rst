@@ -91,6 +91,7 @@ The `clixon_cli` client has the following command-line options:
   -C <format>     Dump configuration options on stdout after loading. Format is one of xml|json|text|cli|default
   -F <file>       Read commands from file (default stdin)
   -1              Run once, do not enter interactive mode
+  -s              Disable output scrolling
   -a <family>     Internal IPC backend socket family: UNIX|IPv4|IPv6
   -u <path|addr>  Internal IPC socket domain path or IP addr (see -a)
   -d <dir>        Specify cli plugin directory
