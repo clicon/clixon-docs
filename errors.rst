@@ -31,7 +31,7 @@ The following options control the Clixon logging:
    If log destination includes ``file``, this is the log-file.
 
 ``CLICON_LOG_STRING_LIMIT``
-   Length limitation of debug and log strings. Default ``0`` means no limit.
+   Length limitation of all debug and log strings. Default ``0`` means no limit.
 
 Note that the configure options are overriden by the command-line argument ``-l``.
 
@@ -183,6 +183,36 @@ The extended flags can only be used as a command-line option, not in the `CLICON
 
 It is recommended to use the `_APP*` bitmasks since they are reserved
 for application use, but the API can be used to associate a new flag to any bit pattern.
+
+
+Explicit truncation
+-------------------
+`Implicit` truncation of log and debug messages is made with the `CLICON_LOG_STRING_LIMIT` configure option. This applies unconditionally to all logs.
+
+But some debug logs are defined as `explicit` truncation in C-code,
+which includes message, xml, json, and yang debug logs. Those logs can
+be very large and are therefore truncated to a pre-defined value
+(160) unless detailed logs are made.
+
+This pre-defined level can be changed with `clixon_debug_explicit_trunc_set()`.
+
+Example, assume you want to debug NETCONF messages o stderr::
+
+  > clixon_cli -D msg -l e
+
+This limits the NETCONF logs to 160 bytes.
+
+If you want to limit this further (to 80), you can either, make a plugin call (in C):
+
+   clixon_debug_explicit_trunc_set(80);
+
+or you can set an implicit truncation (which applies to all other logs as well)::
+
+    > clixon_cli -D msg -l e -o CLICON_LOG_STRING_LIMIT=80
+
+If you instead want to restore full log length you can use detailed logging::
+
+    > clixon_cli -D msg -D detaul -l e
 
 Debug log target
 ----------------
