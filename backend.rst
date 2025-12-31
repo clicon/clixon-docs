@@ -47,6 +47,7 @@ The backend have the following command-line options:
   -U <user>       Run backend daemon as this user AND drop privileges permanently
   -g <group>      Client membership required to this group (default: clicon)
   -y <file>       Load yang spec file (override yang main module)
+  -A              Do not clear autocli cache on start
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
 Logging and debugging

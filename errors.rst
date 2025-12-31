@@ -39,7 +39,7 @@ C-code
 ------
 In C-code, clixon error and logging is initialized by ``clixon_log_init``::
 
-  clixon_log_init(h, prefix, upto, flags); 
+  clixon_log_init(h, prefix, upto, flags);
 
 where:
 
@@ -91,7 +91,7 @@ They are on the form::
 A third class of CLI errors are similar to the previous class but quits the CLI::
 
   cli> command
-  Nov 15 15:42:56: acl_get_list: 334: Yang error: no ACLs defined  
+  Nov 15 15:42:56: acl_get_list: 334: Yang error: no ACLs defined
   sh#
 
 These errors are typically due to system functions failing in a fatal way.
@@ -100,7 +100,7 @@ Error categories
 ----------------
 An application can specialize error handling for a specific category by using `clixon_err_cat_reg()` and a log callback. Example::
 
-   /* Clixon error category log callback 
+   /* Clixon error category log callback
     * @param[in]    handle  Application-specific handle
     * @param[out]   cb      Read log/error string into this buffer
     */
@@ -163,6 +163,29 @@ The detail area levels are the following:
 
 You can combine flags, so that, for example ``-D 5`` means default + detailed, but no packet debugs.  Similarly, some messages require multiple flags, like XML + DETAIL would be ``-D 20``.
 
+Extending debug flags
+---------------------
+An application plugin can extend the debug flags using the C-API.
+
+For example, to add a new flag `example`, add the following call in `clixon_plugin_init()`::
+
+    if (clixon_debug_key_add("example", CLIXON_DBG_APP2) < 0)
+        goto done;
+
+The "example" flag can now be used using `-D` when starting the CLI or backend::
+
+    clixon_cli -D example
+
+The extended flags can only be used as a command-line option, not in the `CLICON_DEBUG` since it is not defined in YANG.
+
+.. note::
+        Extended debug flags cannot be used in YANG options
+
+It is recommended to use the `_APP*` bitmasks since they are reserved
+for application use, but the API can be used to associate a new flag to any bit pattern.
+
+Debug log target
+----------------
 You can direct the debug logs using the ``-l <option>`` as follows:
 
 - ``s`` : syslog
@@ -189,7 +212,7 @@ For example, using netconf to change debug level in backend::
 
    echo "<rpc username=\"root\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><debug xmlns=\"http://clicon.org/lib\"><level>1</level></debug></rpc>]]>]]>" | clixon_netconf -q0
 
-In this example, netconf is run using EOM encoding and does not require hello:s.   
+In this example, netconf is run using EOM encoding and does not require hello:s.
 
 Using curl to change debug in backend via the restconf daemon::
 
@@ -203,7 +226,7 @@ Enable debugging when configuring (compile-time)::
 
 which includes symbol table info so that you can make breakpoints on functions(output is omitted)::
 
-   > sudo gdb clixon_backend 
+   > sudo gdb clixon_backend
    (gdb) run -FD 1 -l e
    Starting program: /usr/local/sbin/clixon_backend -FD 1 -l e
    (gdb) b main
@@ -217,16 +240,16 @@ Valgrind and callgrind
 ----------------------
 
 Examples of using valgrind for memeory checks::
-  
+
   valgrind --leak-check=full --show-leak-kinds=all clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
 
-Example of using callgrind for profiling::  
+Example of using callgrind for profiling::
 
   LD_BIND_NOW=y valgrind --tool=callgrind clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
   sudo kcachegrind
 
 Or massif for memory usage::
-  
+
   valgrind --tool=massif clixon_netconf -qf /tmp/myconf.xml -y /tmp/my.yang
   massif-visualizer
 
@@ -257,7 +280,7 @@ The errmsg callback has many parameters. Some are not always applicable:
   * format: Format string similar to `printf`
   * ap: Variable argument list assciated with format. Similar to `vprintf`
   * cbmsg: Customized error message as output of the function. If NULL, use regular message.
-   
+
 A simple way to replace all error messages would be::
 
    int
