@@ -353,12 +353,13 @@ Assume the following YANG::
       description "referring node";
       type leafref{
          path "../parameter/name";
+      }
    }
 
 Example clispec::
 
    set leafref <var:int32 expand_dbvar(...) ...;
-   delete leafref <var:int32 expand_dbvar(...), leafref-no-refer> ...;
+   delete leafref <var:int32 expand_dbvar(...)>, leafref-no-refer ...;
 
 Similarly, using tree references::
 
