@@ -285,7 +285,33 @@ Or massif for memory usage::
 
 Customization
 =============
-Errors, logs and debug messages can be customized by plugins via the `ca_errmsg` API.
+Errors, logs and debug messages can be customized by plugins via the `ca_errmsg` API. There is also an error-message extension for leafrefs.
+
+Error message extension
+-----------------------
+
+The ``error-message`` extension to clixon-lib.yang allows for cusomized error messages to types. Only leafref types are supported.
+
+Example, assume the following extended YANG example from RFC 7950::
+
+     import clixon-lib {
+        prefix cl;
+     }
+     ...
+        leaf mgmt-interface {
+           type leafref {
+              path "../interface/name";
+              require-instance true;
+              cl:error-message "The interface is not found";
+           }
+        }
+
+An assignment to "mgmt-interface" of e.g., eth3, which fails validation of the existing interfaces will show the following error message::
+
+  The interface is not found e3
+
+Errmsg API
+----------
 
 Customized errors applies to all clixon applications. For example, logs for the backend and return output in the CLI.
 
