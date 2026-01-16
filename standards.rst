@@ -165,6 +165,7 @@ Clixon implements private candidate as defined in `NETCONF and RESTCONF Private 
 * ``<delete-config>`` is not possible on candidate configuration (draft vs RFC6241)
 * ``<get-data>`` and ``<edit-data>`` is not supported by Clixon (RFC8526)
 * Clixon fulfils RFC6241 regarding confirmed commit, but not draft proposal on immediate revert of unconfirmed configuration if session disconnects.
+
 RESTCONF
 ========
 Clixon supports the two RESTCONF compile-time variants: *FCGI* and *Native*. Both implements `RFC 8040: RESTCONF Protocol <https://www.rfc-editor.org/rfc/rfc8040.txt>`_.
