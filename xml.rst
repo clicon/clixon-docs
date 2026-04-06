@@ -654,8 +654,9 @@ The most basic way to traverse an cxobj tree is to linearly iterate
 over all children from a parent element node.
 ::
 
-   cxobj *x = NULL;
-   while ((x = xml_child_each(xt, x, CX_ELMNT)) != NULL) {
+   cxobj *x;
+   int    ix = 0;
+   while ((x = xml_child_iter(xt, &ix, CX_ELMNT)) != NULL) {
      ...
    }
 

@@ -127,11 +127,17 @@ CLICON_CLI_DIR
 CLICON_CLISPEC_DIR
   Directory containing frontend cligen spec files. Load all `.cli` files in this directory as CLI specification files.
 
-CLICON_CLI_PIPE_DIR
-  Directory where CLI pipe scripts or binaries are searched for in cli callback
-
 CLICON_CLISPEC_FILE
   Specific frontend cligen spec file as alternative or complement to `CLICON_CLISPEC_DIR`. Also available as `-c` in clixon_cli.
+
+CLICON_AUTOCLI_CACHE_DIR
+  Directory containing backend generated cligen spec files from YANG, see also `clispec-cache`
+
+CLICON_NACM_AUTOCLI
+  Enable NACM rules for autocli. If set, the autocli will not expand commands the user does not have read-access to.
+
+CLICON_CLI_PIPE_DIR
+  Directory where CLI pipe scripts or binaries are searched for in cli callback
 
 CLICON_CLI_OUTPUT_FORMAT
   Default CLI output format.
@@ -271,6 +277,477 @@ CLICON_PLUGIN
 
 CLICON_PIPETREE
   Name of a pipe output tree as described in
+
+Autocli
+=======
+The Clixon CLI contains parts that are *generated* from a YANG
+specification. This *autocli* is generated from YANG into CLI specifications,
+parsed and merged into the top-level Clixon CLI.
+
+The autocli is configured using three basic mechanisms:
+
+1. `Config file`_ : Modify behavior of the generated tree
+2. `Tree expansion`_: How the generated cli is merged into the overall CLI
+3. `YANG Extensions`_: Modify CLI behavior via YANG
+
+Each mechanism is described in sub-sections below, but first an overview of autocli usage.
+
+Overview
+--------
+Consider a (simplified) YANG specification, such as::
+
+  module example {
+    container table {
+      list parameter{
+        key name;
+        leaf name{
+          type string;
+        }
+      }
+    }
+  }
+
+An example of a generated syntax is as follows (again simplified)::
+
+   table; {
+      parameter <name:string>;
+   }
+
+The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`` into the Clixon CLI as follows::
+
+  CLICON_PROMPT="%U@%H %W> ";
+  set @datamodel, cli_auto_set();
+  merge @datamodel, cli_auto_merge();
+  delete @datamodel, @add:leafref-no-refer, @add:ac-strict-expand, cli_auto_del();
+  show config, cli_auto_show("datamodel", "candidate", "text", true, false);{
+     @datamodel, cli_show_auto("candidate", "text");
+  }
+
+For example, the `set` part is expanded using the CLIgen tree-operator to something like::
+
+  set table, cli_auto_set(); {
+     parameter <name:string>, cli_auto_set();
+  }
+
+An example run of the above example is as follows::
+
+  > clixon_cli
+  user@host /> set table ?
+    <cr>
+    parameter
+  user@host /> set table parameter 23
+  user@host /> show config
+  table {
+     parameter {
+        name 23;
+     }
+  }
+  user@host />
+
+where the generated autocli extends the Clixon CLI with YANG-derived configuration statements.
+
+Operations
+----------
+The autocli `set/merge/delete` commands are modelled after NETCONF operations as defined in the `NETCONF RFC <https://datatracker.ietf.org/doc/html/rfc6241#section-7.2>`_, with the following (shortened) definition, and mapping to the autocli operations above):
+
+* `merge`: (Autocli `merge`) The configuration data is merged with the configuration in the configuration datastore
+* `replace`: (Autocli `set`) The configuration data replaces any related configuration in the configuration datastore.
+* `create`: The configuration data is added to the configuration if and only if the configuration data does not already exist in the configuration datastore.
+* `delete`: The configuration data is deleted from the configuration if and only if the configuration data currently exists in the configuration datastore.
+* `remove`: (Autocli `delete`) The configuration data is deleted from the configuration if the configuration data currently exists in the configuration datastore.  If the configuration data does not exist, the "remove" operation is silently ignored
+
+In particular, the autocli `set` operation may cause some
+confusion. For terminals, i.e., CLI commands derived from YANG leaf or
+leaf-list, the behavior of "replace/set" and "merge" are
+identical. However for non-terminals (i.e., CLI commands derived from
+YANG container or list) "replace/set" and "merge" differ: "set"
+replaces the existing configuration. "Merge" merges the existing
+configuration.
+
+Example, where x is (derived from) a container and y is (derived from) a leaf::
+
+  set x y 22
+  set x y 24      # Replace y: y changes value to 24
+  set x           # Replace x: y is removed
+  merge x y 26
+  merge x y 28    # Merge y: y changes value to 28
+  merge x         # Merge x: y still has value 28
+
+Therefore, most users may want to use `merge` as default autocli operation, instead of `set`.
+
+.. note::
+        Use autocli `merge` as default operation
+
+Config file
+-----------
+The clixon config file has a ``<autocli>`` sub-clause for global
+autocli configurations.  A typical CLI configuration
+with default autocli settings is as follows::
+
+  <clixon-config xmlns="http://clicon.org/config">
+    <CLICON_CONFIGFILE>/usr/local/etc/clixon/example.xml</CLICON_CONFIGFILE>
+    ...
+    <autocli>
+      <module-default>true</module-default>
+      <list-keyword-default>kw-nokey</list-keyword-default>
+      <treeref-state-default>false</treeref-state-default>
+      <edit-mode-default>list container</edit-mode-default>
+      <completion-default>true</completion-default>
+    </autocli>
+  </clixon-config>
+
+The autocli configuration consists of a set of default *options*, followed by a set of *rules*. For more info see the ``clixon-autocli.yang`` specification.
+
+Options
+^^^^^^^
+The following options set default values to the auto-cli, some of these may be further refined by successive rules.
+
+`module-default`
+   How to generate the autocli from modules:
+
+   - If `true`, all modules with a top-level datanode are generated, ie they get a top-level entry in the ``@basemodel`` tree. You can explicitly disable modules. This is default
+   - If `false`, you need to explicitly enable modules for autocli generation  using `module enable rules`_.
+
+`list-keyword-default`
+   How to generate the autocli from YANG lists.
+   There are several variants defined. To understand the different variants, consider a simple YANG LIST defintion as follows::
+
+      list a {
+         key x;
+	 leaf x;
+	 leaf y;
+      }
+
+   The different variants with the resulting autocli are as follows:
+
+   - `kw-none` : No extra keywords, only variables: ``a <x> <y>``
+   - `kw-nokey` : Keywords on non-key variables: ``a <x> y <y>``. This is default.
+   - `kw-all` : Keywords on all variables: ``a x <x> y <y>``
+
+`treeref-state-default`
+   If generate autocli from YANG *state* data. The motivation for this option is that many specs have very large state parts. In particular, some openconfig YANG specifications have  ca 10 times larger state than config parts.
+
+   - If `true`, generate CLI from YANG state/non-config statements, not only from config data.
+   - If `false` do not generate autocli commands from YANG state data. This is default.
+
+`edit-mode-default`
+   Open automatic edit-modes for some YANG keywords and do not allow others.
+   A CLI edit mode opens a carriage-return option and changes the context to be
+   in that local context.
+   For example::
+
+      user@host> interfaces interface e0<cr>
+      eth0>
+
+   Default is to generate edit-modes for all YANG containers and lists. For more info see `edit modes`_
+
+`completion-default`
+   Generate code for CLI completion of existing db symbols.
+   That is, check existing configure database for completion options.
+   This is normally always enabled.
+
+`grouping-treeref`
+   Controls the behaviour when generating CLISPEC of YANG `uses` statements into the
+   corresponding `grouping` definition. If `true`, use indirect tree reference ``@treeref``
+   to reference the grouping definition. This may reduces memory footprint of the CLI.
+
+`clispec-cache`
+   Autocli cache mode for saving generated autocli clispecs between runs.
+   Either `disabled` or `read`.
+   Set to `read` to activate the cache, if so, the `CLICON_AUTOCLI_CACHE_DIR` must also be set in the backend.
+
+Rules
+^^^^^
+To complement options, a set of rules to further define the autocli can be defined.
+Common rule fields are:
+
+`name`
+   Arbitrary name assigned for the rule, must be unique.
+
+`operation`
+   Rule operation, There are currently two operations defined: `module enable` and command `compress`.
+
+`module-name`
+   Name of the module associated with this rule.
+   Wildchars '*' and '?' can be used (glob pattern).
+   Revision and yang suffix are omitted.
+   Example: ``openconfig-*``
+
+Module enable rules
+^^^^^^^^^^^^^^^^^^^
+Module enable rules are used in combination with
+``module-default=false`` to enable CLI generation for a limited set of
+YANG modules.
+
+For example, assume you want to enable modules `example1`, `example2` and no others::
+
+   <autocli>
+      <module-default>false</module-default>
+      <rule>
+         <name>include example</name>
+         <operation>enable</operation>
+         <module-name>example*</module-name>
+     </rule>
+   </autocli>
+
+If the option ``module-default`` is ``true``, module enable rules have no effect since all modules are already enabled.
+
+You can also disable all modules by default, and enable them individually, like the following example shows::
+
+   <autocli>
+      <module-default>true</module-default>
+      <rule>
+         <name>exclude example 2</name>
+         <operation>disable</operation>
+         <module-name>example2</module-name>
+     </rule>
+   </autocli>
+
+Likewise, ``disable`` rules have no effect if ``module-default`` is ``false``.
+
+Compress rules
+^^^^^^^^^^^^^^
+Compress rules are used to skip CLI commands, making the complete command name shorter.
+
+For example, assume YANG definition::
+
+   container interfaces {
+      list interface {
+         ...
+      }
+   }
+
+Instead of typing ``interfaces interface e0`` you would want to type only ``interface e0``.
+The following rule matches all YANG containers with lists as its only child, and removes the keyword ``interfaces``::
+
+   <rule>
+      <name>compress</name>
+      <operation>compress</operation>
+      <yang-keyword>container</yang-keyword>
+      <yang-keyword-child>list</yang-keyword-child>
+   </rule>
+
+Note that this matches the openconfig compress rule: `The surrounding 'container' entities are removed from 'list' nodes <https://github.com/openconfig/ygot/blob/master/docs/design.md#openconfig-path-compression>`_
+
+A second openconfig compress rule is `The 'config' and 'state' containers are "compressed" out of the schema. <https://github.com/openconfig/ygot/blob/master/docs/design.md#openconfig-path-compression>`_ as examplified here (for 'config' only)::
+
+   <rule>
+      <name>openconfig compress</name>
+      <operation>compress</operation>
+      <yang-keyword>container</yang-keyword>
+      <schema-nodeid>config</schema-nodeid>
+      <module-name>openconfig*</module-name>
+   </rule>
+
+Specific fields for compress are:
+
+`yang-keyword`
+   If present identifes a YANG keyword which the rule applies to.
+   Example: ``container``
+
+`schema-nodeid`
+   A single <id> identifying a YANG schema-node identifier as defined in RFC 7950 Sec 6.5.
+   Example: ``config``
+
+`yang-keyword-child`
+   The YANG statement has a single child, and the yang type of the child is the value of this option.
+   Example: : ``container``
+
+`extension`
+   The extension is set either in the node itself, or in the module the node belongs to.
+   Extension prefix must be set.
+   Example: ``oc-ext:openconfig-version``
+
+Tree expansion
+--------------
+In the example above, the tree-reference ``@datamodel`` is used to
+merge the YANG-generated cli-spec into the overall cli-spec. There are
+several variants of how the generated tree is expanded with slight differences in which
+symbols are shown, how completion works, etc.
+
+They are all derivates of the basic ``@basemodel`` tree.  The following tree variants are
+defined:
+
+* ``@basemodel`` - The most basic tree including everything
+* ``@datamodel`` - The most common tree for configuration with state
+* ``@datamodelshow`` - A tree made for showing configuration syntax
+* ``@datamodelmode`` - A tree for editing modes
+* ``@datamodelstate`` - A tree for showing state as well as configuration
+
+Note to use ``@datamodelstate`` config option ``treeref-state-default`` must be set.
+
+YANG Extensions
+---------------
+A third method to define the autocli is using :ref:`YANG extensions<clixon_yang>`, where a YANG specification is annotated with extension.
+
+Clixon provides a dedicated YANG extension for the autocli for this purpose: ``clixon-lib:autocli``.
+
+The following example shows the main example usage of the "hide" extension of the "hidden" leaf::
+
+   import clixon-autocli{
+      prefix autocli;
+   }
+   container table{
+      list parameter{
+         ...
+         leaf hidden{
+            type string;
+            autocli:hide;
+         }
+      }
+   }
+
+The CLI ``hidden`` command is not shown but the command still exists::
+
+  cli /> set table parameter a ?
+  value
+  <cr>
+  cli /> set table parameter a hidden 99
+  cli /> show configuration
+  table {
+    parameter {
+        name a;
+        hidden 99;
+    }
+  }
+
+The following autocli extensions are defined:
+
+``hide``
+   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node.
+``hide-show``
+   Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
+``skip``
+   Skip the command altogether.
+``strict-expand``
+   Only show exactly the expanded options of a variable. It should not be possible to add a *new* value that is not in the expanded list. See also ``ac-strict-expand`` in Section `Autocli tree labels`_.
+``alias``
+   Replace the command with another value, only implemented for YANG leaves.
+
+Edit modes
+----------
+The autocli supports *automatic edit modes* where by entering a ``<cr>``, you enter an edit mode. An edit mode is created for every YANG container or list.
+
+For example, the example YANG previously given and the following cli-spec::
+
+   edit @datamodelmode, cli_auto_edit("basemodel");
+   up, cli_auto_up("basemodel");
+   top, cli_auto_top("basemodel");
+   set @datamodel, cli_auto_set();
+
+Then an example session for illustration is as follows, where first a small config is created, then a list instance mode is entered(``parameter a``), a value changed, and a container mode (``table``)::
+
+  user@host /> set table parameter a value 42
+  user@host /> set table parameter b value 77
+  user@host /> edit table parameter a
+  user@host parameter=a/>
+  user@host parameter=a/> show configuration
+    name a;
+    value 42;
+  user@host parameter=a/> set value 99
+  user@host parameter=a/> up
+  user@host table> show configuration
+  parameter {
+      name a;
+      value 99;
+  }
+  parameter {
+      name b;
+      value 77;
+  }
+  user@host table> top
+  user@host />
+
+NACM for autocli
+----------------
+When NACM is enabled, the autocli can be configured to hide CLI commands that
+the current user does not have read access to.  This is controlled by the
+``CLICON_NACM_AUTOCLI`` option and requires ``clispec-cache=read`` autocli
+mode (see `Config file`_).
+
+For a general introduction to NACM, see the :ref:`NACM <clixon_netconf>`
+documentation.
+
+Overview
+^^^^^^^^
+When ``CLICON_NACM_AUTOCLI`` is ``true``, the CLI fetches the NACM rules for
+the current user from the backend at startup.  During tab-completion and
+``?``-expansion, any YANG data node whose schema path is covered by a NACM
+``deny`` rule (or is not covered by a ``permit`` rule when ``read-default`` is
+``deny``) is silently hidden from the completion list.
+
+Two NACM ``read-default`` policies are supported:
+
+``permit`` (default)
+  All nodes are visible unless an explicit ``deny`` rule matches.  Only the
+  denied nodes are hidden.
+
+``deny``
+  All nodes are hidden unless an explicit ``permit`` rule matches.  Ancestors
+  of permitted nodes are shown so the user can navigate down to them; descendants
+  of permitted nodes are also shown.
+
+.. note::
+
+   NACM autocli filtering is a *cosmetic* aid: the backend still enforces
+   full NACM access control on every datastore operation.  A user who crafts
+   a command bypassing the autocli will still be denied by the backend.
+
+Configuration
+^^^^^^^^^^^^^
+Enable NACM autocli by adding the following to the Clixon config file::
+
+  <CLICON_NACM_AUTOCLI>true</CLICON_NACM_AUTOCLI>
+
+The autocli cache must be set to ``read`` mode (the CLI fetches clispecs from
+the backend, which allows per-user NACM filtering)::
+
+  <autocli>
+    ...
+    <clispec-cache>read</clispec-cache>
+  </autocli>
+
+Disable NACM autocli filtering on a per-invocation basis with the ``-o``
+command-line option::
+
+  clixon_cli -o CLICON_NACM_AUTOCLI=false
+
+Example
+^^^^^^^
+Consider a YANG model with top-level containers ``public`` and ``secret``, and
+the following NACM configuration that permits all reads but explicitly denies
+``/secret`` for the ``limited`` group::
+
+  <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
+    <enable-nacm>true</enable-nacm>
+    <read-default>permit</read-default>
+    <rule-list>
+      <name>limited-acl</name>
+      <group>limited</group>
+      <rule>
+        <name>deny-secret</name>
+        <module-name>*</module-name>
+        <path xmlns:ex="urn:example">/ex:secret</path>
+        <access-operations>read</access-operations>
+        <action>deny</action>
+      </rule>
+    </rule-list>
+  </nacm>
+
+A user in the ``limited`` group sees only ``public`` at tab-completion::
+
+  limited@host /> set ?
+    public    Public configuration
+
+An admin user sees both::
+
+  admin@host /> set ?
+    public    Public configuration
+    secret    Secret configuration
+
+The same filtering applies in edit mode.  If the user navigates into a
+container and then types ``set ?``, only the sub-nodes that are permitted by
+NACM are shown.
 
 CLI callbacks
 =============
@@ -492,7 +969,6 @@ Before starting the program in the child process, environment variables are set 
 The function checks the parameters passed to it. Situations where at least one function argument is absent
 or when two arguments are present both in the function and in the cvv vector are considered invalid.
 
-
 ``run_program_python3_source_arg_vector_err`` will fail because you can either enter interactively or write in a call::
 
     roma@f-15 /> run_program_python3_source_arg_vector_err /tmp/test.py
@@ -705,390 +1181,6 @@ The alias API is limited and an application developer may need to modify or exte
 1. Saving aliases persistently, eg an src file.
 2. Adding help-texts
 3. Mode/tree support
-
-Autocli
-=======
-The Clixon CLI contains parts that are *generated* from a YANG
-specification. This *autocli* is generated from YANG into CLI specifications,
-parsed and merged into the top-level Clixon CLI.
-
-The autocli is configured using three basic mechanisms:
-
-1. `Config file`_ : Modify behavior of the generated tree
-2. `Tree expansion`_: How the generated cli is merged into the overall CLI
-3. `YANG Extensions`_: Modify CLI behavior via YANG
-
-Each mechanism is described in sub-sections below, but first an overview of autocli usage.
-
-Overview
---------
-Consider a (simplified) YANG specification, such as::
-
-  module example {
-    container table {
-      list parameter{
-        key name;
-        leaf name{
-          type string;
-        }
-      }
-    }
-  }
-
-An example of a generated syntax is as follows (again simplified)::
-
-   table; {
-      parameter <name:string>;
-   }
-
-The auto-cli syntax is loaded using a `sub-tree operator`_ such as ``@datamodel`` into the Clixon CLI as follows::
-
-  CLICON_PROMPT="%U@%H %W> ";
-  set @datamodel, cli_auto_set();
-  merge @datamodel, cli_auto_merge();
-  delete @datamodel, @add:leafref-no-refer, @add:ac-strict-expand, cli_auto_del();
-  show config, cli_auto_show("datamodel", "candidate", "text", true, false);{
-     @datamodel, cli_show_auto("candidate", "text");
-  }
-
-For example, the `set` part is expanded using the CLIgen tree-operator to something like::
-
-  set table, cli_auto_set(); {
-     parameter <name:string>, cli_auto_set();
-  }
-
-An example run of the above example is as follows::
-
-  > clixon_cli
-  user@host /> set table ?
-    <cr>
-    parameter
-  user@host /> set table parameter 23
-  user@host /> show config
-  table {
-     parameter {
-        name 23;
-     }
-  }
-  user@host />
-
-where the generated autocli extends the Clixon CLI with YANG-derived configuration statements.
-
-NETCONF operations
-------------------
-The autocli `set/merge/delete` commands are modelled after NETCONF operations as defined in the `NETCONF RFC <https://datatracker.ietf.org/doc/html/rfc6241#section-7.2>`_, with the following (shortened) definition, and mapping to the autocli operations above):
-
-* `merge`: (Autocli `merge`) The configuration data is merged with the configuration in the configuration datastore
-* `replace`: (Autocli `set`) The configuration data replaces any related configuration in the configuration datastore.
-* `create`: The configuration data is added to the configuration if and only if the configuration data does not already exist in the configuration datastore.
-* `delete`: The configuration data is deleted from the configuration if and only if the configuration data currently exists in the configuration datastore.
-* `remove`: (Autocli `delete`) The configuration data is deleted from the configuration if the configuration data currently exists in the configuration datastore.  If the configuration data does not exist, the "remove" operation is silently ignored
-
-In particular, the autocli `set` operation may cause some
-confusion. For terminals, i.e., CLI commands derived from YANG leaf or
-leaf-list, the behavior of "replace/set" and "merge" are
-identical. However for non-terminals (i.e., CLI commands derived from
-YANG container or list) "replace/set" and "merge" differ: "set"
-replaces the existing configuration. "Merge" merges the existing
-configuration.
-
-Example, where x is (derived from) a container and y is (derived from) a leaf::
-
-  set x y 22
-  set x y 24      # Replace y: y changes value to 24
-  set x           # Replace x: y is removed
-  merge x y 26
-  merge x y 28    # Merge y: y changes value to 28
-  merge x         # Merge x: y still has value 28
-
-Therefore, most users may want to use `merge` as default autocli operation, instead of `set`.
-
-.. note::
-        Use autocli `merge` as default operation
-
-Config file
------------
-The clixon config file has a ``<autocli>`` sub-clause for global
-autocli configurations.  A typical CLI configuration
-with default autocli settings is as follows::
-
-  <clixon-config xmlns="http://clicon.org/config">
-    <CLICON_CONFIGFILE>/usr/local/etc/clixon/example.xml</CLICON_CONFIGFILE>
-    ...
-    <autocli>
-      <module-default>true</module-default>
-      <list-keyword-default>kw-nokey</list-keyword-default>
-      <treeref-state-default>false</treeref-state-default>
-      <edit-mode-default>list container</edit-mode-default>
-      <completion-default>true</completion-default>
-    </autocli>
-  </clixon-config>
-
-The autocli configuration consists of a set of default *options*, followed by a set of *rules*. For more info see the ``clixon-autocli.yang`` specification.
-
-Options
-^^^^^^^
-The following options set default values to the auto-cli, some of these may be further refined by successive rules.
-
-`module-default`
-   How to generate the autocli from modules:
-
-   - If `true`, all modules with a top-level datanode are generated, ie they get a top-level entry in the ``@basemodel`` tree. You can explicitly disable modules. This is default
-   - If `false`, you need to explicitly enable modules for autocli generation  using `module enable rules`_.
-
-`list-keyword-default`
-   How to generate the autocli from YANG lists.
-   There are several variants defined. To understand the different variants, consider a simple YANG LIST defintion as follows::
-
-      list a {
-         key x;
-	 leaf x;
-	 leaf y;
-      }
-
-   The different variants with the resulting autocli are as follows:
-
-   - `kw-none` : No extra keywords, only variables: ``a <x> <y>``
-   - `kw-nokey` : Keywords on non-key variables: ``a <x> y <y>``. This is default.
-   - `kw-all` : Keywords on all variables: ``a x <x> y <y>``
-
-`treeref-state-default`
-   If generate autocli from YANG *state* data. The motivation for this option is that many specs have very large state parts. In particular, some openconfig YANG specifications have  ca 10 times larger state than config parts.
-
-   - If `true`, generate CLI from YANG state/non-config statements, not only from config data.
-   - If `false` do not generate autocli commands from YANG state data. This is default.
-
-`edit-mode-default`
-   Open automatic edit-modes for some YANG keywords and do not allow others.
-   A CLI edit mode opens a carriage-return option and changes the context to be
-   in that local context.
-   For example::
-
-      user@host> interfaces interface e0<cr>
-      eth0>
-
-   Default is to generate edit-modes for all YANG containers and lists. For more info see `edit modes`_
-
-`completion-default`
-   Generate code for CLI completion of existing db symbols.
-   That is, check existing configure database for completion options.
-   This is normally always enabled.
-
-`grouping-treeref`
-   Controls the behaviour when generating CLISPEC of YANG `uses` statements into the
-   corresponding `grouping` definition. If `true`, use indirect tree reference ``@treeref``
-   to reference the grouping definition. This may reduces memory footprint of the CLI.
-
-`clispec-cache`
-   Autocli cache mode for saving generated autocli clispecs between runs.
-   Set to `readwrite` to get a dynamic cache behavior.
-
-`clispec-cache-dir`
-   Directory for generated clispecs. Directory is created if it does not exist.
-   The cli client must have read/write access to this directory.
-   The directory is expanded, ie can be relative and include tilde.
-
-Rules
-^^^^^
-To complement options, a set of rules to further define the autocli can be defined.
-Common rule fields are:
-
-`name`
-   Arbitrary name assigned for the rule, must be unique.
-
-`operation`
-   Rule operation, There are currently two operations defined: `module enable` and command `compress`.
-
-`module-name`
-   Name of the module associated with this rule.
-   Wildchars '*' and '?' can be used (glob pattern).
-   Revision and yang suffix are omitted.
-   Example: ``openconfig-*``
-
-Module enable rules
-^^^^^^^^^^^^^^^^^^^
-Module enable rules are used in combination with
-``module-default=false`` to enable CLI generation for a limited set of
-YANG modules.
-
-For example, assume you want to enable modules `example1`, `example2` and no others::
-
-   <autocli>
-      <module-default>false</module-default>
-      <rule>
-         <name>include example</name>
-         <operation>enable</operation>
-         <module-name>example*</module-name>
-     </rule>
-   </autocli>
-
-If the option ``module-default`` is ``true``, module enable rules have no effect since all modules are already enabled.
-
-You can also disable all modules by default, and enable them individually, like the following example shows::
-
-   <autocli>
-      <module-default>true</module-default>
-      <rule>
-         <name>exclude example 2</name>
-         <operation>disable</operation>
-         <module-name>example2</module-name>
-     </rule>
-   </autocli>
-
-Likewise, ``disable`` rules have no effect if ``module-default`` is ``false``.
-
-Compress rules
-^^^^^^^^^^^^^^
-Compress rules are used to skip CLI commands, making the complete command name shorter.
-
-For example, assume YANG definition::
-
-   container interfaces {
-      list interface {
-         ...
-      }
-   }
-
-Instead of typing ``interfaces interface e0`` you would want to type only ``interface e0``.
-The following rule matches all YANG containers with lists as its only child, and removes the keyword ``interfaces``::
-
-   <rule>
-      <name>compress</name>
-      <operation>compress</operation>
-      <yang-keyword>container</yang-keyword>
-      <yang-keyword-child>list</yang-keyword-child>
-   </rule>
-
-Note that this matches the openconfig compress rule: `The surrounding 'container' entities are removed from 'list' nodes <https://github.com/openconfig/ygot/blob/master/docs/design.md#openconfig-path-compression>`_
-
-A second openconfig compress rule is `The 'config' and 'state' containers are "compressed" out of the schema. <https://github.com/openconfig/ygot/blob/master/docs/design.md#openconfig-path-compression>`_ as examplified here (for 'config' only)::
-
-   <rule>
-      <name>openconfig compress</name>
-      <operation>compress</operation>
-      <yang-keyword>container</yang-keyword>
-      <schema-nodeid>config</schema-nodeid>
-      <module-name>openconfig*</module-name>
-   </rule>
-
-Specific fields for compress are:
-
-`yang-keyword`
-   If present identifes a YANG keyword which the rule applies to.
-   Example: ``container``
-
-`schema-nodeid`
-   A single <id> identifying a YANG schema-node identifier as defined in RFC 7950 Sec 6.5.
-   Example: ``config``
-
-`yang-keyword-child`
-   The YANG statement has a single child, and the yang type of the child is the value of this option.
-   Example: : ``container``
-
-`extension`
-   The extension is set either in the node itself, or in the module the node belongs to.
-   Extension prefix must be set.
-   Example: ``oc-ext:openconfig-version``
-
-Tree expansion
---------------
-In the example above, the tree-reference ``@datamodel`` is used to
-merge the YANG-generated cli-spec into the overall cli-spec. There are
-several variants of how the generated tree is expanded with slight differences in which
-symbols are shown, how completion works, etc.
-
-They are all derivates of the basic ``@basemodel`` tree.  The following tree variants are
-defined:
-
-* ``@basemodel`` - The most basic tree including everything
-* ``@datamodel`` - The most common tree for configuration with state
-* ``@datamodelshow`` - A tree made for showing configuration syntax
-* ``@datamodelmode`` - A tree for editing modes
-* ``@datamodelstate`` - A tree for showing state as well as configuration
-
-Note to use ``@datamodelstate`` config option ``treeref-state-default`` must be set.
-
-YANG Extensions
----------------
-A third method to define the autocli is using :ref:`YANG extensions<clixon_yang>`, where a YANG specification is annotated with extension.
-
-Clixon provides a dedicated YANG extension for the autocli for this purpose: ``clixon-lib:autocli``.
-
-The following example shows the main example usage of the "hide" extension of the "hidden" leaf::
-
-   import clixon-autocli{
-      prefix autocli;
-   }
-   container table{
-      list parameter{
-         ...
-         leaf hidden{
-            type string;
-            autocli:hide;
-         }
-      }
-   }
-
-The CLI ``hidden`` command is not shown but the command still exists::
-
-  cli /> set table parameter a ?
-  value
-  <cr>
-  cli /> set table parameter a hidden 99
-  cli /> show configuration
-  table {
-    parameter {
-        name a;
-        hidden 99;
-    }
-  }
-
-The following autocli extensions are defined:
-
-``hide``
-   Do not show the command in eg auto-completion. This was primarily intended for operational commands such as ``start shell`` but is this context used for hiding commands generated from the associated YANG node.
-``hide-show``
-   Do not show the config in show configuration commands. However, retreiving a config via NETCONF or examining the datastore directly shows the hidden configure commands.
-``skip``
-   Skip the command altogether.
-``strict-expand``
-   Only show exactly the expanded options of a variable. It should not be possible to add a *new* value that is not in the expanded list. See also ``ac-strict-expand`` in Section `Autocli tree labels`_.
-``alias``
-   Replace the command with another value, only implemented for YANG leaves.
-
-Edit modes
-----------
-The autocli supports *automatic edit modes* where by entering a ``<cr>``, you enter an edit mode. An edit mode is created for every YANG container or list.
-
-For example, the example YANG previously given and the following cli-spec::
-
-   edit @datamodelmode, cli_auto_edit("basemodel");
-   up, cli_auto_up("basemodel");
-   top, cli_auto_top("basemodel");
-   set @datamodel, cli_auto_set();
-
-Then an example session for illustration is as follows, where first a small config is created, then a list instance mode is entered(``parameter a``), a value changed, and a container mode (``table``)::
-
-  user@host /> set table parameter a value 42
-  user@host /> set table parameter b value 77
-  user@host /> edit table parameter a
-  user@host parameter=a/>
-  user@host parameter=a/> show configuration
-    name a;
-    value 42;
-  user@host parameter=a/> set value 99
-  user@host parameter=a/> up
-  user@host table> show configuration
-  parameter {
-      name a;
-      value 99;
-  }
-  parameter {
-      name b;
-      value 77;
-  }
-  user@host table> top
-  user@host />
 
 Advanced
 ========

@@ -110,6 +110,8 @@ Access notification authorization (Sec 3.4.6) is NOT implemented.
 
 Data-node paths, eg ``<rule>...<path>ex:table/ex:parameter</path></rule>`` instance-identifiers are restricted to canonical namespace identifiers for both XML and JSON encoding. That is, if a symbol (such as ``table`` above) is a symbol in a module with prefix ``ex``, another prefix cannot be used, even though defined with a ``xmlns`` rule.
 
+The `enable-external-groups` switch is not implemented.
+
 Config options
 --------------
 The following configuration options are related to NACM:

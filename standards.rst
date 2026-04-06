@@ -28,7 +28,6 @@ Not implemented:
 * instance-identifier type (9.13)
 * status (7.21.2)
 * YIN (13)
-* Default values on leaf-lists (7.7.2)
 * error-message is not implemented as sub-statement of "range", "length" and "pattern"
 * quoted string concatenation using + for other than the "string" non.-terminal (eg identifer-args)
 
@@ -174,13 +173,13 @@ The following features of RFC8040 are supported:
 
 * OPTIONS, HEAD, GET, POST, PUT, DELETE, PATCH
 * Stream notifications (Sec 6)
-* Query parameters: `insert`, `point`, `content`, `depth`, `start-time`, `stop-time` and `with-defaults`.
+* Query parameters: `insert`, `point`, `content`, `depth`, `start-time`, `stop-time`, `with-defaults` and `fields` (root only)
 * Monitoring (Sec 9)
 
 The following features are *not* implemented:
 
 * ETag/Last-Modified
-* Query parameters: `fields` and `filter`
+* Query parameters: `filter`
 
 RESTCONF event notification as described in RFC7950 section 6 is supported as follows:
 
