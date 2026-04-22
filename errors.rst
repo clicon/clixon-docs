@@ -47,7 +47,6 @@ where:
 * `upto`: log priority as defined by syslog(3), eg: LOG_DEBUG, LOG_INFO,..
 * `flags`: a bitmask of where logs appear, values are: ``CLIXON_LOG_STDERR``, ``_STDOUT``, ``_SYSLOG``, ``_FILE``.
 
-
 Error call
 ----------
 An error is typically called by ``clixon_err()`` and a return value of ``-1`` as follows::
@@ -150,6 +149,7 @@ The subject-area levels are the following:
 - ``rpc``       RPC handling
 - ``stream``    Notification streams
 - ``parse``     XML, YANG, XPath, etc parsing
+- ``validate``  Validate config wrt YANG
 - ``app``       Application-specific handling, ie any application using clixon can use this
 - ``app2``      Application-specific 2
 - ``app3``      Application-specific 3

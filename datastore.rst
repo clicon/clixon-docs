@@ -134,8 +134,72 @@ Caching
 Clixon stores datastore content in an in-memory write-through cache
 managed by the Clixon backend.
 As soon as data is modified in-mem, a write is made to file.
-Reads from file is made only on startup, or more precisley, if the cache is empty.
+Reads from file is made only on startup, or more precisely, if the cache is empty.
 Modifications by an external part of the file is only read by the backend on startup.
+
+Per-datastore cache policy
+--------------------------
+
+The default write-through behaviour (keep data both in memory and on
+disk) is appropriate for most datastores.  However, different
+datastores have different persistence requirements:
+
+* ``running`` — must survive a backend restart; keep both in memory and on file.
+* ``candidate`` — a temporary working copy; in-memory only is safe and avoids unnecessary disk I/O.
+* ``startup`` — read at boot and written when committed; file-only avoids holding a duplicate copy in RAM.
+
+The ``CLICON_XMLDB_CACHE_STATUS`` configuration option is a list that
+lets you override the default policy per datastore.
+
+Cache modes
+^^^^^^^^^^^
+
+Three cache modes are available:
+
+``file-inmem`` *(default)*
+   Write-through cache.  Data is kept in memory and written to disk on
+   every modification.  Reads come from memory after the initial load
+   from file at startup.  This is the default for all datastores unless
+   overridden.
+
+``inmem``
+   In-memory only.  Data is never written to disk.  The datastore is
+   volatile and its contents are lost when the backend exits.  Useful
+   for the candidate datastore when persistence is not required, or for
+   any ephemeral datastore.
+
+``file``
+   File only (no persistent in-memory cache).  The datastore file is
+   read on every access and the in-memory copy is discarded after each
+   read.  This is appropriate for the startup datastore where the file
+   is accessed infrequently and memory savings matter.
+
+Configuration
+^^^^^^^^^^^^^
+
+``CLICON_XMLDB_CACHE_STATUS`` is a list keyed on the datastore name.
+Each entry has a ``name`` (e.g. ``candidate``, ``running``, ``startup``)
+and a ``status`` value (``file-inmem``, ``inmem``, or ``file``).
+
+A typical configuration that makes the candidate datastore volatile
+and keeps the startup datastore file-only::
+
+  <CLICON_XMLDB_CACHE_STATUS>
+    <name>candidate</name>
+    <status>inmem</status>
+  </CLICON_XMLDB_CACHE_STATUS>
+  <CLICON_XMLDB_CACHE_STATUS>
+    <name>startup</name>
+    <status>file</status>
+  </CLICON_XMLDB_CACHE_STATUS>
+
+Datastores not listed use the default ``file-inmem`` policy.
+
+.. note::
+
+   An ``inmem`` candidate is lost when the backend restarts.  After restart
+   the candidate is re-initialised from the running datastore, which is
+   normal NETCONF behaviour.
 
 Candidate
 =========
@@ -452,13 +516,3 @@ Note that the contructed XML must be a valid with respect to YANG from the top-l
    static clixon_plugin_api api = {
       ...
       .ca_system_only=main_system_only_callback,
-
-C API
-=====
-Some C functions to modify the datastore are:
-
-* `xmldb_put` for modifying data
-* `xmldb_get0` for a copy of the cache
-* `xmldb_cache_get` for a copy of the cache
-* `xmldb_copy` for copying datastores: both file and cache are copied
-* `xmldb_volatile_set` to disable cache write-through temporarily

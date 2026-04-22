@@ -26,10 +26,10 @@ mechanism.
    netconf
    restconf
    snmp
+   grpc-gnmi
    yang
    events
    usecases
-   client
    xml
    path
    pagination

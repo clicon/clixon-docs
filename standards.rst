@@ -291,3 +291,27 @@ Clixon implements JSON according to:
 - `ECMA JSON Data Interchange Syntax <http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf>`_
 - `RFC 7951 JSON Encoding of Data Modeled with YANG <https://www.rfc-editor.org/rfc/rfc7951.txt>`_.
 - `RFC 8259 The JavaScript Object Notation (JSON) Data Interchange Format <https://www.rfc-editor.org/rfc/rfc8259.txt>`_
+
+
+gRPC/gNMI
+=========
+Clixon introduces a first preliminary gRPC/gNMI interface in version 7.8 according to: `<https://openconfig.net/docs/gnmi/gnmi-specification>`_.
+
+Features include:
+
+- nghttp2 server, gRPC framing, trailers
+- Capabilities, returns loaded YANG modules + encodings (JSON_IETF, JSON, ASCII)
+- Get(XPath handling, namespace handling),
+- Set(update/replace/delete)
+- Subscribe RPC (ONCE)
+- Module qualified names, unqualified node fallback
+- Bool, double, ascii typed values
+
+Limitations include:
+
+- TLS (high prio)
+- NACM (depends on TLS)
+- Set leaf-list Set
+- Subscribe RPC (STREAM/POLL)
+- Notifications
+- Mount-point support
