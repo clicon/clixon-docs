@@ -12,7 +12,7 @@ via a standalone daemon ``clixon_grpc``. gNMI is a gRPC-based protocol for retri
 modifying device configuration and operational state using YANG-defined data models.
 
 .. note::
-   Preliminary gRPC/gNMI support is introduced in Clixon version 7.8
+   Prototype gRPC/gNMI support is introduced in Clixon version 7.8
 
 Architecture
 ============

@@ -819,8 +819,64 @@ Example, assume there are two table parameters in the candidate datastore::
 
 Expanding leafrefs
 ^^^^^^^^^^^^^^^^^^
-Expansion of leafrefs is by default the referred node, but can be changed by the the `leafref-no-refer` label.
-When adding a new node, expansion follow the reference to the referred nodes while deleting a node expands on the existing, non-referred nodes.
+When completing a leafref variable, the CLI can either expand using the *referred* node (the
+leafref target path), or expand using the *existing* values in the datastore (the node itself).
+
+The behavior depends on how ``expand_dbvar()`` is used:
+
+**Autocli-generated clispec** (``@datamodel`` / ``@tree``):
+  The autocli generator automatically adds a ``leafref-refer`` label to variables whose YANG
+  type is ``leafref`` or ``union`` (possibly containing leafrefs).  This causes
+  ``expand_dbvar()`` to follow the leafref and offer values from the referred node.
+
+  To suppress this and expand from the existing values instead, add the ``leafref-no-refer``
+  label, typically via ``@add:leafref-no-refer``::
+
+    set @tree, cli_add();
+    delete @tree, @add:leafref-no-refer, cli_delete();
+
+  This results in the following behavior for adding and removing leafrefs, respectively:
+
+  - ``set``: expands to values in the referred node (e.g. ``parameter/name``)
+  - ``delete``: expands to the existing values in the datastore (what is actually stored)
+
+**Manually crafted clispec**:
+  ``expand_dbvar()`` defaults to **not** following leafrefs (``leafref-refer=false``).
+  This is correct for most manual CLI commands that want to expand from existing datastore
+  values, not from a leafref target.
+
+  To opt into leafref following in a manual clispec, add the ``leafref-refer`` label
+  explicitly::
+
+    set leafref <var:string leafref-refer expand_dbvar("candidate", "/ex:list/leafref")>;
+    delete leafref <var:string expand_dbvar("candidate", "/ex:list/leafref")>;
+
+In summary:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 20 30
+
+   * - Scenario
+     - ``leafref-refer``
+     - ``leafref-no-refer``
+     - Result
+   * - Autocli, leafref/union type
+     - set by generator
+     - absent
+     - follows leafref ✓
+   * - Autocli + ``@add:leafref-no-refer``
+     - set by generator
+     - set by @add
+     - uses existing values ✓
+   * - Manual clispec (default)
+     - absent
+     - absent
+     - uses existing values ✓
+   * - Manual clispec + ``leafref-refer``
+     - set explicitly
+     - absent
+     - follows leafref ✓
 
 Assume the following YANG::
 
@@ -838,12 +894,7 @@ Assume the following YANG::
       }
    }
 
-Example clispec::
-
-   set leafref <var:int32 expand_dbvar(...) ...;
-   delete leafref <var:int32 expand_dbvar(...)>, leafref-no-refer ...;
-
-Similarly, using tree references::
+Example using autocli tree references::
 
   set @tree, cli_add();
   delete @tree, @add:leafref-no-refer, cli_delete();
@@ -862,7 +913,9 @@ This results in the following behavior for adding and removing leafrefs, respect
        c
   cli>
 
-In other words, when adding new nodes, the CLI expands to referred, original values ("a" and "b"), but when deleting nodes, the actual values, non-referred ("a" and "c") are offered as potential choices.
+In other words, when adding new nodes, the CLI expands to referred, original values ("a" and
+"b"), but when deleting nodes, the actual values, non-referred ("a" and "c") are offered as
+potential choices.
 
 Show commands
 =============
