@@ -108,13 +108,6 @@ If the YANG above is instantiated to, for example, ``<a><b>foo</b></a>``, this w
 
 File formats
 ============
-By default, the datastore files use pretty-printed XML, with the top-symbol `config`. The following is an example of a valid datastore::
-
-   <config>
-     <hello xmlns="urn:example:hello">
-       <world/>
-     </hello>
-   </config>
 
 The format of the datastores can be changed using the following options:
 
@@ -124,9 +117,56 @@ The format of the datastores can be changed using the following options:
    XMLDB datastore pretty print. The default value is `true`, which inserts spaces and line-feeds making the XML/JSON human readable. If false, the XML/JSON is more compact.
 
 Limitations:
+
 * Format settings apply to all datastores
 * `xml` and `json` are allowed for single datastores
 * `xml` is allowed for split datstores
+
+XML format
+----------
+
+By default, datastore files use pretty-printed XML with ``<config>`` as the top-level wrapper element.  All data model nodes carry their YANG namespace declared with ``xmlns``.  The following is an example of a valid XML datastore for a YANG list ``parameter`` defined in module ``example`` with namespace ``urn:example:clixon``::
+
+   <config>
+     <table xmlns="urn:example:clixon">
+       <parameter>
+         <name>a</name>
+         <value>42</value>
+       </parameter>
+       <parameter>
+         <name>b</name>
+         <value>99</value>
+       </parameter>
+     </table>
+   </config>
+
+JSON format
+-----------
+
+When ``CLICON_XMLDB_FORMAT`` is set to ``json``, datastore files follow `RFC 7951 <https://www.rfc-editor.org/rfc/rfc7951>`_ (JSON Encoding of YANG Data).  The top-level wrapper key is ``"config"``, mirroring the XML ``<config>`` element.  All data model nodes are encoded with their YANG module name as a namespace prefix, i.e. ``"<module>:<node>"``.
+
+The following is an example of a valid JSON datastore for the same ``parameter`` list::
+
+   {
+     "config": {
+       "example:table": {
+         "example:parameter": [
+           {
+             "example:name": "a",
+             "example:value": "42"
+           },
+           {
+             "example:name": "b",
+             "example:value": "99"
+           }
+         ]
+       }
+     }
+   }
+
+.. note::
+
+   The module-name prefix on every node is required by RFC 7951 and must match the YANG module that defines the node, not any imported module.  Omitting the prefix causes a parse error.
 
 Caching
 =======
