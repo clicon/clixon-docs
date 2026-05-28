@@ -1028,6 +1028,116 @@ pretty parameter
 All show commands have a pretty-print parameter. If `true` the putput is pretty-printed.
 Indentation level is controlled by the ``PRETTYPRINT_INDENT`` compile-time option
 
+Load and save commands
+======================
+
+Clixon provides utility callbacks to load configuration from a file into the candidate datastore and to save a datastore to a file.  These callbacks are typically used in CLI spec files together with a filename argument.
+
+load_config_file
+----------------
+
+``load_config_file`` reads a configuration file and sends its content to the backend as an ``edit-config`` operation on the candidate datastore.  In a typical clispec the operation and format are exposed as nested sub-commands::
+
+   load("Load configuration") <filename:string>("Filename"), load_config_file("filename", "replace");{
+       replace("Replace candidate with file contents"), load_config_file("filename", "replace");{
+           xml("Replace candidate with XML file"),  load_config_file("filename", "replace", "xml");
+           json("Replace candidate with JSON file"), load_config_file("filename", "replace", "json");
+           text("Replace candidate with text file"), load_config_file("filename", "replace", "text");
+           cli("Replace candidate with CLI file"),  load_config_file("filename", "replace", "cli");
+       }
+       merge("Merge file with existing candidate"), load_config_file("filename", "merge");{
+           xml("Merge XML file into candidate"),  load_config_file("filename", "merge", "xml");
+           json("Merge JSON file into candidate"), load_config_file("filename", "merge", "json");
+           text("Merge text file into candidate"), load_config_file("filename", "merge", "text");
+           cli("Merge CLI file into candidate"),  load_config_file("filename", "merge", "cli");
+       }
+   }
+
+This produces a command hierarchy where the operation and format are optional sub-commands::
+
+   > load /path/to/file                  # replace, xml (defaults)
+   > load /path/to/file merge            # merge, xml (default format)
+   > load /path/to/file merge json       # merge, json
+
+The callback takes the following arguments:
+
+* ``varname`` : Name of the CLIgen variable that holds the filename, as given on the command line.
+* ``operation`` : Either ``merge`` (merge file content with the existing candidate) or ``replace`` (replace the entire candidate with the file content).
+* ``format`` : Optional. One of ``xml`` (default), ``json``, ``text``, ``cli``, or ``netconf``.
+
+XML file format
+^^^^^^^^^^^^^^^
+
+When the format is ``xml`` (the default) the file must contain a single top-level XML element that wraps the configuration data.  The name of the wrapper element is arbitrary — it is discarded and replaced with ``config`` internally — but the conventional name produced by ``save_config_file`` is ``<config>``.  All data model nodes carry their YANG namespace declared with ``xmlns``.
+
+Example XML file for a YANG list ``parameter`` defined in module ``example`` with namespace ``urn:example:clixon``::
+
+   <config>
+     <table xmlns="urn:example:clixon">
+       <parameter>
+         <name>a</name>
+         <value>42</value>
+       </parameter>
+       <parameter>
+         <name>b</name>
+         <value>99</value>
+       </parameter>
+     </table>
+   </config>
+
+The ``save`` command (see `save_config_file`_) produces XML files in this format, so a file saved from the CLI can be loaded directly::
+
+   > save candidate.xml xml
+   > load candidate.xml replace xml
+
+JSON file format
+^^^^^^^^^^^^^^^^
+
+When the format is ``json`` the file must follow `RFC 7951 <https://www.rfc-editor.org/rfc/rfc7951>`_ (JSON Encoding of YANG Data).  The file must contain a single top-level JSON object whose sole key is ``"config"`` (matching the datastore top-symbol).  Configuration nodes inside ``"config"`` are encoded with their YANG module name as a namespace prefix, i.e. ``"<module>:<node>"``.
+
+Example JSON file for the same ``parameter`` list::
+
+   {
+     "config": {
+       "example:table": {
+         "example:parameter": [
+           {
+             "example:name": "a",
+             "example:value": "42"
+           },
+           {
+             "example:name": "b",
+             "example:value": "99"
+           }
+         ]
+       }
+     }
+   }
+
+.. note::
+
+   The module-name prefix on every node is required by RFC 7951 and must match the YANG module that defines the node, not any imported module.  Omitting the prefix causes a parse error.
+
+The ``save`` command (see `save_config_file`_) produces JSON files in this format, so a file saved from the CLI can be loaded directly::
+
+   > save candidate.json json
+   > load candidate.json replace json
+
+save_config_file
+----------------
+
+``save_config_file`` retrieves the content of a datastore and writes it to a local file.  A typical CLI spec entry is::
+
+   save("Save configuration") <filename:string>("Filename"), save_config_file("running", "filename", "json");
+
+The callback takes the following arguments:
+
+* ``dbname`` : The datastore to read from: ``running``, ``candidate``, or ``startup``.
+* ``varname`` : Name of the CLIgen variable holding the output filename.
+* ``format`` : Optional. One of ``xml`` (default), ``json``, ``text``, ``cli``, or ``netconf``.
+
+The saved file can be reloaded with ``load_config_file`` using the same format.
+
 Output pipes
 ============
 Output pipes resemble UNIX shell pipes and are useful to filter or modify CLI output. Example::
