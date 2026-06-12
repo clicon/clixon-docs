@@ -237,32 +237,7 @@ Example — creating an element with a body value::
 
 This is equivalent to using the combined helper ``xml_new_body("name", parent, "myvalue")``.
 
-**Migration note for applications using Clixon as a library**
-
-Earlier code may manipulate ``CX_BODY`` child nodes directly. The following
-patterns should be replaced with the new API:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 50 50
-
-   * - Old pattern
-     - New pattern
-   * - ``xb = xml_new("body", xn, CX_BODY);``
-       ``xml_value_set(xb, val);``
-     - ``xml_body_set(xn, val);``
-   * - ``xb = xml_body_get(xn);``
-       ``xml_value_set(xb, val);``
-     - ``xml_body_set(xn, val);``
-   * - ``xb = xml_new("body", xn, CX_BODY);``
-       ``xml_value_append(xb, val);``
-     - ``xml_body_append(xn, val);``
-   * - ``xml_rm_children(xn, CX_BODY);``
-     - ``xml_body_reset(xn);``
-
-.. note::
-   ``xml_value_set()`` and ``xml_value_append()`` remain valid for
-   **attribute** (``CX_ATTR``) nodes and should not be replaced there.
+For migration from direct ``CX_BODY`` manipulation, see :ref:`migration_790`.
 
 Binding YANG to XML
 -------------------
@@ -711,8 +686,10 @@ over all children from a parent element node.
 
 where ``CX_ELMNT`` selects element children (no attributes or body text).
 
-However, it is recommended to use the `Searching in XML`_ for more efficient
-searching.
+For migration from the older ``xml_child_each()`` API, see :ref:`migration_790`.
+
+However, it is recommended to use `Searching in XML`_ for more efficient
+searching rather than linear iteration where possible.
 
 Character encoding
 ==================

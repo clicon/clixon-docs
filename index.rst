@@ -34,6 +34,7 @@ mechanism.
    path
    pagination
    upgrade
+   migration
    errors
    misc
 
