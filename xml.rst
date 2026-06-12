@@ -215,6 +215,55 @@ The following example creates the same XML tree as in the above examples using A
 .. note::
         If you create the XML tree manually, you may have to explicitly call a yang bind function.
 
+Setting body values
+^^^^^^^^^^^^^^^^^^^
+Body text (the text content of a leaf element) should be set using the
+dedicated body API rather than creating ``CX_BODY`` child nodes directly.
+Three functions are provided:
+
+- ``xml_body_set(xn, val)``    — set (replace) the body value on element ``xn``
+- ``xml_body_append(xn, val)`` — append to the body value (creates body if needed)
+- ``xml_body_reset(xn)``       — remove the body value from ``xn``
+
+For reading, use the existing ``xml_body(xn)`` which returns the value as a string.
+
+Example — creating an element with a body value::
+
+   cxobj *x;
+   if ((x = xml_new("name", parent, CX_ELMNT)) == NULL)
+      goto done;
+   if (xml_body_set(x, "myvalue") < 0)
+      goto done;
+
+This is equivalent to using the combined helper ``xml_new_body("name", parent, "myvalue")``.
+
+**Migration note for applications using Clixon as a library**
+
+Earlier code may manipulate ``CX_BODY`` child nodes directly. The following
+patterns should be replaced with the new API:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - Old pattern
+     - New pattern
+   * - ``xb = xml_new("body", xn, CX_BODY);``
+       ``xml_value_set(xb, val);``
+     - ``xml_body_set(xn, val);``
+   * - ``xb = xml_body_get(xn);``
+       ``xml_value_set(xb, val);``
+     - ``xml_body_set(xn, val);``
+   * - ``xb = xml_new("body", xn, CX_BODY);``
+       ``xml_value_append(xb, val);``
+     - ``xml_body_append(xn, val);``
+   * - ``xml_rm_children(xn, CX_BODY);``
+     - ``xml_body_reset(xn);``
+
+.. note::
+   ``xml_value_set()`` and ``xml_value_append()`` remain valid for
+   **attribute** (``CX_ATTR``) nodes and should not be replaced there.
+
 Binding YANG to XML
 -------------------
 A further step is to ensure that the XML tree complies to a YANG
