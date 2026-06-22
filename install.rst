@@ -272,7 +272,8 @@ These include (standard options are omitted)
                                 (default: $prefix/share/yang/standard). You can retrieve the standard files at https://github.com/YangModels/yang
   --with-clicon-user=user     Run as this user in example and test
   --with-clicon-group=group   Run as this group in example and test
-
+  --enable-xml-child-each-wrapper  Replace the deprecated ``xml_child_each()`` iterator with a wrapper that calls the new ``xml_child_iter()`` API which reduces XML config memory footprint. (See :doc:`migration`).
+  --enable-optmem-xml-body    Fold the body value of an XML element into the element struct itself, which reduces XML config memory footprint. (See :doc:`migration`).
 
 There are also some variables that can be set, such as::
 

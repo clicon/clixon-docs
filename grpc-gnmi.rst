@@ -55,7 +55,9 @@ Then build and install::
    sudo make install
 
 This builds the ``clixon_grpc`` executable and installs proto files to
-``$prefix/share/clixon/proto/``.
+``$prefix/share/clixon/proto/``, including the required Google well-known
+protobuf definitions (``any.proto``, ``descriptor.proto``, ``duration.proto``)
+under ``$prefix/share/clixon/proto/google/protobuf/``.
 
 Starting clixon_grpc
 ====================
@@ -89,6 +91,44 @@ Example startup sequence::
    clixon_backend -f /etc/clixon/example.xml -s init -d
    clixon_grpc -f /etc/clixon/example.xml -d
 
+Local client-side
+=================
+To use a gNMI client such as ``grpcurl`` `locally` against a running Clixon system, the
+client needs access to the ``gnmi.proto`` schema file and its dependencies.
+
+On a development system these are available in the build tree. On a **runtime
+system** (where only Clixon binaries are installed) they are installed by
+``make install`` to ``$prefix/share/clixon/proto/``, where ``$prefix`` is typically ``/usr`` or ``/usr/local``
+
+Install grpcurl
+---------------
+
+Download and install `grpcurl` from the releases page <https://github.com/fullstorydev/grpcurl/releases>`_.
+
+Verify the proto files are present
+-----------------------------------
+
+After ``sudo make install`` (or after installing a Clixon binary package), the
+following files must exist under ``$prefix/share/clixon/proto``::
+
+   gnmi.proto
+   gnmi_ext.proto
+   google/protobuf/any.proto
+   google/protobuf/descriptor.proto
+   google/protobuf/duration.proto
+
+
+Basic grpcurl invocation
+------------------------
+
+Given the installed files above, grpcurl calls need an ``-import-path`` pointing at the
+installed proto directory::
+
+   grpcurl -plaintext \
+     -import-path $prefix/share/clixon/proto \
+     -proto gnmi.proto \
+     -d '{}' localhost:9339 gnmi.gNMI/Capabilities
+
 Supported RPCs
 ==============
 
@@ -101,7 +141,6 @@ Example::
 
    grpcurl -plaintext \
      -import-path /usr/local/share/clixon/proto \
-     -import-path /usr/include \
      -proto gnmi.proto \
      -d '{}' localhost:9339 gnmi.gNMI/Capabilities
 
@@ -120,7 +159,6 @@ Example — get a leaf::
 
    grpcurl -plaintext \
      -import-path /usr/local/share/clixon/proto \
-     -import-path /usr/include \
      -proto gnmi.proto \
      -d '{"path":[{"elem":[{"name":"interfaces"},{"name":"interface","key":{"name":"eth0"}}]}],"type":"ALL","encoding":"ASCII"}' \
      localhost:9339 gnmi.gNMI/Get
@@ -139,7 +177,6 @@ Example — set a leaf::
 
    grpcurl -plaintext \
      -import-path /usr/local/share/clixon/proto \
-     -import-path /usr/include \
      -proto gnmi.proto \
      -d '{"update":[{"path":{"elem":[{"name":"val"}]},"val":{"string_val":"hello"}}]}' \
      localhost:9339 gnmi.gNMI/Set
@@ -154,7 +191,6 @@ Example — subscribe ONCE::
 
    grpcurl -plaintext \
      -import-path /usr/local/share/clixon/proto \
-     -import-path /usr/include \
      -proto gnmi.proto \
      -d '{"subscribe":{"mode":"ONCE","encoding":"ASCII","subscription":[{"path":{"elem":[{"name":"val"}]}}]}}' \
      localhost:9339 gnmi.gNMI/Subscribe
