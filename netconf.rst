@@ -23,9 +23,6 @@ session to the backend. The netconf client communicates to the outside
 world via `stdio`. Usually one sets up an SSH sub-system to
 communicate from external nodes.
 
-Note that Netconf supports chunked framing defined in RFC 6241 from
-Clixon 5.7, but examples may not be updated.
-
 Command-line options
 --------------------
 
@@ -106,7 +103,7 @@ NACM rules apply to all datastores.
 
 Restrictions
 ------------
-Access notification authorization (Sec 3.4.6) is NOT implemented.
+Access _notification_ authorization (Sec 3.4.6) is NOT implemented.
 
 Data-node paths, eg ``<rule>...<path>ex:table/ex:parameter</path></rule>`` instance-identifiers are restricted to canonical namespace identifiers for both XML and JSON encoding. That is, if a symbol (such as ``table`` above) is a symbol in a module with prefix ``ex``, another prefix cannot be used, even though defined with a ``xmlns`` rule.
 
@@ -156,8 +153,7 @@ User credentials
 ^^^^^^^^^^^^^^^^
 Access control relies on a user and groups. When an internal Clixon
 client communicates with the backend, it piggybacks the name of the
-user in the request, See :ref:`Internal netconf username
-<clixon_misc>`::
+user in the request.
 
   <rpc username="myuser"><get-config><source><running/></source></get-config></rpc>
 
@@ -171,7 +167,12 @@ The allowed values of `CLICON_NACM_CREDENTIALS` is:
 
 * `none`: Do not match NACM user to any user credentials. Any user can pose as any other user. Set this for IP sockets, or do not use NACM.
 * `exact`: Exact match between NACM user and unix socket peer user.
-* `except`: Exact match between NACM user and unix socket peer user, `except` for root and `wwwuser`. This is default.
+* `except` (proxy): Exact match between NACM user and unix socket peer user, `except` for root and `wwwuser`. This is default.
+
+`None` has two identified scenarios: (1) debug/test and (2) secured local clients.
+Outside of those scenarios, NACM is insecure using `none`.
+
+Trust for `except` can be set  programmatically, see nacm_proxyuser_add() API.
 
 .. note::
    Peer and group credentials are only active when the backend uses a UNIX socket (not IP socket),
@@ -206,6 +207,15 @@ inherit any rules associated with it, as long as ``enable-external-groups`` is
 
 Setting ``enable-external-groups`` to ``false`` disables this behaviour; only
 explicitly listed ``user-name`` entries are used, only ``bob`` in this example.
+
+Explicit group
+^^^^^^^^^^^^^^
+When external groups are set, an internal Clixon client can piggyback the name of an explicit group in the request to bypass the OS groups::
+
+  <rpc username="myuser" groupname="mygroup"><get-config><source><running/></source></get-config></rpc>
+
+.. note::
+   Explicit group override is only available when `CLICON_NACM_CREDENTIALS` is `none`
 
 Recovery user
 -------------

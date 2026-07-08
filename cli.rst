@@ -102,7 +102,8 @@ The `clixon_cli` client has the following command-line options:
   -L              Debug print dynamic CLI syntax including completions and expansions
   -y <file>       Load yang spec file (override yang main modul)e
   -c <file>       Specify cli spec file
-  -U <user>       Over-ride unix user with a pseudo user for NACM.
+  -U <user>       Override unix user with a pseudo user for NACM.
+  -g <group>      Override unix groups with a masquerading group for NACM mode NONE
   -o <option=value>  Give configuration option overriding config file (see clixon-config.yang)
 
 Inline CLI commands
