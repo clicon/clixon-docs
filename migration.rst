@@ -54,6 +54,30 @@ The key differences are:
 * Change ``xml_child_each(xt, xc, type)`` to ``xml_child_iter(xt, &ix, type)``
 * The ``type`` argument (e.g. ``CX_ELMNT``, ``CX_ATTR``, ``CX_BODY``, or ``-1`` for all) is unchanged
 
+In the case where the iterator ``xc`` has a previous set value (not NULL), replace as follows (CX_ELMNT can be changed accordingly):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - Old (``xml_child_each xc given``)
+     - New (``xml_child_iter xc given``)
+   * - .. code-block:: c
+
+          while ((xc = xml_child_each(xt, xc, CX_ELMNT))
+          != NULL) {
+              /* ... */
+          }
+
+     - .. code-block:: c
+
+          int ix = xml_child_order(xt, cx) + 1;
+          while ((xc = xml_child_iter(xt, &ix, CX_ELMNT))
+                 != NULL) {
+              /* ... */
+          }
+
+
 After migrating, configure with ``--enable-xml-child-each-wrapper`` to catch any
 remaining uses of the old API via a build-time deprecation wrapper.
 

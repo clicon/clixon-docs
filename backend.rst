@@ -544,7 +544,7 @@ Example::
 
 Flags
 ^^^^^
-A programmer can also use XML flags that are set in "src" and "target" XML trees to identify what has changed. The following flags are used to makr the trees:
+A programmer can also use XML flags that are set in "src" and "target" XML trees to identify what has changed. The following flags are used to mark the trees:
 
 XML_FLAG_DEL
   All deleted XML nodes in "src" and all its descendants
@@ -553,6 +553,13 @@ XML_FLAG_ADD
 XML_FLAG_CHANGE
   All changed XML nodes in both "src" and "target" and all its descendants.
   Also all ancestors of all added, deleted and changed nodes.
+XML_FLAG_DEL_ANC
+  All ancestors in the "target" tree of deleted nodes. Used for incremental
+  mandatory/must checking: when a node is deleted, sibling constraints in the
+  target tree may need re-evaluation even though those siblings are unchanged.
+XML_FLAG_ADD_ANC
+  All ancestors in the "source" tree of added nodes. Symmetric to
+  ``XML_FLAG_DEL_ANC``: set on source-tree ancestors when nodes are added.
 
 For example, assume the tree (A B) is replaced with (B C), then the two trees are marked with the following flags::
 
