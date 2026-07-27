@@ -7,6 +7,8 @@
 Event notifications
 *******************
 
+This section is for event notifications. Event handling of processes and sockets is covered in :ref:`misc section<clixon_misc>`: event handling.
+
 Overview
 ========
 

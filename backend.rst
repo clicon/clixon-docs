@@ -135,6 +135,8 @@ CLICON_SOCK_PORT
 CLICON_SOCK_GROUP
   Group membership to access clixon_backend UNIX socket. Default is `clicon`. This is not available for IP sockets.
 
+CLICON_SOCK_PRIO
+  Set the backend's local client (NETCONF) data sockets as high priority
 
 Backend files
 =============

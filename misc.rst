@@ -178,5 +178,26 @@ A program registers events and timeouts.
 CLICON_EVENT_SELECT
   Enable select-based event-handling. Otherwise use poll-based event handling
 
-Select-based event-handling have scaling limitations since only 1024
-file descriptors are supported. However, select-based event-handling may be more robust, since poll-based event handling was introduced in Clixon 7.4.
+Select-based event-handling have scaling limitations since only 1024 file descriptors are supported.
+Since Clixon 7.9, poll-based event handling is default, eventually this option will be deprecated.
+
+Socket event priority
+---------------------
+File descriptors can be registered with a priority so that high-priority
+sockets are serviced before low-priority ones. In each event-loop cycle all
+ready high-priority fds are drained first, after which the low-priority fds are
+serviced. When high-priority fds exist, only one low-priority fd is serviced per
+cycle (so that new high-priority input can preempt), but round-robin fairness
+among the low-priority fds is preserved.
+
+Priority is a per-registration property, set via the ``prio`` argument of the
+event API (``clixon_event_reg_fd_prio()``) using ``CLIXON_EVENT_PRIO_HIGH`` or
+``CLIXON_EVENT_PRIO_LOW(=0)``. It is independent of any configuration option and
+works in both the poll-based and select-based event handlers.
+
+CLICON_SOCK_PRIO
+  Register the backend's local client (NETCONF) data sockets as high priority
+ (default ``false``). When enabled, established client request sockets are
+  serviced before the server/accept socket and any other non-prio sockets. This
+  is useful when the backend opens additional sockets, such as the controller's
+  device connections.
