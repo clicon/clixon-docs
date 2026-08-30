@@ -81,8 +81,8 @@ In the case where the iterator ``xc`` has a previous set value (not NULL), repla
 After migrating, configure with ``--enable-xml-child-each-wrapper`` to catch any
 remaining uses of the old API via a build-time deprecation wrapper.
 
-XML body API: direct ``CX_BODY`` manipulation → ``xml_body_set/append/reset()``
---------------------------------------------------------------------------------
+New XML body API
+----------------
 Three new functions replace the pattern of manually creating and manipulating
 ``CX_BODY`` child nodes to set the text content of an element:
 

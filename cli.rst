@@ -162,10 +162,13 @@ In other words, this setting is used ONLY on raw terminals such as serial consol
 CLICON_CLI_TAB_MODE
    Set CLI tab mode flags:
 
-   * Set bit 1 (0x01) if you want to has same output as ``?``, ie line per command, otherwise short info of available commands
-   * Set bit 2 (0x02) if you want commands and variables to have same preference, otherwise select command
-   * Set bit 3 (0x04) if you want to complete multiple command levels at once, otherwise complete only one level per TAB
-   * Set bit 4 (0x08) if you want to complete and show available commands in one step, otherwise a second TAB shows alternatives. By default this bit is set.
+   * Bit 1 (0x01): Same output as ``?``, ie line per command, otherwise short info of available commands
+   * Bit 2 (0x02): Commands and variables have same preference, otherwise select command
+   * Bit 3 (0x04): Complete multiple command levels at once, otherwise complete only one level per TAB
+   * Bit 4 (0x08); Complete and show available commands in one step, otherwise a second TAB shows alternatives.
+   * Bit 5 (0x10): Show help instead of silently auto-completing to a keyword when a static variable is also valid at the same level (and bit 2 is not set). Does not affect expand-generated keywords.
+
+By default bit 4 is set.
 
 History
 -------

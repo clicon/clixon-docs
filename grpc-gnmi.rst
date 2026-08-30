@@ -195,6 +195,14 @@ Example — subscribe ONCE::
      -d '{"subscribe":{"mode":"ONCE","encoding":"ASCII","subscription":[{"path":{"elem":[{"name":"val"}]}}]}}' \
      localhost:9339 gnmi.gNMI/Subscribe
 
+Using `gnmic`::
+
+  gnmic -a 127.0.0.1:9339 \
+    --insecure subscribe \
+    --path "/example:val" \
+    --mode once \
+    --encoding json_ietf
+
 Encodings
 =========
 
