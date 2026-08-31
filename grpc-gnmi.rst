@@ -93,23 +93,28 @@ Example startup sequence::
 
 Local client-side
 =================
-To use a gNMI client such as ``grpcurl`` `locally` against a running Clixon system, the
-client needs access to the ``gnmi.proto`` schema file and its dependencies.
+The recommended gNMI client is `gnmic <https://gnmic.openconfig.net>`_, a purpose-built
+high-level gNMI CLI. It has the gNMI protobuf schema built in, so no proto files are
+needed on the client side.
+
+Install gnmic
+-------------
+Follow the instructions on `<https://gnmic.openconfig.net/install/>`_, for example::
+
+   bash -c "$(curl -sL https://get-gnmic.openconfig.net)"
+
+Since the Clixon gRPC daemon currently has no TLS, all examples use ``--insecure``.
+
+Low-level debugging with grpcurl
+--------------------------------
+For low-level protocol debugging, a generic gRPC client such as `grpcurl
+<https://github.com/fullstorydev/grpcurl>`_ can also be used. Unlike gnmic it needs
+access to the ``gnmi.proto`` schema file and its dependencies.
 
 On a development system these are available in the build tree. On a **runtime
 system** (where only Clixon binaries are installed) they are installed by
-``make install`` to ``$prefix/share/clixon/proto/``, where ``$prefix`` is typically ``/usr`` or ``/usr/local``
-
-Install grpcurl
----------------
-
-Download and install `grpcurl` from the releases page <https://github.com/fullstorydev/grpcurl/releases>`_.
-
-Verify the proto files are present
------------------------------------
-
-After ``sudo make install`` (or after installing a Clixon binary package), the
-following files must exist under ``$prefix/share/clixon/proto``::
+``make install`` to ``$prefix/share/clixon/proto/``, where ``$prefix`` is typically
+``/usr`` or ``/usr/local``::
 
    gnmi.proto
    gnmi_ext.proto
@@ -117,12 +122,7 @@ following files must exist under ``$prefix/share/clixon/proto``::
    google/protobuf/descriptor.proto
    google/protobuf/duration.proto
 
-
-Basic grpcurl invocation
-------------------------
-
-Given the installed files above, grpcurl calls need an ``-import-path`` pointing at the
-installed proto directory::
+grpcurl calls need an ``-import-path`` pointing at the installed proto directory::
 
    grpcurl -plaintext \
      -import-path $prefix/share/clixon/proto \
@@ -139,10 +139,7 @@ encodings (``JSON_IETF``, ``JSON``, ``ASCII``).
 
 Example::
 
-   grpcurl -plaintext \
-     -import-path /usr/local/share/clixon/proto \
-     -proto gnmi.proto \
-     -d '{}' localhost:9339 gnmi.gNMI/Capabilities
+   gnmic -a 127.0.0.1:9339 --insecure capabilities
 
 Get
 ---
@@ -155,13 +152,10 @@ Retrieves configuration and/or state data. The ``type`` field controls what is r
 The ``path`` elements are translated to XPath for the backend query. Multiple paths in
 a single request are each queried independently.
 
-Example — get a leaf::
+Example — get a subtree::
 
-   grpcurl -plaintext \
-     -import-path /usr/local/share/clixon/proto \
-     -proto gnmi.proto \
-     -d '{"path":[{"elem":[{"name":"interfaces"},{"name":"interface","key":{"name":"eth0"}}]}],"type":"ALL","encoding":"ASCII"}' \
-     localhost:9339 gnmi.gNMI/Get
+   gnmic -a 127.0.0.1:9339 --insecure \
+     get --path "/interfaces/interface[name=eth0]" --type ALL
 
 Set
 ---
@@ -173,35 +167,67 @@ Modifies configuration data. Supports three operations in a single request:
 
 Each operation is applied in order: deletes, then replaces, then updates.
 
-Example — set a leaf::
+Example — set and delete a leaf::
 
-   grpcurl -plaintext \
-     -import-path /usr/local/share/clixon/proto \
-     -proto gnmi.proto \
-     -d '{"update":[{"path":{"elem":[{"name":"val"}]},"val":{"string_val":"hello"}}]}' \
-     localhost:9339 gnmi.gNMI/Set
+   gnmic -a 127.0.0.1:9339 --insecure \
+     set --update-path "/example:val" --update-value "hello"
+
+   gnmic -a 127.0.0.1:9339 --insecure \
+     set --delete "/example:val"
 
 Subscribe
 ---------
-The ``ONCE`` mode is supported. A ``SubscribeRequest`` with ``mode=ONCE`` returns
-current data for each subscribed path as a series of ``SubscribeResponse`` update
-messages, followed by a final ``sync_response=true`` message.
+The ``ONCE``, ``STREAM`` and ``POLL`` subscription list modes are supported.
+
+ONCE
+^^^^
+A ``SubscribeRequest`` with ``mode=ONCE`` returns current data for each subscribed path
+as a series of ``SubscribeResponse`` update messages, followed by a final
+``sync_response=true`` message, after which the RPC completes.
 
 Example — subscribe ONCE::
 
-   grpcurl -plaintext \
-     -import-path /usr/local/share/clixon/proto \
-     -proto gnmi.proto \
-     -d '{"subscribe":{"mode":"ONCE","encoding":"ASCII","subscription":[{"path":{"elem":[{"name":"val"}]}}]}}' \
-     localhost:9339 gnmi.gNMI/Subscribe
+  gnmic -a 127.0.0.1:9339 --insecure \
+    subscribe --path "/example:val" --mode once
 
-Using `gnmic`::
+STREAM
+^^^^^^
+A ``SubscribeRequest`` with ``mode=STREAM`` first returns the current data for each
+subscribed path followed by ``sync_response=true`` (unless ``updates_only`` is set, in
+which case only the sync_response is sent), then keeps the RPC open and sends periodic
+updates.
 
-  gnmic -a 127.0.0.1:9339 \
-    --insecure subscribe \
-    --path "/example:val" \
-    --mode once \
-    --encoding json_ietf
+The ``SAMPLE`` and ``TARGET_DEFINED`` per-subscription modes are supported; both sample
+the subscribed path periodically:
+
+* ``sample_interval`` — sampling period in nanoseconds; 0 means target-defined (10s default). Intervals below 100 ms are clamped.
+* ``suppress_redundant`` — if set, updates are only sent when the value has changed since the last update
+* ``heartbeat_interval`` — with ``suppress_redundant``, forces an update after this period even if the value is unchanged
+
+The ``ON_CHANGE`` per-subscription mode is not yet implemented.
+
+The subscription is terminated when the client closes or cancels the RPC.
+
+Example — stream with 2s sampling::
+
+  gnmic -a 127.0.0.1:9339 --insecure \
+    subscribe --path "/example:val" \
+    --mode stream --stream-mode sample --sample-interval 2s
+
+POLL
+^^^^
+A ``SubscribeRequest`` with ``mode=POLL`` first returns initial data and
+``sync_response=true`` as for STREAM, then keeps the RPC open. Each subsequent
+``SubscribeRequest`` containing a ``poll`` message triggers a fresh set of updates for
+all subscribed paths, followed by a ``sync_response``.
+
+Per the gNMI specification, any message other than ``poll`` sent after the initial
+request terminates the RPC with an ``INVALID_ARGUMENT`` error.
+
+Example — poll mode (gnmic prompts interactively for each poll)::
+
+  gnmic -a 127.0.0.1:9339 --insecure \
+    subscribe --path "/example:val" --mode poll
 
 Encodings
 =========
@@ -222,7 +248,7 @@ The following features are not yet implemented:
 * **TLS** — plain TCP only; no SSL/TLS transport
 * **Authentication** — no credentials or certificate validation
 * **NACM** — no access control applied
-* **Subscribe STREAM and POLL** — only ``ONCE`` mode is implemented
+* **Subscribe ON_CHANGE** — the ``ON_CHANGE`` per-subscription mode is not implemented; ``STREAM`` subscriptions are sampled periodically
 * **Subscribe encoding** — Subscribe responses always use ASCII encoding regardless of the requested encoding
 * **Prefix field** — the ``prefix`` field in ``GetRequest`` and ``SetRequest`` is silently ignored; all paths must be absolute
 * **Path wildcards** — ``*`` and ``...`` path wildcards are not supported

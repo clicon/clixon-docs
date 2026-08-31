@@ -303,7 +303,7 @@ Features include:
 - Capabilities, returns loaded YANG modules + encodings (JSON_IETF, JSON, ASCII)
 - Get(XPath handling, namespace handling),
 - Set(update/replace/delete)
-- Subscribe RPC (ONCE)
+- Subscribe RPC (ONCE, STREAM with SAMPLE/TARGET_DEFINED, POLL)
 - Module qualified names, unqualified node fallback
 - Bool, double, ascii typed values
 
@@ -312,6 +312,6 @@ Limitations include:
 - TLS (high prio)
 - NACM (depends on TLS)
 - Set leaf-list Set
-- Subscribe RPC (STREAM/POLL)
+- Subscribe ON_CHANGE subscription mode
 - Notifications
 - Mount-point support

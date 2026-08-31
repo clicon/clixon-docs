@@ -197,7 +197,7 @@ works in both the poll-based and select-based event handlers.
 
 CLICON_SOCK_PRIO
   Register the backend's local client (NETCONF) data sockets as high priority
- (default ``false``). When enabled, established client request sockets are
+  (default ``false``). When enabled, established client request sockets are
   serviced before the server/accept socket and any other non-prio sockets. This
   is useful when the backend opens additional sockets, such as the controller's
   device connections.
