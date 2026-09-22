@@ -24,7 +24,7 @@ Please consult the `clixon-config YANG spec <https://github.com/clicon/clixon/bl
 Example
 =======
 The following is the configuration file of a simple example::
-   
+
    <clixon-config xmlns="http://clicon.org/config">
      <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
      <CLICON_CONFIGDIR>/usr/local/etc/clixon.d</CLICON_CONFIGDIR>
@@ -73,7 +73,6 @@ The following options control the Clixon configuration:
 
    * leaf values are overwritten
    * leaf-list values are appended
-   
 
 Runtime modification
 ====================
@@ -94,14 +93,14 @@ A value is specified as one of the following:
 - ``<module>:*`` : enable all features in the specified module
 - ``*:<feature>`` : enable the specific feature in all modules.
 
-Example:: 
+Example::
 
       <CLICON_FEATURE>ietf-netconf:startup</CLICON_FEATURE>
       <CLICON_FEATURE>ietf-netconf:*</CLICON_FEATURE>
       <CLICON_FEATURE>*:*</CLICON_FEATURE>
-      
+
 Supplying the ``-o`` option adds a value to the feature list.
-      
+
 Clixon have three hardcoded features:
 
 - ietf-netconf:candidate (RFC6241 8.3)
@@ -111,10 +110,10 @@ Clixon have three hardcoded features:
 Finding YANG files
 ==================
 The example have two options for finding Yang files::
-   
+
      <CLICON_YANG_DIR>/usr/local/share/clixon</CLICON_YANG_DIR>
      <CLICON_YANG_MODULE_MAIN>clixon-hello</CLICON_YANG_MODULE_MAIN>
-     
+
 which means that Yang files are searched for in ``/usr/local/share/clixon`` and that module ``clixon-hello`` is loaded. Note:
 
 - ``clixon-hello.yang`` must be present in ``/usr/local/share/clixon``
@@ -126,11 +125,11 @@ The following configuration file options control the loading of Yang files:
 ``CLICON_YANG_DIR``
    A list of directories (yang dir path) where Clixon searches for module and submodules *recursively*.
 ``CLICON_YANG_MAIN_FILE``
-   Load a specific Yang module given by a file. 
+   Load a specific Yang module given by a file.
 ``CLICON_YANG_MODULE_MAIN``
    Specifies a single module to load. The module is searched for in the yang dir path.
 ``CLICON_YANG_MODULE_REVISION``
-   Specifies a revision to the main module. 
+   Specifies a revision to the main module.
 ``CLICON_YANG_MAIN_DIR``
    Load all yang modules in this directory, not recursively.
 
@@ -189,7 +188,7 @@ You then install your own "clixon-myconfig.yang" where you add your own config o
         }
 
 You can now use your extended options in the regular config file, along with the basic ones, but with another namespace::
-  
+
   <clixon-config xmlns="http://clicon.org/config">
     <CLICON_CONFIGFILE>/usr/local/etc/clixon.xml</CLICON_CONFIGFILE>
     <CLICON_CONFIG_EXTEND>clixon-myconfig</CLICON_CONFIG_EXTEND>

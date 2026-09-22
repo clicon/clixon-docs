@@ -232,11 +232,14 @@ Example — poll mode (gnmic prompts interactively for each poll)::
 Encodings
 =========
 
-The following gNMI encodings are supported:
+The following gNMI encodings are supported, for both Get and Subscribe
+responses, per the ``encoding`` field of the request (default is
+``JSON_IETF``):
 
-* ``JSON_IETF`` — RFC 7951 JSON encoding (default for Get responses)
+* ``JSON_IETF`` — RFC 7951 JSON encoding (default)
 * ``JSON`` — JSON encoding
-* ``ASCII`` — plain text (used for Subscribe responses)
+* ``ASCII`` — the JSON value serialized as a plain string, rather than a
+  structured/typed value
 
 ``PROTO`` and ``BYTES`` encodings are not supported.
 
@@ -248,8 +251,9 @@ The following features are not yet implemented:
 * **TLS** — plain TCP only; no SSL/TLS transport
 * **Authentication** — no credentials or certificate validation
 * **NACM** — no access control applied
+* **Set leaf-list** — the gNMI ``leaflist_val`` ``TypedValue`` encoding is not implemented for Set; an ``Update`` targeting a leaf-list is silently skipped (no error, no effect). Get already returns leaf-lists correctly, since it serializes the whole matched subtree to JSON rather than encoding values individually.
 * **Subscribe ON_CHANGE** — the ``ON_CHANGE`` per-subscription mode is not implemented; ``STREAM`` subscriptions are sampled periodically
-* **Subscribe encoding** — Subscribe responses always use ASCII encoding regardless of the requested encoding
+* **Mount-point support** — YANG schema mount-points (RFC 8528) are not resolved in gNMI paths
 * **Prefix field** — the ``prefix`` field in ``GetRequest`` and ``SetRequest`` is silently ignored; all paths must be absolute
 * **Path wildcards** — ``*`` and ``...`` path wildcards are not supported
 * **union_replace** — the Set ``union_replace`` operation is not implemented

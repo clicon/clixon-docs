@@ -310,8 +310,12 @@ Features include:
 Limitations include:
 
 - TLS (high prio)
+- Authentication
 - NACM (depends on TLS)
-- Set leaf-list Set
+- Set leaf-list (Get already returns leaf-lists correctly)
 - Subscribe ON_CHANGE subscription mode
-- Notifications
 - Mount-point support
+- Prefix field (GetRequest/SetRequest, silently ignored)
+- Path wildcards (*, ...)
+- union_replace
+- use_models

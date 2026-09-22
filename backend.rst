@@ -556,9 +556,15 @@ XML_FLAG_CHANGE
   All changed XML nodes in both "src" and "target" and all its descendants.
   Also all ancestors of all added, deleted and changed nodes.
 XML_FLAG_DEL_ANC
-  All ancestors in the "target" tree of deleted nodes. Used for incremental
-  mandatory/must checking: when a node is deleted, sibling constraints in the
-  target tree may need re-evaluation even though those siblings are unchanged.
+  All ancestors in the "target" tree of deleted nodes, all the way up to the
+  root. Used for incremental ``must``/``when``/``leafref`` and minmax/unique
+  checking, which need to know whether *anything* changed below the specific
+  ancestor an expression depends on, regardless of depth.
+XML_FLAG_DEL_DIRECT
+  Only the *direct* target-tree parent of a deleted node. Used for
+  incremental mandatory checking: a node's own mandatory-child-exists
+  constraint can only be invalidated by a deletion among its immediate
+  children, never by one further down the tree.
 XML_FLAG_ADD_ANC
   All ancestors in the "source" tree of added nodes. Symmetric to
   ``XML_FLAG_DEL_ANC``: set on source-tree ancestors when nodes are added.

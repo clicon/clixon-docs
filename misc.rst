@@ -196,8 +196,13 @@ event API (``clixon_event_reg_fd_prio()``) using ``CLIXON_EVENT_PRIO_HIGH`` or
 works in both the poll-based and select-based event handlers.
 
 CLICON_SOCK_PRIO
-  Register the backend's local client (NETCONF) data sockets as high priority
-  (default ``false``). When enabled, established client request sockets are
-  serviced before the server/accept socket and any other non-prio sockets. This
-  is useful when the backend opens additional sockets, such as the controller's
-  device connections.
+  Promote interactive CLI client sockets to high priority (default ``false``).
+  A client's transport is not known until it sends its internal hello (see the
+  RFC 6022 ``transport`` extension in :ref:`Standards section<clixon_standards>`),
+  so every client starts at low priority when it connects; if this option is
+  set, a client whose hello identifies it as ``cli`` is then promoted to high
+  priority. This makes an interactive human CLI session stay responsive when
+  the backend is otherwise busy with bulk/background traffic from NETCONF,
+  RESTCONF, gRPC or SNMP clients, or with other sockets the backend has open,
+  such as the controller's device connections. Other transports are left at
+  low priority.
