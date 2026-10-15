@@ -627,6 +627,30 @@ The following autocli extensions are defined:
    Only show exactly the expanded options of a variable. It should not be possible to add a *new* value that is not in the expanded list. See also ``ac-strict-expand`` in Section `Autocli tree labels`_.
 ``alias``
    Replace the command with another value, only implemented for YANG leaves.
+``expand``
+   Use a custom CLI expand callback instead of the default ``expand_dbvar()``. For cases where the set of valid values cannot be derived from existing XML instances in the candidate db alone.
+
+Example: custom expand callback
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+   import clixon-autocli{
+      prefix autocli;
+   }
+   container table{
+      list parameter{
+         ...
+         leaf color{
+            type string;
+            autocli:expand "cli_expand_fixed";
+         }
+      }
+   }
+
+Where ``cli_expand_fixed()`` is a plugin-provided C function with the same signature as ``expand_dbvar()``.
+
+.. note::
+   If the custom callback lives in a CLI frontend plugin option ``CLICON_PLUGIN_DLOPEN_GLOBAL`` must be set to ``true``.
 
 Edit modes
 ----------

@@ -202,7 +202,7 @@ The Clixon-SNMP frontend implements the MIB-YANG mapping as defined in RFC 6643.
 
 XML and XPath
 =============
-Clixon has its own implementation of XML and XPath. See more in the detailed API reference.
+Clixon has its own implementation of XML and XPath (1.0). See more in the detailed API reference.
 
 The XML-related standards include:
 
@@ -316,6 +316,6 @@ Limitations include:
 - Subscribe ON_CHANGE subscription mode
 - Mount-point support
 - Prefix field (GetRequest/SetRequest, silently ignored)
-- Path wildcards (*, ...)
+- Path wildcards ('*', ...)
 - union_replace
 - use_models
