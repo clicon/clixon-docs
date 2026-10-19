@@ -173,13 +173,12 @@ The following features of RFC8040 are supported:
 
 * OPTIONS, HEAD, GET, POST, PUT, DELETE, PATCH
 * Stream notifications (Sec 6)
-* Query parameters: `insert`, `point`, `content`, `depth`, `start-time`, `stop-time`, `with-defaults` and `fields` (root only)
+* All query parameters
 * Monitoring (Sec 9)
 
 The following features are *not* implemented:
 
 * ETag/Last-Modified
-* Query parameters: `filter`
 
 RESTCONF event notification as described in RFC7950 section 6 is supported as follows:
 
@@ -272,9 +271,9 @@ Pagination
 ==========
 The pagination solution is based on the following drafts:
 
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-07.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-07.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-07.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-14.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-13.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-12.html>`_
 
 Clixon implements all attributes except `cursor`, `locale`, `sublist-limit` and `remaining`.
 

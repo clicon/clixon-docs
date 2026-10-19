@@ -16,14 +16,14 @@ Overview
 ========
 The pagination solution is based on the following drafts:
 
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-04.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-04.html>`_
-- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-04.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-14.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-nc-13.html>`_
+- `<https://www.ietf.org/archive/id/draft-ietf-netconf-list-pagination-rc-12.html>`_
 
 The drafts define two YANGs:
 
-- ietf-list-pagination@2024-07-08.yang
-- ietf-list-pagination-nc@2024-07-08.yang
+- ietf-list-pagination@2026-10-09.yang
+- ietf-list-pagination-nc@2026-10-09.yang
   
 For example, the following requests a list of 120 items in chunks of 20::
 
