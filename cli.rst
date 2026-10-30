@@ -945,6 +945,24 @@ In other words, when adding new nodes, the CLI expands to referred, original val
 "b"), but when deleting nodes, the actual values, non-referred ("a" and "c") are offered as
 potential choices.
 
+Supported leafref path forms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Following a leafref requires evaluating the leaf's YANG ``path`` statement against the
+datastore. This is supported for both legal forms of ``path`` that may contain ``current()``,
+as defined by RFC 7950 Section 9.9.2:
+
+- A plain absolute or ``..``-relative path, without any predicate::
+
+    path "/if:interfaces/if:interface/if:name";
+    path "../../if:name";
+
+- A path with one or more correlated-key predicates of the form
+  ``[nodeid = current()/../.../nodeid]``, where ``current()`` refers back to the leafref leaf's
+  own position::
+
+    path "/a:list[a:k=current()/../k1]/a:name";
+    path "/a:list[a:k1=current()/../../k1][a:k2=current()/../k2]/a:name";
+
 Show commands
 =============
 Clixon includes show commands for showing datastore and state content. An application may use these functions as basis for more specialized show functions. Some show functions are:
